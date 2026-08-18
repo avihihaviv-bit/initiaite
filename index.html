@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initiate // Patrol C2</title>
+
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#121a2b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Initiate">
+
+    <script>
+        // Auth guard: redirect to the login screen before anything renders
+        // if there is no active session (runs synchronously, blocks paint).
+        if (!sessionStorage.getItem('initiate_token')) { location.replace('login.html'); }
+    </script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="icons.js"></script>
+</head>
+<body dir="rtl" id="html-root">
+
+    <div class="header">
+        <div class="header-left-controls">
+            <button class="lang-btn" onclick="toggleLanguage()" id="lang-toggle-btn">EN</button>
+            <button class="menu-btn" onclick="openSidebar()" data-icon="menu" aria-label="Menu"></button>
+        </div>
+        <div class="brand">
+            <div class="brand-mark" data-icon="crosshair"></div>
+            <div>
+                <div class="header-title" data-i18n="appTitle">INITIATE // ניידת סיור</div>
+            </div>
+        </div>
+        <div class="header-icons">
+            <button class="icon-btn map-btn" onclick="openMapModal()" data-i18n-title="mapTip" data-icon="map"></button>
+            <button class="icon-btn" onclick="openCheckModal('person')" data-i18n-title="personTip" data-icon="user"></button>
+            <button class="icon-btn" onclick="openCheckModal('vehicle')" data-i18n-title="vehicleTip" data-icon="car"></button>
+            <button class="icon-btn" onclick="openCheckModal('address')" data-i18n-title="addressTip" data-icon="pin"></button>
+            <button class="icon-btn" onclick="openCheckModal('weapon')" data-i18n-title="weaponTip" data-icon="gun"></button>
+        </div>
+    </div>
+
+    <!-- Terminal Check Modal -->
+    <div id="check-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeCheckModal()" data-icon="close"></span>
+            <h2 id="modal-title" class="modal-title">Terminal Query</h2>
+            <div id="modal-input-container"></div>
+            <button class="btn btn-primary" onclick="performCheck()" id="run-query-btn">
+                <span data-icon="search"></span><span data-i18n="runQuery">Execute Scan</span>
+            </button>
+            <div id="modal-result" class="modal-result"></div>
+        </div>
+    </div>
+
+    <!-- Police Report Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeReportModal()" data-icon="close"></span>
+            <h2 class="modal-title"><span data-icon="fileText"></span><span data-i18n="reportTitle">Action Report</span></h2>
+            <div style="font-size: 13px; color: var(--text-mute); text-align: center; margin-bottom: 14px;" id="report-event-id"></div>
+
+            <label class="field-label" data-i18n="summaryLabel">Incident Summary</label>
+            <textarea id="report-text" class="modal-textarea" rows="3" data-i18n-placeholder="reportPlaceholder" placeholder="Incident summary..."></textarea>
+
+            <h4 class="field-label" style="margin-top:16px;" data-i18n="attachPersons">Linked Entities:</h4>
+            <div id="history-container" class="history-list"></div>
+
+            <h4 class="field-label" data-i18n="attachEvidence">Evidence (Media):</h4>
+            <div class="upload-zone" id="upload-zone">
+                <div data-icon="camera"></div>
+                <div class="upload-zone-text" data-i18n="uploadText">Tap to open camera / gallery<br><small>or drag & drop files here</small></div>
+                <input type="file" id="media-upload" accept="image/*,video/*" multiple capture="environment">
+            </div>
+            <div id="file-list" class="file-list"></div>
+
+            <button class="btn btn-success" onclick="submitReport()" id="submit-report-btn">
+                <span data-icon="checkCircle"></span><span data-i18n="closeDispatch">Close Incident & Dispatch</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="map-modal" class="modal">
+        <div class="modal-content map-modal-content">
+            <span class="modal-close" onclick="closeMapModal()" data-icon="close"></span>
+            <h2 class="modal-title"><span data-icon="map"></span><span data-i18n="mapTitle">Tactical Sector Map</span></h2>
+            <div class="search-row">
+                <input type="text" id="map-search-input" class="modal-input" data-i18n-placeholder="mapSearchPlaceholder" placeholder="e.g., Sokolov 45, Holon">
+                <button class="btn btn-primary btn-auto" onclick="searchAddress()">
+                    <span data-icon="search"></span><span data-i18n="searchBtn">Search</span>
+                </button>
+            </div>
+            <div id="map-status" class="status-line" style="margin: 6px 0 0;" data-i18n="locating">Acquiring GPS...</div>
+            <div id="map-container"></div>
+            <button id="waze-btn" class="btn" style="background-color: var(--accent); color: #0f172a; border: none; display: none;" onclick="navigateWaze()">
+                <span data-icon="navigation"></span><span data-i18n="navWaze">Navigate via Waze</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar / Logistics -->
+    <div id="sidebar" class="sidebar">
+        <span class="close-btn" onclick="closeSidebar()" data-icon="close"></span>
+
+        <div class="sidebar-user">
+            <div class="sidebar-user-avatar" data-icon="user"></div>
+            <div>
+                <div class="sidebar-user-name" id="sidebar-username">—</div>
+                <div class="sidebar-user-role" data-i18n="onDutyLabel">On duty &middot; Patrol 12</div>
+            </div>
+        </div>
+
+        <h3 data-i18n="sidebarTitle">Unit Logistics</h3>
+
+        <div class="sidebar-item" onclick="toggleSection(this, 'team-details')">
+            <span data-icon="users"></span><span data-i18n="teamHeader">Unit & Crew Details</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="team-details" class="sidebar-content">
+            <span data-i18n="distText">District:</span> <span data-i18n="districtValue">Tel Aviv</span> | <span data-i18n="regionText">Region:</span> <span data-i18n="regionValue">Ayalon</span><br>
+            <span data-i18n="stationText">Station:</span> <span data-i18n="stationValue">Holon</span> | <span data-i18n="unitText">Unit:</span> <span data-i18n="unitValue">Patrol 3</span><br><hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <span data-i18n="callsignText">Call Sign:</span> <strong data-i18n="callsignValue">Patrol 12</strong><br>
+            <span data-i18n="carNumText">Vehicle ID:</span> <strong>42-678-90</strong><br>
+            <span data-i18n="commanderText">Crew Cmdr:</span> <span data-i18n="commanderValue">SGT Y. Yisraeli</span><br>
+            <span data-i18n="officerText">Patrol Officer:</span> <span data-i18n="officerValue">CPL D. Levi</span>
+        </div>
+
+        <div class="sidebar-item" onclick="toggleSection(this, 'equip-details')">
+            <span data-icon="package"></span><span data-i18n="equipHeader">Vehicle Equipment</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="equip-details" class="sidebar-content">
+            <span data-i18n="equip1">✔️ M16 Patrol Rifle</span><br>
+            <span data-i18n="equip2">✔️ 2 Ballistic Vests</span><br>
+            <span data-i18n="equip3">✔️ Spike Strip Kit</span><br>
+            <span data-i18n="equip4">✔️ Breathalyzer (Yanshuf)</span>
+        </div>
+
+        <div class="sidebar-item" onclick="toggleSection(this, 'car-status')">
+            <span data-icon="activity"></span><span data-i18n="carHeader">Vehicle Status</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="car-status" class="sidebar-content">
+            <span data-i18n="mileageText">Odometer:</span> <span data-i18n="mileageValue">145,230 km</span><br>
+            <span data-i18n="fuelText">Fuel Level:</span> <span data-i18n="fuelValue">80%</span><br>
+            <span data-i18n="damageText">Notes:</span> <span data-i18n="damageValue">Front bumper scratch.</span>
+        </div>
+
+        <div class="sidebar-item" onclick="toggleSection(this, 'mandatory-tasks')">
+            <span data-icon="clipboard"></span><span data-i18n="tasksHeader">Mandatory Tasks</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="mandatory-tasks" class="sidebar-content">
+            <span data-i18n="taskItem1">1. Firing range qualification.</span><br>
+            <span data-i18n="taskItem2">2. Submit shift operational log.</span>
+        </div>
+
+        <div class="sidebar-item" onclick="toggleSection(this, 'commander-notes')">
+            <span data-icon="megaphone"></span><span data-i18n="cmdNotesHeader">Commander Directives</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="commander-notes" class="sidebar-content">
+            <span data-i18n="cmdNoteText">Increase high-visibility patrols in industrial zone between 02:00 - 04:00.</span>
+        </div>
+
+        <div class="sidebar-item" onclick="toggleSection(this, 'briefing-notes')">
+            <span data-icon="fileText"></span><span data-i18n="briefingHeader">Shift Briefing</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="briefing-notes" class="sidebar-content">
+            <strong data-i18n="boloLabel">BOLO:</strong> <span data-i18n="boloText">White Mazda 3, Lic: 12-345-67. Linked to armed robberies. Exercise extreme caution.</span>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-item logout" onclick="logout()">
+                <span data-icon="logOut"></span><span data-i18n="logoutBtn">Log Out</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('reaction', event)">
+            <span data-icon="radio"></span><span data-i18n="tabReaction">Reaction</span>
+            <span class="badge-count" id="reaction-count" style="display:none;">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('initiative', event)">
+            <span data-icon="target"></span><span data-i18n="tabInitiative">Initiative</span>
+        </div>
+    </div>
+
+    <!-- Reaction Tab -->
+    <div id="reaction" class="content active">
+        <div class="section-heading">
+            <h2 data-i18n="activeIncidents">Active Incidents</h2>
+            <button onclick="triggerDummyEvent()" class="btn btn-danger btn-sm btn-auto">
+                <span data-icon="plus" class="icon-sm"></span><span data-i18n="simEvent">Sim Emergency</span>
+            </button>
+        </div>
+        <div id="reaction-list"></div>
+    </div>
+
+    <!-- Initiative Tab -->
+    <div id="initiative" class="content">
+        <button class="btn btn-scan" onclick="scanArea()">
+            <span data-icon="crosshair"></span><span data-i18n="scanBtn">Scan Sector Surroundings</span>
+        </button>
+        <div id="location-status" class="status-line"></div>
+        <div id="initiative-list"></div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
