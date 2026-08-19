@@ -1,8 +1,9 @@
-const TOKEN_KEY = 'initiate_token';
-const USERNAME_KEY = 'initiate_username';
-const CONTEXT_KEY = 'initiate_context';
-const authToken = sessionStorage.getItem(TOKEN_KEY);
-const context = JSON.parse(sessionStorage.getItem(CONTEXT_KEY) || '{}');
+/* Command tab logic. Loaded after app.js on index.html and reuses its
+   globals (TOKEN_KEY, authToken, context, authFetch, logout, showToast,
+   hydrateIcons) rather than redeclaring them — this is one page now, not
+   a separate app. Everything here stays inert (no map, no polling) until
+   ensureCommandTabInit() runs, which only happens if the Command tab is
+   actually opened, which only happens for a commander call sign. */
 
 const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000;
 const STATION_COORDS = { holon: [32.0114, 34.7734], batyam: [32.0171, 34.7492], herzliya: [32.1624, 34.8447], raanana: [32.1848, 34.8713] };
@@ -11,44 +12,8 @@ let units = [];
 let events = [];
 let auditEntries = [];
 let stationFilter = '';
+let commandInitialized = false;
 
-/* ---------------------------------------------------------------------- */
-/* Auth / toast (same pattern as app.js)                                   */
-/* ---------------------------------------------------------------------- */
-async function authFetch(url, options) {
-    options = options || {};
-    const headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + authToken });
-    const res = await fetch(url, Object.assign({}, options, { headers }));
-    if (res.status === 401) {
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(USERNAME_KEY);
-        sessionStorage.removeItem(CONTEXT_KEY);
-        showToast(I18N[currentLang].sessionExpired, 'error');
-        setTimeout(() => location.replace('login.html'), 900);
-        throw new Error('UNAUTHORIZED');
-    }
-    return res;
-}
-async function logout() {
-    try { await authFetch('/api/auth/logout', { method: 'POST' }); } catch (e) { /* ignore */ }
-    sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(USERNAME_KEY);
-    sessionStorage.removeItem(CONTEXT_KEY);
-    location.replace('login.html');
-}
-function showToast(message, type, iconName) {
-    type = type || 'info';
-    const container = document.getElementById('toast-container');
-    const el = document.createElement('div');
-    el.className = `toast ${type}`;
-    const icon = iconName || (type === 'success' ? 'checkCircle' : type === 'error' ? 'alertTriangle' : 'bell');
-    el.innerHTML = `${svgIcon(icon)}<span>${message}</span>`;
-    container.appendChild(el);
-    setTimeout(() => {
-        el.style.transition = '0.25s'; el.style.opacity = '0'; el.style.transform = 'translateY(6px)';
-        setTimeout(() => el.remove(), 250);
-    }, 3200);
-}
 function emptyState(icon, title) { return `<div class="empty-state">${svgIcon(icon)}<div class="empty-state-title">${title}</div></div>`; }
 function isOffline(unit) { return (Date.now() - new Date(unit.lastUpdate).getTime()) > OFFLINE_THRESHOLD_MS; }
 function elapsedLabel(iso) {
@@ -99,7 +64,7 @@ function computeClusteredPositions(items, getLatLng, thresholdMeters) {
 /* ---------------------------------------------------------------------- */
 /* Map                                                                      */
 /* ---------------------------------------------------------------------- */
-let map, unitsLayer, incidentsLayer, boundariesLayer, closuresLayer, hotspotsLayer;
+let cmdMap, unitsLayer, incidentsLayer, boundariesLayer, closuresLayer, hotspotsLayer;
 
 function buildBoundariesLayer() {
     const group = L.layerGroup();
@@ -123,20 +88,20 @@ function buildHotspotsLayer() {
     return group;
 }
 
-function initMap() {
+function initCmdMap() {
     const home = STATION_COORDS[context.station];
-    map = L.map('cmd-map-container').setView(home || [32.05, 34.85], home ? 13 : 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-    unitsLayer = L.layerGroup().addTo(map);
-    incidentsLayer = L.layerGroup().addTo(map);
-    boundariesLayer = buildBoundariesLayer().addTo(map);
-    closuresLayer = buildClosuresLayer().addTo(map);
+    cmdMap = L.map('cmd-map-container').setView(home || [32.05, 34.85], home ? 13 : 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(cmdMap);
+    unitsLayer = L.layerGroup().addTo(cmdMap);
+    incidentsLayer = L.layerGroup().addTo(cmdMap);
+    boundariesLayer = buildBoundariesLayer().addTo(cmdMap);
+    closuresLayer = buildClosuresLayer().addTo(cmdMap);
     hotspotsLayer = buildHotspotsLayer();
-    setTimeout(() => map.invalidateSize(), 200);
+    setTimeout(() => cmdMap.invalidateSize(), 200);
 }
-function toggleLayerBoundaries(e) { if (e.target.checked) boundariesLayer.addTo(map); else map.removeLayer(boundariesLayer); }
-function toggleLayerClosures(e) { if (e.target.checked) closuresLayer.addTo(map); else map.removeLayer(closuresLayer); }
-function toggleLayerHotspots(e) { if (e.target.checked) hotspotsLayer.addTo(map); else map.removeLayer(hotspotsLayer); }
+function toggleLayerBoundaries(e) { if (e.target.checked) boundariesLayer.addTo(cmdMap); else cmdMap.removeLayer(boundariesLayer); }
+function toggleLayerClosures(e) { if (e.target.checked) closuresLayer.addTo(cmdMap); else cmdMap.removeLayer(closuresLayer); }
+function toggleLayerHotspots(e) { if (e.target.checked) hotspotsLayer.addTo(cmdMap); else cmdMap.removeLayer(hotspotsLayer); }
 
 function renderUnitsOnMap() {
     unitsLayer.clearLayers();
@@ -293,7 +258,7 @@ async function dispatchBackup(eventId) {
             renderAll();
             refreshAuditLog();
             showToast(I18N[currentLang].backupDispatched, 'success');
-            map.closePopup();
+            cmdMap.closePopup();
         }
     } catch (e) { /* authFetch already handled 401 */ }
 }
@@ -354,7 +319,7 @@ function exportAuditLog() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Data refresh + init                                                     */
+/* Data refresh + lazy init                                                */
 /* ---------------------------------------------------------------------- */
 async function refreshUnits() { const res = await authFetch('/api/command/units'); const data = await res.json(); units = data.units; }
 async function refreshEvents() { const res = await authFetch('/api/reaction/events'); const data = await res.json(); events = data.events; }
@@ -366,7 +331,7 @@ function renderAll() {
     renderUnitsOnMap();
     renderIncidentsOnMap();
 }
-async function pollAll() {
+async function pollCommandAll() {
     try { await Promise.all([refreshUnits(), refreshEvents()]); renderAll(); } catch (e) { /* authFetch already handled 401 */ }
 }
 
@@ -374,18 +339,18 @@ function renderContextChip() {
     const districtLabel = locationLabel(LOCATIONS.districts, context.district, currentLang);
     const sectorLabel = locationLabel(LOCATIONS.sectors[context.district] || [], context.sector, currentLang);
     const stationLabel = locationLabel(LOCATIONS.stations[context.sector] || [], context.station, currentLang);
-    document.getElementById('cmd-context-chip').innerText = `${districtLabel} · ${sectorLabel} · ${stationLabel} · ${context.callSign || ''}`;
-    document.getElementById('cmd-username').innerText = sessionStorage.getItem(USERNAME_KEY) || '—';
+    document.getElementById('cmd-context-chip').innerText = `${I18N[currentLang].commanderTitle} — ${districtLabel} · ${sectorLabel} · ${stationLabel} · ${context.callSign || ''}`;
 }
 
-onLanguageChange = function () { renderContextChip(); renderAll(); renderAuditLog(); };
+/* Called from app.js's switchTab() the first time the Command tab opens.
+   Every call after the first just fixes the map's size (it was rendering
+   into a display:none container) — nothing gets re-fetched or torn down. */
+function ensureCommandTabInit() {
+    if (commandInitialized) { if (cmdMap) cmdMap.invalidateSize(); return; }
+    commandInitialized = true;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    hydrateIcons();
-    initLangToggleButton();
-    updateTexts();
     renderContextChip();
-    initMap();
+    initCmdMap();
 
     document.getElementById('station-filter').addEventListener('change', (e) => { stationFilter = e.target.value; renderAll(); });
     document.getElementById('layer-boundaries').addEventListener('change', toggleLayerBoundaries);
@@ -393,8 +358,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('layer-hotspots').addEventListener('change', toggleLayerHotspots);
     document.getElementById('broadcast-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendBroadcast(); } });
 
-    await pollAll();
-    await refreshAuditLog();
-    setInterval(pollAll, 8000);
+    pollCommandAll();
+    refreshAuditLog();
+    setInterval(pollCommandAll, 8000);
     setInterval(refreshAuditLog, 8000);
-});
+}
+
+/* Chain onto app.js's language-change hook rather than replacing it —
+   both patrol tabs and the Command tab (once opened) need to re-render. */
+const _patrolOnLanguageChange = onLanguageChange;
+onLanguageChange = function () {
+    if (typeof _patrolOnLanguageChange === 'function') _patrolOnLanguageChange();
+    if (!commandInitialized) return;
+    renderContextChip();
+    renderAll();
+    renderAuditLog();
+};

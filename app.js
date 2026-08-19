@@ -3,6 +3,7 @@ const TOKEN_KEY = 'initiate_token';
 const USERNAME_KEY = 'initiate_username';
 const CONTEXT_KEY = 'initiate_context';
 const authToken = sessionStorage.getItem(TOKEN_KEY);
+const context = JSON.parse(sessionStorage.getItem(CONTEXT_KEY) || '{}');
 
 /* i18n dictionary, LOCATIONS, currentLang and toggleLanguage()/updateTexts()
    live in the shared i18n.js, loaded before this file. */
@@ -382,6 +383,7 @@ function switchTab(tabId, evt) {
     if (targetTab) targetTab.classList.add('active');
     document.getElementById(tabId).classList.add('active');
     if (tabId === 'reaction') loadReactionEvents();
+    if (tabId === 'command') ensureCommandTabInit();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -438,18 +440,16 @@ function scanArea() {
 /* Init                                                                     */
 /* ---------------------------------------------------------------------- */
 function renderShiftContext() {
-    let ctx = null;
-    try { ctx = JSON.parse(sessionStorage.getItem(CONTEXT_KEY)); } catch (e) { /* ignore */ }
-    if (!ctx) return;
-    const districtLabel = locationLabel(LOCATIONS.districts, ctx.district, currentLang);
-    const sectorLabel = locationLabel(LOCATIONS.sectors[ctx.district] || [], ctx.sector, currentLang);
-    const stationLabel = locationLabel(LOCATIONS.stations[ctx.sector] || [], ctx.station, currentLang);
+    if (!context || !context.district) return;
+    const districtLabel = locationLabel(LOCATIONS.districts, context.district, currentLang);
+    const sectorLabel = locationLabel(LOCATIONS.sectors[context.district] || [], context.sector, currentLang);
+    const stationLabel = locationLabel(LOCATIONS.stations[context.sector] || [], context.station, currentLang);
     document.getElementById('ctx-district').innerText = districtLabel;
     document.getElementById('ctx-region').innerText = sectorLabel;
     document.getElementById('ctx-station').innerText = stationLabel;
-    document.getElementById('ctx-callsign').innerText = ctx.callSign || '—';
-    document.getElementById('ctx-callsign-role').innerText = ctx.callSign || '—';
-    document.getElementById('ctx-crew').innerText = (ctx.crew && ctx.crew.length) ? ctx.crew.join(', ') : '—';
+    document.getElementById('ctx-callsign').innerText = context.callSign || '—';
+    document.getElementById('ctx-callsign-role').innerText = context.callSign || '—';
+    document.getElementById('ctx-crew').innerText = (context.crew && context.crew.length) ? context.crew.join(', ') : '—';
 }
 
 /* ---------------------------------------------------------------------- */
@@ -490,6 +490,7 @@ function initApp() {
     renderShiftContext();
     const username = sessionStorage.getItem(USERNAME_KEY);
     if (username) document.getElementById('sidebar-username').innerText = username;
+    if (context.role === 'commander') document.getElementById('command-tab-btn').style.display = '';
 
     const t = I18N[currentLang];
     document.getElementById('initiative-list').innerHTML = `<div class="empty-state">${svgIcon('crosshair')}<div class="empty-state-title">${t.scanPromptTitle}</div><div class="empty-state-sub">${t.scanPromptSub}</div></div>`;

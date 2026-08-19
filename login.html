@@ -20,11 +20,7 @@
         // Already have a live session? Skip straight to the right screen.
         if (sessionStorage.getItem('initiate_token')) {
             const ctxRaw = sessionStorage.getItem('initiate_context');
-            if (!ctxRaw) { location.replace('setup.html'); }
-            else {
-                try { location.replace(JSON.parse(ctxRaw).role === 'commander' ? 'commander.html' : 'index.html'); }
-                catch (e) { location.replace('setup.html'); }
-            }
+            location.replace(ctxRaw ? 'index.html' : 'setup.html');
         }
     </script>
     <link rel="stylesheet" href="styles.css">

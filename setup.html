@@ -145,7 +145,7 @@
             const role = callSign.indexOf('401') !== -1 ? 'commander' : 'patrol';
             const context = { district, sector, station, callSign, crew, role };
             sessionStorage.setItem('initiate_context', JSON.stringify(context));
-            location.replace(role === 'commander' ? 'commander.html' : 'index.html');
+            location.replace('index.html');
         });
     </script>
 </body>

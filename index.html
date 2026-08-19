@@ -200,6 +200,9 @@
         <div class="tab" onclick="switchTab('initiative', event)">
             <span data-icon="target"></span><span data-i18n="tabInitiative">Initiative</span>
         </div>
+        <div class="tab" id="command-tab-btn" onclick="switchTab('command', event)" style="display:none;">
+            <span data-icon="shield"></span><span data-i18n="tabCommand">Command</span>
+        </div>
     </div>
 
     <!-- Reaction Tab -->
@@ -222,8 +225,76 @@
         <div id="initiative-list"></div>
     </div>
 
+    <!-- Command Tab (commanders only — call sign containing "401") -->
+    <div id="command" class="content">
+        <div class="cmd-context-line" id="cmd-context-chip">—</div>
+
+        <div class="cmd-toolbar">
+            <button class="btn btn-auto btn-sm" id="broadcast-toggle-btn" onclick="toggleBroadcastComposer()">
+                <span data-icon="megaphone" class="icon-sm"></span><span data-i18n="flashBroadcastTitle">הודעת הבזק</span>
+            </button>
+
+            <div class="cmd-filter">
+                <label class="field-label" style="margin:0;" data-i18n="filterStationLabel">סינון לפי תחנה</label>
+                <select id="station-filter" class="modal-input" style="margin:0; padding:8px 10px; font-size:13px;"></select>
+            </div>
+
+            <div class="cmd-layers" id="layer-toggles">
+                <span class="field-label" style="margin:0;" data-i18n="layersLabel">שכבות מפה</span>
+                <label class="layer-check"><input type="checkbox" id="layer-boundaries" checked> <span data-i18n="layerBoundaries">גבולות גזרה</span></label>
+                <label class="layer-check"><input type="checkbox" id="layer-closures" checked> <span data-i18n="layerClosures">חסימות צירים</span></label>
+                <label class="layer-check"><input type="checkbox" id="layer-hotspots"> <span data-i18n="layerHotspots">מוקדי אירועים</span></label>
+            </div>
+        </div>
+
+        <div id="broadcast-composer" class="cmd-broadcast-composer" style="display:none;">
+            <input type="text" id="broadcast-input" class="modal-input" style="margin:0;" data-i18n-placeholder="flashBroadcastPlaceholder" placeholder="נסח הודעה לשידור לכלל הניידות...">
+            <button class="btn btn-primary btn-auto" style="margin:0;" onclick="sendBroadcast()">
+                <span data-icon="megaphone" class="icon-sm"></span><span data-i18n="sendBroadcastBtn">שדר</span>
+            </button>
+        </div>
+
+        <div class="cmd-grid">
+            <div id="cmd-map-container" class="cmd-map"></div>
+
+            <div class="cmd-panel">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchPanelTab('incidents', event)">
+                        <span data-icon="alertTriangle" class="icon-sm"></span><span data-i18n="incidentsTab">אירועים</span>
+                        <span class="badge-count" id="cmd-incidents-count" style="display:none;">0</span>
+                    </div>
+                    <div class="tab" onclick="switchPanelTab('units', event)">
+                        <span data-icon="car" class="icon-sm"></span><span data-i18n="unitsTab">ניידות</span>
+                    </div>
+                    <div class="tab" onclick="switchPanelTab('log', event)">
+                        <span data-icon="clipboard" class="icon-sm"></span><span data-i18n="logTab">יומן מבצעים</span>
+                    </div>
+                </div>
+
+                <div id="panel-incidents" class="cmd-panel-content active"></div>
+                <div id="panel-units" class="cmd-panel-content"></div>
+                <div id="panel-log" class="cmd-panel-content">
+                    <button class="btn btn-sm btn-auto" style="margin-bottom:10px;" onclick="exportAuditLog()">
+                        <span data-icon="fileText" class="icon-sm"></span><span data-i18n="exportLogBtn">ייצוא יומן</span>
+                    </button>
+                    <div id="audit-log-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unit detail modal (Command tab) -->
+    <div id="unit-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeUnitModal()" data-icon="close"></span>
+            <h2 class="modal-title"><span data-icon="car"></span><span id="unit-modal-callsign">—</span></h2>
+            <div id="unit-modal-body"></div>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
 
     <script src="app.js"></script>
+    <script src="command.js"></script>
 </body>
 </html>
