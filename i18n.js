@@ -207,7 +207,7 @@ const I18N = {
         boloLabel: "BOLO:",
         boloText: "White Mazda 3, Lic: 12-345-67. Linked to armed robberies. Exercise extreme caution.",
         logoutBtn: "Log Out",
-        tabReaction: "Reaction",
+        tabReaction: "Response",
         tabInitiative: "Initiative",
         activeIncidents: "Active Sector Incidents",
         simEvent: "Sim Emergency",
