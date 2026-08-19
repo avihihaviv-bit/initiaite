@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initiate // Shift Setup</title>
+
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#121a2b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Initiate">
+
+    <script>
+        // Auth guard: shift setup requires a live session.
+        if (!sessionStorage.getItem('initiate_token')) { location.replace('login.html'); }
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="icons.js"></script>
+    <script src="i18n.js"></script>
+</head>
+<body dir="rtl" id="html-root">
+
+    <button class="lang-btn login-lang" onclick="toggleLanguage()" id="lang-toggle-btn">EN</button>
+
+    <div class="login-page">
+        <div class="login-card setup-card">
+            <div class="login-brand">
+                <div class="login-brand-mark" id="brand-mark"></div>
+                <div class="login-title" data-i18n="setupTitle">הגדרת הקשר משמרת</div>
+                <div class="login-subtitle" data-i18n="setupSubtitle" style="text-transform:none; letter-spacing:0;">יש להשלים את הפרטים לפני הכניסה למערכת</div>
+            </div>
+
+            <div id="setup-error" class="login-error">
+                <span id="setup-error-icon"></span>
+                <span id="setup-error-text" data-i18n="setupIncomplete">נא למלא את כל שדות החובה</span>
+            </div>
+
+            <form id="setup-form" autocomplete="off">
+                <label class="field-label" data-i18n="districtLabel">מחוז</label>
+                <select id="district-select" class="modal-input"></select>
+
+                <label class="field-label" data-i18n="sectorLabel">מרחב</label>
+                <select id="sector-select" class="modal-input" disabled></select>
+
+                <label class="field-label" data-i18n="stationLabel">תחנה</label>
+                <select id="station-select" class="modal-input" disabled></select>
+
+                <label class="field-label" data-i18n="callSignLabel">אות קריאה</label>
+                <input type="text" id="callsign-input" class="modal-input" data-i18n-placeholder="callSignPlaceholder" placeholder="לדוגמה: איילון 22">
+                <div class="field-hint" data-i18n="callSignHint">אות קריאה המכיל "401" מזהה מפקד ומנתב למרכז השליטה</div>
+
+                <label class="field-label" data-i18n="crewLabel">אנשי צוות</label>
+                <div class="tag-input" id="crew-tag-input">
+                    <div class="tag-list" id="crew-tag-list"></div>
+                    <input type="text" id="crew-input" data-i18n-placeholder="crewPlaceholder" placeholder="הקלד שם ולחץ Enter">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="setup-submit-btn" style="margin-top: 16px;">
+                    <span data-icon="checkCircle"></span><span data-i18n="continueBtn">המשך למערכת</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('brand-mark').innerHTML = svgIcon('shield', 'icon-lg');
+        document.getElementById('setup-error-icon').outerHTML = svgIcon('alertTriangle');
+        initLangToggleButton();
+        updateTexts();
+        hydrateIcons();
+
+        function populateSelect(selectEl, options, lang) {
+            const t = I18N[lang];
+            selectEl.innerHTML = `<option value="">${t.selectPlaceholder}</option>` +
+                options.map(o => `<option value="${o.value}">${o[lang]}</option>`).join('');
+        }
+
+        const districtSelect = document.getElementById('district-select');
+        const sectorSelect = document.getElementById('sector-select');
+        const stationSelect = document.getElementById('station-select');
+
+        function renderDistricts() { populateSelect(districtSelect, LOCATIONS.districts, currentLang); }
+        renderDistricts();
+
+        districtSelect.addEventListener('change', () => {
+            const sectors = LOCATIONS.sectors[districtSelect.value] || [];
+            populateSelect(sectorSelect, sectors, currentLang);
+            sectorSelect.disabled = sectors.length === 0;
+            stationSelect.innerHTML = `<option value="">${I18N[currentLang].selectPlaceholder}</option>`;
+            stationSelect.disabled = true;
+        });
+        sectorSelect.addEventListener('change', () => {
+            const stations = LOCATIONS.stations[sectorSelect.value] || [];
+            populateSelect(stationSelect, stations, currentLang);
+            stationSelect.disabled = stations.length === 0;
+        });
+
+        // Re-render dropdown option labels (keeping current selections) on language toggle.
+        onLanguageChange = function () {
+            const d = districtSelect.value, s = sectorSelect.value, st = stationSelect.value;
+            renderDistricts(); districtSelect.value = d;
+            populateSelect(sectorSelect, LOCATIONS.sectors[d] || [], currentLang);
+            sectorSelect.value = s; sectorSelect.disabled = !d;
+            populateSelect(stationSelect, LOCATIONS.stations[s] || [], currentLang);
+            stationSelect.value = st; stationSelect.disabled = !s;
+        };
+
+        // Crew multi-tag input
+        let crew = [];
+        const crewInput = document.getElementById('crew-input');
+        const crewTagList = document.getElementById('crew-tag-list');
+        function renderCrewTags() {
+            crewTagList.innerHTML = crew.map((name, i) => `
+                <span class="tag-chip">${name}<button type="button" onclick="removeCrewMember(${i})" aria-label="remove">${svgIcon('close', 'icon-sm')}</button></span>
+            `).join('');
+        }
+        function removeCrewMember(i) { crew.splice(i, 1); renderCrewTags(); }
+        crewInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = crewInput.value.trim();
+                if (val) { crew.push(val); crewInput.value = ''; renderCrewTags(); }
+            } else if (e.key === 'Backspace' && !crewInput.value && crew.length) {
+                crew.pop(); renderCrewTags();
+            }
+        });
+
+        function showSetupError(message) {
+            const box = document.getElementById('setup-error');
+            if (message) document.getElementById('setup-error-text').innerText = message;
+            box.style.display = 'flex';
+        }
+        function hideSetupError() { document.getElementById('setup-error').style.display = 'none'; }
+
+        document.getElementById('setup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideSetupError();
+            const district = districtSelect.value, sector = sectorSelect.value, station = stationSelect.value;
+            const callSign = document.getElementById('callsign-input').value.trim();
+            if (!district || !sector || !station || !callSign) { showSetupError(); return; }
+
+            const role = callSign.indexOf('401') !== -1 ? 'commander' : 'patrol';
+            const context = { district, sector, station, callSign, crew, role };
+            sessionStorage.setItem('initiate_context', JSON.stringify(context));
+            location.replace(role === 'commander' ? 'commander.html' : 'index.html');
+        });
+    </script>
+</body>
+</html>

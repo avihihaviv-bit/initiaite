@@ -17,15 +17,18 @@
     <meta name="apple-mobile-web-app-title" content="Initiate">
 
     <script>
-        // Auth guard: redirect to the login screen before anything renders
-        // if there is no active session (runs synchronously, blocks paint).
+        // Auth + shift-context guard: redirect before anything renders if
+        // there is no session, or the shift setup screen hasn't been
+        // completed yet (runs synchronously, blocks paint).
         if (!sessionStorage.getItem('initiate_token')) { location.replace('login.html'); }
+        else if (!sessionStorage.getItem('initiate_context')) { location.replace('setup.html'); }
     </script>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="styles.css">
     <script src="icons.js"></script>
+    <script src="i18n.js"></script>
 </head>
 <body dir="rtl" id="html-root">
 
@@ -116,7 +119,7 @@
             <div class="sidebar-user-avatar" data-icon="user"></div>
             <div>
                 <div class="sidebar-user-name" id="sidebar-username">—</div>
-                <div class="sidebar-user-role" data-i18n="onDutyLabel">On duty &middot; Patrol 12</div>
+                <div class="sidebar-user-role"><span data-i18n="onDutyLabel">On duty</span> &middot; <span id="ctx-callsign-role">—</span></div>
             </div>
         </div>
 
@@ -126,12 +129,11 @@
             <span data-icon="users"></span><span data-i18n="teamHeader">Unit & Crew Details</span><span class="chevron" data-icon="chevronDown"></span>
         </div>
         <div id="team-details" class="sidebar-content">
-            <span data-i18n="distText">District:</span> <span data-i18n="districtValue">Tel Aviv</span> | <span data-i18n="regionText">Region:</span> <span data-i18n="regionValue">Ayalon</span><br>
-            <span data-i18n="stationText">Station:</span> <span data-i18n="stationValue">Holon</span> | <span data-i18n="unitText">Unit:</span> <span data-i18n="unitValue">Patrol 3</span><br><hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
-            <span data-i18n="callsignText">Call Sign:</span> <strong data-i18n="callsignValue">Patrol 12</strong><br>
+            <span data-i18n="distText">District:</span> <span id="ctx-district">—</span> | <span data-i18n="regionText">Region:</span> <span id="ctx-region">—</span><br>
+            <span data-i18n="stationText">Station:</span> <span id="ctx-station">—</span><br><hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <span data-i18n="callsignText">Call Sign:</span> <strong id="ctx-callsign">—</strong><br>
             <span data-i18n="carNumText">Vehicle ID:</span> <strong>42-678-90</strong><br>
-            <span data-i18n="commanderText">Crew Cmdr:</span> <span data-i18n="commanderValue">SGT Y. Yisraeli</span><br>
-            <span data-i18n="officerText">Patrol Officer:</span> <span data-i18n="officerValue">CPL D. Levi</span>
+            <span data-i18n="crewText">Crew:</span> <span id="ctx-crew">—</span>
         </div>
 
         <div class="sidebar-item" onclick="toggleSection(this, 'equip-details')">
@@ -183,6 +185,12 @@
     </div>
 
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+    <div id="broadcast-banner" class="broadcast-banner" style="display:none;">
+        <span data-icon="megaphone" class="icon-sm"></span>
+        <span id="broadcast-banner-text"></span>
+        <button class="broadcast-banner-close" onclick="dismissBroadcast()" data-icon="close"></button>
+    </div>
 
     <div class="tabs">
         <div class="tab active" onclick="switchTab('reaction', event)">

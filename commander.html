@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initiate // Command Center</title>
+
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#121a2b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Initiate">
+
+    <script>
+        // Auth + context + role guard. A non-commander context shouldn't land here.
+        if (!sessionStorage.getItem('initiate_token')) { location.replace('login.html'); }
+        else {
+            const raw = sessionStorage.getItem('initiate_context');
+            if (!raw) { location.replace('setup.html'); }
+            else {
+                try { if (JSON.parse(raw).role !== 'commander') location.replace('index.html'); }
+                catch (e) { location.replace('setup.html'); }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="icons.js"></script>
+    <script src="i18n.js"></script>
+</head>
+<body dir="rtl" id="html-root" class="commander-body">
+
+    <div class="header">
+        <div class="header-left-controls">
+            <button class="lang-btn" onclick="toggleLanguage()" id="lang-toggle-btn">EN</button>
+            <button class="menu-btn" onclick="logout()" data-icon="logOut" aria-label="Logout" title="Logout"></button>
+        </div>
+        <div class="brand">
+            <div class="brand-mark" data-icon="crosshair"></div>
+            <div>
+                <div class="header-title" data-i18n="commanderTitle">מרכז שליטה ובקרה</div>
+                <div class="header-subtitle" id="cmd-context-chip">—</div>
+            </div>
+        </div>
+        <div class="header-icons">
+            <span class="cmd-user-chip"><span data-icon="user" class="icon-sm"></span><span id="cmd-username">—</span></span>
+        </div>
+    </div>
+
+    <div class="cmd-toolbar">
+        <button class="btn btn-auto btn-sm" id="broadcast-toggle-btn" onclick="toggleBroadcastComposer()">
+            <span data-icon="megaphone" class="icon-sm"></span><span data-i18n="flashBroadcastTitle">הודעת הבזק</span>
+        </button>
+
+        <div class="cmd-filter">
+            <label class="field-label" style="margin:0;" data-i18n="filterStationLabel">סינון לפי תחנה</label>
+            <select id="station-filter" class="modal-input" style="margin:0; padding:8px 10px; font-size:13px;"></select>
+        </div>
+
+        <div class="cmd-layers" id="layer-toggles">
+            <span class="field-label" style="margin:0;" data-i18n="layersLabel">שכבות מפה</span>
+            <label class="layer-check"><input type="checkbox" id="layer-boundaries" checked> <span data-i18n="layerBoundaries">גבולות גזרה</span></label>
+            <label class="layer-check"><input type="checkbox" id="layer-closures" checked> <span data-i18n="layerClosures">חסימות צירים</span></label>
+            <label class="layer-check"><input type="checkbox" id="layer-hotspots"> <span data-i18n="layerHotspots">מוקדי אירועים</span></label>
+        </div>
+    </div>
+
+    <div id="broadcast-composer" class="cmd-broadcast-composer" style="display:none;">
+        <input type="text" id="broadcast-input" class="modal-input" style="margin:0;" data-i18n-placeholder="flashBroadcastPlaceholder" placeholder="נסח הודעה לשידור לכלל הניידות...">
+        <button class="btn btn-primary btn-auto" style="margin:0;" onclick="sendBroadcast()">
+            <span data-icon="megaphone" class="icon-sm"></span><span data-i18n="sendBroadcastBtn">שדר</span>
+        </button>
+    </div>
+
+    <div class="cmd-grid">
+        <div id="cmd-map-container" class="cmd-map"></div>
+
+        <div class="cmd-panel">
+            <div class="tabs">
+                <div class="tab active" onclick="switchPanelTab('incidents', event)">
+                    <span data-icon="alertTriangle" class="icon-sm"></span><span data-i18n="incidentsTab">אירועים</span>
+                    <span class="badge-count" id="cmd-incidents-count" style="display:none;">0</span>
+                </div>
+                <div class="tab" onclick="switchPanelTab('units', event)">
+                    <span data-icon="car" class="icon-sm"></span><span data-i18n="unitsTab">ניידות</span>
+                </div>
+                <div class="tab" onclick="switchPanelTab('log', event)">
+                    <span data-icon="clipboard" class="icon-sm"></span><span data-i18n="logTab">יומן מבצעים</span>
+                </div>
+            </div>
+
+            <div id="panel-incidents" class="cmd-panel-content active"></div>
+            <div id="panel-units" class="cmd-panel-content"></div>
+            <div id="panel-log" class="cmd-panel-content">
+                <button class="btn btn-sm btn-auto" style="margin-bottom:10px;" onclick="exportAuditLog()">
+                    <span data-icon="fileText" class="icon-sm"></span><span data-i18n="exportLogBtn">ייצוא יומן</span>
+                </button>
+                <div id="audit-log-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unit detail modal -->
+    <div id="unit-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeUnitModal()" data-icon="close"></span>
+            <h2 class="modal-title"><span data-icon="car"></span><span id="unit-modal-callsign">—</span></h2>
+            <div id="unit-modal-body"></div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="commander.js"></script>
+</body>
+</html>

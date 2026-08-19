@@ -1,171 +1,13 @@
 const API_BASE = '';
 const TOKEN_KEY = 'initiate_token';
 const USERNAME_KEY = 'initiate_username';
+const CONTEXT_KEY = 'initiate_context';
 const authToken = sessionStorage.getItem(TOKEN_KEY);
-let currentLang = 'HE';
 
-/* ---------------------------------------------------------------------- */
-/* i18n                                                                    */
-/* ---------------------------------------------------------------------- */
-const i18n = {
-    HE: {
-        appTitle: "INITIATE // ניידת סיור",
-        mapTip: "מפה טקטית",
-        personTip: "בדיקת אדם",
-        vehicleTip: "בדיקת רכב",
-        addressTip: "בדיקת כתובת",
-        weaponTip: "בדיקת נשק",
-        runQuery: "בצע סריקה במאגר",
-        reportTitle: "דו\"ח פעולה מבצעי",
-        summaryLabel: "תקציר האירוע",
-        reportPlaceholder: "תאר את מהלך האירוע...",
-        attachPersons: "שיוך ישויות שנבדקו:",
-        noHistory: "אין בדיקות מסוף אחרונות",
-        attachEvidence: "צירוף ראיות (מדיה):",
-        uploadText: "הקש לפתיחת מצלמה / גלריה<br><small>או גרור קבצים לכאן</small>",
-        closeDispatch: "סגור אירוע ושדר למוקד",
-        mapTitle: "מפת גזרה וניווט",
-        mapSearchPlaceholder: "לדוגמה: סוקולוב 45, חולון",
-        searchBtn: "חפש",
-        locating: "מאתר GPS...",
-        navWaze: "נווט ב-Waze",
-        sidebarTitle: "לוגיסטיקה ויחידה",
-        onDutyLabel: "בתפקיד · ניידת 12",
-        teamHeader: "פרטי צוות ויחידה",
-        distText: "מחוז:", regionText: "מרחב:", stationText: "תחנה:", unitText: "יחידה:",
-        callsignText: "אות קריאה:", carNumText: "מס' ניידת:", commanderText: "מפקד:", officerText: "סייר:",
-        districtValue: "תל אביב", regionValue: "איילון", stationValue: "חולון", unitValue: "ניידת 3",
-        callsignValue: "ניידת 12", commanderValue: "רס\"ב י. ישראלי", officerValue: "רב\"ט ד. לוי",
-        equipHeader: "ציוד ניידת",
-        equip1: "✔️ רובה סער M16", equip2: "✔️ 2 אפודי מגן", equip3: "✔️ ערכת פס שיניים", equip4: "✔️ ינשוף (מד אלכוהול)",
-        carHeader: "כשירות רכב",
-        mileageText: "קילומטראז':", fuelText: "דלק:", damageText: "נזקים:",
-        mileageValue: "145,230 ק\"מ", fuelValue: "80%", damageValue: "שריטה בפגוש קדמי.",
-        tasksHeader: "משימות שגרתיות",
-        taskItem1: "1. מבחן ירי בטווח.", taskItem2: "2. הגשת יומן פעילות משמרת.",
-        cmdNotesHeader: "דגשי מפקד",
-        cmdNoteText: "הגברת נוכחות גלויה באזור התעשייה בין השעות 02:00-04:00.",
-        briefingHeader: "תדריך משמרת",
-        boloLabel: "איתור:",
-        boloText: "מאזדה 3 לבנה, מס' רישוי 12-345-67. מעורבת בשוד מזוין. יש לנקוט משנה זהירות.",
-        logoutBtn: "התנתקות",
-        tabReaction: "תגובה",
-        tabInitiative: "יוזמה",
-        activeIncidents: "אירועים מבצעיים פתוחים",
-        simEvent: "דמה אירוע חירום",
-        scanBtn: "סורק סביבה מבצעית",
-        acceptBtn: "קבל אירוע וצא לדרך",
-        finishBtn: "סיום - כתיבת דו\"ח",
-        loadingEvents: "טוען אירועים...",
-        errorEvents: "שגיאה בטעינת אירועים",
-        allClearTitle: "אין אירועים פתוחים",
-        allClearSub: "כל האירועים בגזרה טופלו. המשך סיור שגרתי.",
-        scanPromptTitle: "מוכן לסריקה",
-        scanPromptSub: "לחץ על הכפתור כדי לסרוק משימות יזומות בסביבתך.",
-        scanningTitle: "מאתר GPS... 🛰️",
-        scanningRadius: "סורק רדיוס...",
-        noTasksTitle: "לא נמצאו משימות",
-        noTasksSub: "אין משימות יזומות ברדיוס הסריקה כרגע.",
-        tasksFound: "משימות נמצאו",
-        priorityCritical: "עדיפות עליונה",
-        priorityUrgent: "דחוף",
-        priorityRoutine: "שגרתי",
-        querying: "מתחבר למסוף...",
-        clearResult: "ללא חריגים",
-        enterData: "נא להזין נתונים",
-        reportSent: "הדו\"ח שודר למוקד וליומן החקירות בהצלחה",
-        sessionExpired: "פג תוקף החיבור. יש להתחבר מחדש.",
-        attached: "צורף:",
-        idPlaceholder: "ת.ז. (9 ספרות)",
-        detailsLabel: "פרטים",
-        firstNamePlaceholder: "שם פרטי",
-        lastNamePlaceholder: "שם משפחה"
-    },
-    EN: {
-        appTitle: "INITIATE // PATROL C2",
-        mapTip: "Tactical Map",
-        personTip: "Person Check",
-        vehicleTip: "Vehicle Check",
-        addressTip: "Address Check",
-        weaponTip: "Weapon Check",
-        runQuery: "Execute Database Scan",
-        reportTitle: "Operational Report",
-        summaryLabel: "Incident Summary",
-        reportPlaceholder: "Enter action summary...",
-        attachPersons: "Linked Entities:",
-        noHistory: "No recent queries",
-        attachEvidence: "Evidence (Media):",
-        uploadText: "Tap to open camera / gallery<br><small>or drag & drop files here</small>",
-        closeDispatch: "Close Incident & Dispatch",
-        mapTitle: "Sector Map & Nav",
-        mapSearchPlaceholder: "e.g., Sokolov 45, Holon",
-        searchBtn: "Search",
-        locating: "Acquiring GPS...",
-        navWaze: "Navigate via Waze",
-        sidebarTitle: "Unit Logistics",
-        onDutyLabel: "On duty · Patrol 12",
-        teamHeader: "Crew & Unit Details",
-        distText: "District:", regionText: "Region:", stationText: "Station:", unitText: "Unit:",
-        callsignText: "Call Sign:", carNumText: "Vehicle ID:", commanderText: "Cmdr:", officerText: "Officer:",
-        districtValue: "Tel Aviv", regionValue: "Ayalon", stationValue: "Holon", unitValue: "Patrol 3",
-        callsignValue: "Patrol 12", commanderValue: "SGT Y. Yisraeli", officerValue: "CPL D. Levi",
-        equipHeader: "Equipment",
-        equip1: "✔️ M16 Patrol Rifle", equip2: "✔️ 2 Ballistic Vests", equip3: "✔️ Spike Strip Kit", equip4: "✔️ Breathalyzer (Yanshuf)",
-        carHeader: "Vehicle Status",
-        mileageText: "Odometer:", fuelText: "Fuel:", damageText: "Damage:",
-        mileageValue: "145,230 km", fuelValue: "80%", damageValue: "Front bumper scratch.",
-        tasksHeader: "Mandatory Tasks",
-        taskItem1: "1. Firing range qualification.", taskItem2: "2. Submit shift operational log.",
-        cmdNotesHeader: "Directives",
-        cmdNoteText: "Increase high-visibility patrols in industrial zone between 02:00 - 04:00.",
-        briefingHeader: "Briefing",
-        boloLabel: "BOLO:",
-        boloText: "White Mazda 3, Lic: 12-345-67. Linked to armed robberies. Exercise extreme caution.",
-        logoutBtn: "Log Out",
-        tabReaction: "Reaction",
-        tabInitiative: "Initiative",
-        activeIncidents: "Active Sector Incidents",
-        simEvent: "Sim Emergency",
-        scanBtn: "Scan Sector Surroundings",
-        acceptBtn: "Dispatch & En Route",
-        finishBtn: "Finish - Write Report",
-        loadingEvents: "Loading incidents...",
-        errorEvents: "Error loading incidents",
-        allClearTitle: "No Active Incidents",
-        allClearSub: "All sector incidents are handled. Continue routine patrol.",
-        scanPromptTitle: "Ready to Scan",
-        scanPromptSub: "Tap the button to scan for proactive tasks near you.",
-        scanningTitle: "Acquiring GPS... 🛰️",
-        scanningRadius: "Scanning radius...",
-        noTasksTitle: "No Tasks Found",
-        noTasksSub: "No proactive tasks within the scan radius right now.",
-        tasksFound: "tasks found",
-        priorityCritical: "Critical",
-        priorityUrgent: "Urgent",
-        priorityRoutine: "Routine",
-        querying: "Querying terminal...",
-        clearResult: "Clear",
-        enterData: "Enter data",
-        reportSent: "Report transmitted to dispatch successfully",
-        sessionExpired: "Session expired. Please sign in again.",
-        attached: "Attached:",
-        idPlaceholder: "ID (9 digits)",
-        detailsLabel: "Details",
-        firstNamePlaceholder: "First Name",
-        lastNamePlaceholder: "Last Name"
-    }
-};
+/* i18n dictionary, LOCATIONS, currentLang and toggleLanguage()/updateTexts()
+   live in the shared i18n.js, loaded before this file. */
 
-/* ---------------------------------------------------------------------- */
-/* Icon hydration                                                          */
-/* ---------------------------------------------------------------------- */
-function hydrateIcons(root) {
-    (root || document).querySelectorAll('[data-icon]').forEach(el => {
-        const name = el.getAttribute('data-icon');
-        const extra = el.classList.contains('icon-sm') ? 'icon-sm' : (el.classList.contains('icon-lg') ? 'icon-lg' : '');
-        el.innerHTML = svgIcon(name, extra);
-    });
-}
+/* hydrateIcons() lives in the shared icons.js. */
 
 /* ---------------------------------------------------------------------- */
 /* Auth                                                                     */
@@ -177,7 +19,7 @@ async function authFetch(url, options) {
     if (res.status === 401) {
         sessionStorage.removeItem(TOKEN_KEY);
         sessionStorage.removeItem(USERNAME_KEY);
-        showToast(i18n[currentLang].sessionExpired, 'error');
+        showToast(I18N[currentLang].sessionExpired, 'error');
         setTimeout(() => location.replace('login.html'), 900);
         throw new Error('UNAUTHORIZED');
     }
@@ -188,6 +30,7 @@ async function logout() {
     try { await authFetch('/api/auth/logout', { method: 'POST' }); } catch (e) { /* ignore */ }
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(USERNAME_KEY);
+    sessionStorage.removeItem(CONTEXT_KEY);
     location.replace('login.html');
 }
 
@@ -210,31 +53,9 @@ function showToast(message, type, iconName) {
     }, 3200);
 }
 
-/* ---------------------------------------------------------------------- */
-/* Language toggle                                                         */
-/* ---------------------------------------------------------------------- */
-function toggleLanguage() {
-    currentLang = currentLang === 'HE' ? 'EN' : 'HE';
-    document.getElementById('lang-toggle-btn').innerText = currentLang === 'HE' ? 'EN' : 'עב';
-    updateTexts();
-    loadReactionEvents();
-}
-
-function updateTexts() {
-    const t = i18n[currentLang];
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) el.innerHTML = t[key];
-    });
-    document.querySelectorAll('[data-i18n-title]').forEach(el => {
-        const key = el.getAttribute('data-i18n-title');
-        if (t[key]) el.title = t[key];
-    });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-        if (t[key]) el.placeholder = t[key];
-    });
-}
+/* Language toggle/updateTexts live in i18n.js; this page just re-renders
+   its live data (event list, shift context labels) whenever the language changes. */
+onLanguageChange = function () { loadReactionEvents(); renderShiftContext(); };
 
 /* ---------------------------------------------------------------------- */
 /* Terminal check modal                                                    */
@@ -252,7 +73,7 @@ const checkTypes = {
 
 function openCheckModal(type) {
     currentCheckType = type;
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
     document.getElementById('modal-title').innerHTML = `${svgIcon(checkTypes[type].icon)}<span>${checkTypes[type].title[currentLang]}</span>`;
     const container = document.getElementById('modal-input-container');
     if (type === 'person') {
@@ -282,7 +103,7 @@ function togglePersonMode() {
 function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
 
 function performCheck() {
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
     const resDiv = document.getElementById('modal-result');
     let searchValue = "";
 
@@ -309,7 +130,7 @@ function performCheck() {
 /* ---------------------------------------------------------------------- */
 function acceptEvent(eventId, btnElement) {
     btnElement.closest('.card').classList.remove('new-event');
-    btnElement.innerHTML = `${svgIcon('fileText')}<span>${i18n[currentLang].finishBtn}</span>`;
+    btnElement.innerHTML = `${svgIcon('fileText')}<span>${I18N[currentLang].finishBtn}</span>`;
     btnElement.classList.add('btn-primary');
     btnElement.onclick = function () { openReportModal(eventId, btnElement.closest('.card')); };
     document.body.classList.remove('police-flash-active');
@@ -317,7 +138,7 @@ function acceptEvent(eventId, btnElement) {
 
 function openReportModal(eventId, cardElement) {
     currentEventForReport = { id: eventId, card: cardElement };
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
     document.getElementById('report-event-id').innerText = `${currentLang === 'HE' ? 'אירוע מס׳' : 'Incident ID'}: ${eventId}`;
     document.getElementById('report-text').value = '';
     document.getElementById('file-list').innerHTML = '';
@@ -341,7 +162,7 @@ function openReportModal(eventId, cardElement) {
 function closeReportModal() { document.getElementById('report-modal').style.display = 'none'; }
 
 function submitReport() {
-    showToast(i18n[currentLang].reportSent, 'success');
+    showToast(I18N[currentLang].reportSent, 'success');
     closeReportModal();
     if (currentEventForReport && currentEventForReport.card) {
         currentEventForReport.card.style.display = 'none';
@@ -358,7 +179,7 @@ function handleFiles() {
     const fileList = document.getElementById('file-list');
     fileList.innerHTML = '';
     for (let i = 0; i < fileInput.files.length; i++) {
-        fileList.innerHTML += `<div class="file-chip">${svgIcon('paperclip', 'icon-sm')}<span>${i18n[currentLang].attached} ${fileInput.files[i].name}</span></div>`;
+        fileList.innerHTML += `<div class="file-chip">${svgIcon('paperclip', 'icon-sm')}<span>${I18N[currentLang].attached} ${fileInput.files[i].name}</span></div>`;
     }
 }
 
@@ -393,7 +214,7 @@ let isFirstLoad = true;
 let allEventsData = [];
 
 function priorityInfo(priority) {
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
     if (priority === 1) return { label: t.priorityCritical };
     if (priority === 2) return { label: t.priorityUrgent };
     return { label: t.priorityRoutine };
@@ -417,7 +238,7 @@ async function loadReactionEvents() {
         renderEvents();
     } catch (err) {
         if (err.message !== 'UNAUTHORIZED') {
-            list.innerHTML = `<div class="empty-state">${svgIcon('alertTriangle')}<div class="empty-state-title">${i18n[currentLang].errorEvents}</div></div>`;
+            list.innerHTML = `<div class="empty-state">${svgIcon('alertTriangle')}<div class="empty-state-title">${I18N[currentLang].errorEvents}</div></div>`;
         }
     }
 }
@@ -434,7 +255,7 @@ function updateReactionCount() {
 
 function renderEvents() {
     const list = document.getElementById('reaction-list');
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
 
     if (allEventsData.length === 0) {
         list.innerHTML = `<div class="empty-state">${svgIcon('checkCircle')}<div class="empty-state-title">${t.allClearTitle}</div><div class="empty-state-sub">${t.allClearSub}</div></div>`;
@@ -567,7 +388,7 @@ function switchTab(tabId, evt) {
 /* Initiative tab                                                          */
 /* ---------------------------------------------------------------------- */
 function scanArea() {
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
     const statusDiv = document.getElementById('location-status');
     const listDiv = document.getElementById('initiative-list');
     statusDiv.innerHTML = `<span class="spinner"></span><span>${t.scanningTitle}</span>`;
@@ -616,13 +437,61 @@ function scanArea() {
 /* ---------------------------------------------------------------------- */
 /* Init                                                                     */
 /* ---------------------------------------------------------------------- */
+function renderShiftContext() {
+    let ctx = null;
+    try { ctx = JSON.parse(sessionStorage.getItem(CONTEXT_KEY)); } catch (e) { /* ignore */ }
+    if (!ctx) return;
+    const districtLabel = locationLabel(LOCATIONS.districts, ctx.district, currentLang);
+    const sectorLabel = locationLabel(LOCATIONS.sectors[ctx.district] || [], ctx.sector, currentLang);
+    const stationLabel = locationLabel(LOCATIONS.stations[ctx.sector] || [], ctx.station, currentLang);
+    document.getElementById('ctx-district').innerText = districtLabel;
+    document.getElementById('ctx-region').innerText = sectorLabel;
+    document.getElementById('ctx-station').innerText = stationLabel;
+    document.getElementById('ctx-callsign').innerText = ctx.callSign || '—';
+    document.getElementById('ctx-callsign-role').innerText = ctx.callSign || '—';
+    document.getElementById('ctx-crew').innerText = (ctx.crew && ctx.crew.length) ? ctx.crew.join(', ') : '—';
+}
+
+/* ---------------------------------------------------------------------- */
+/* Flash broadcast banner (polled from the Commander Dashboard)            */
+/* ---------------------------------------------------------------------- */
+let lastSeenBroadcastId = null;
+let broadcastDismissed = false;
+
+async function pollBroadcast() {
+    try {
+        const res = await authFetch('/api/command/broadcasts/latest');
+        const data = await res.json();
+        const banner = document.getElementById('broadcast-banner');
+        if (data.success && data.broadcast) {
+            if (data.broadcast.id !== lastSeenBroadcastId) {
+                lastSeenBroadcastId = data.broadcast.id;
+                broadcastDismissed = false;
+            }
+            if (!broadcastDismissed) {
+                document.getElementById('broadcast-banner-text').innerText = data.broadcast.message;
+                banner.style.display = 'flex';
+            }
+        } else {
+            banner.style.display = 'none';
+        }
+    } catch (e) { /* silent - non-critical background poll */ }
+}
+function dismissBroadcast() {
+    broadcastDismissed = true;
+    document.getElementById('broadcast-banner').style.display = 'none';
+}
+setInterval(pollBroadcast, 10000);
+
 function initApp() {
     hydrateIcons();
+    initLangToggleButton();
     updateTexts();
+    renderShiftContext();
     const username = sessionStorage.getItem(USERNAME_KEY);
     if (username) document.getElementById('sidebar-username').innerText = username;
 
-    const t = i18n[currentLang];
+    const t = I18N[currentLang];
     document.getElementById('initiative-list').innerHTML = `<div class="empty-state">${svgIcon('crosshair')}<div class="empty-state-title">${t.scanPromptTitle}</div><div class="empty-state-sub">${t.scanPromptSub}</div></div>`;
 
     const fileInput = document.getElementById('media-upload');
@@ -637,6 +506,7 @@ function initApp() {
     });
 
     loadReactionEvents();
+    pollBroadcast();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

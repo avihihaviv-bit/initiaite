@@ -103,5 +103,94 @@ app.post('/api/initiative/scan', requireAuth, (req, res) => {
     res.json({ success: true, count: sortedTasks.length, tasks: sortedTasks });
 });
 
+// ---------------------------------------------------------------------------
+// Commander Dashboard: units, dispatch, broadcasts, audit log.
+// All in-memory, same persistence caveat as reactionEvents/initiativeTasks
+// above — this is mock data for the POC, ready to swap for a real store.
+// ---------------------------------------------------------------------------
+function minutesAgo(n) { return new Date(Date.now() - n * 60000).toISOString(); }
+
+let units = [
+    { id: 'U-21', callSign: { HE: 'איילון 21', EN: 'Ayalon 21' }, station: 'holon', crew: ['רס"מ א. כהן', 'סמל ב. לוי'], phone: '050-1112222', status: 'available', lat: 32.0114, lng: 34.7734, lastUpdate: minutesAgo(1), assignedEventId: null },
+    { id: 'U-26', callSign: { HE: 'איילון 26', EN: 'Ayalon 26' }, station: 'holon', crew: ['סמל ג. מזרחי'], phone: '050-1112223', status: 'available', lat: 32.0118, lng: 34.7739, lastUpdate: minutesAgo(2), assignedEventId: null },
+    { id: 'U-22', callSign: { HE: 'איילון 22', EN: 'Ayalon 22' }, station: 'batyam', crew: ['רב"ט ד. אביטן', 'שוטר ה. פרץ'], phone: '050-1112224', status: 'available', lat: 32.0171, lng: 34.7492, lastUpdate: minutesAgo(1), assignedEventId: null },
+    { id: 'U-23', callSign: { HE: 'איילון 23', EN: 'Ayalon 23' }, station: 'holon', crew: ['סמל ו. דהן'], phone: '050-1112225', status: 'busy', lat: 32.0853, lng: 34.7818, lastUpdate: minutesAgo(6), assignedEventId: '100-2026-8943' },
+    { id: 'U-24', callSign: { HE: 'איילון 24', EN: 'Ayalon 24' }, station: 'holon', crew: ['רב"ט ז. אזולאי', 'שוטר ח. גבאי'], phone: '050-1112226', status: 'break', lat: 32.0684, lng: 34.8248, lastUpdate: minutesAgo(3), assignedEventId: null },
+    { id: 'U-25', callSign: { HE: 'איילון 25', EN: 'Ayalon 25' }, station: 'batyam', crew: ['סמל ט. חדד'], phone: '050-1112227', status: 'distress', lat: 32.0723, lng: 34.8093, lastUpdate: minutesAgo(0), assignedEventId: null },
+    { id: 'U-27', callSign: { HE: 'איילון 27', EN: 'Ayalon 27' }, station: 'holon', crew: ['רב"ט י. שלום'], phone: '050-1112228', status: 'available', lat: 31.9730, lng: 34.7925, lastUpdate: minutesAgo(22), assignedEventId: null },
+    { id: 'U-28', callSign: { HE: 'איילון 28', EN: 'Ayalon 28' }, station: 'batyam', crew: ['סמל כ. עמר'], phone: '050-1112229', status: 'available', lat: 32.0807, lng: 34.8338, lastUpdate: minutesAgo(4), assignedEventId: null },
+    { id: 'Y-11', callSign: { HE: 'ירקון 11', EN: 'Yarkon 11' }, station: 'herzliya', crew: ['רס"מ ל. בן חמו', 'שוטר מ. אשכנזי'], phone: '050-2223331', status: 'available', lat: 32.1608, lng: 34.8410, lastUpdate: minutesAgo(2), assignedEventId: null },
+    { id: 'Y-12', callSign: { HE: 'ירקון 12', EN: 'Yarkon 12' }, station: 'raanana', crew: ['סמל נ. פינטו'], phone: '050-2223332', status: 'busy', lat: 32.0870, lng: 34.8873, lastUpdate: minutesAgo(5), assignedEventId: null },
+    { id: 'Y-13', callSign: { HE: 'ירקון 13', EN: 'Yarkon 13' }, station: 'raanana', crew: ['רב"ט ס. אוחיון', 'שוטר ע. ביטון'], phone: '050-2223333', status: 'break', lat: 32.1839, lng: 34.8698, lastUpdate: minutesAgo(7), assignedEventId: null },
+    { id: 'Y-14', callSign: { HE: 'ירקון 14', EN: 'Yarkon 14' }, station: 'herzliya', crew: ['סמל פ. אלמליח'], phone: '050-2223334', status: 'available', lat: 32.1743, lng: 34.9077, lastUpdate: minutesAgo(1), assignedEventId: null }
+];
+
+let auditLog = [];
+let auditIdCounter = 1;
+function addAuditEntry(actor, actionKey, detail) {
+    auditLog.unshift({ id: auditIdCounter++, timestamp: new Date().toISOString(), actor, actionKey, detail });
+    if (auditLog.length > 200) auditLog.length = 200;
+}
+
+let broadcasts = [];
+
+const VALID_UNIT_STATUSES = ['available', 'break', 'busy', 'distress'];
+const OFFLINE_THRESHOLD_MS = 5 * 60 * 1000;
+function isUnitOffline(unit) { return (Date.now() - new Date(unit.lastUpdate).getTime()) > OFFLINE_THRESHOLD_MS; }
+
+app.get('/api/command/units', requireAuth, (req, res) => {
+    res.json({ success: true, units });
+});
+
+app.post('/api/command/units/:id/status', requireAuth, (req, res) => {
+    const unit = units.find(u => u.id === req.params.id);
+    if (!unit) return res.status(404).json({ success: false, error: 'UNIT_NOT_FOUND' });
+    const { status } = req.body || {};
+    if (!VALID_UNIT_STATUSES.includes(status)) return res.status(400).json({ success: false, error: 'INVALID_STATUS' });
+    unit.status = status;
+    unit.lastUpdate = new Date().toISOString();
+    if (status !== 'busy') unit.assignedEventId = null;
+    addAuditEntry(req.user.username, 'auditStatusChange', `${unit.callSign.EN} → ${status.toUpperCase()}`);
+    res.json({ success: true, unit });
+});
+
+app.post('/api/command/dispatch-backup', requireAuth, (req, res) => {
+    const { eventId } = req.body || {};
+    const event = reactionEvents.find(e => e.eventId === eventId);
+    if (!event) return res.status(404).json({ success: false, error: 'EVENT_NOT_FOUND' });
+
+    const candidates = units
+        .filter(u => u.status === 'available' && !isUnitOffline(u))
+        .map(u => ({ unit: u, distance: geolib.getDistance({ latitude: u.lat, longitude: u.lng }, { latitude: event.location.lat, longitude: event.location.lng }) }))
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 2);
+
+    candidates.forEach(({ unit }) => {
+        unit.status = 'busy';
+        unit.assignedEventId = eventId;
+        unit.lastUpdate = new Date().toISOString();
+        addAuditEntry(req.user.username, 'auditDispatchBackup', `${unit.callSign.EN} → ${eventId}`);
+    });
+
+    res.json({ success: true, dispatched: candidates.map(c => ({ ...c.unit, distance: c.distance })) });
+});
+
+app.post('/api/command/broadcast', requireAuth, (req, res) => {
+    const { message } = req.body || {};
+    if (!message || !message.trim()) return res.status(400).json({ success: false, error: 'EMPTY_MESSAGE' });
+    const broadcast = { id: crypto.randomBytes(6).toString('hex'), message: message.trim(), timestamp: new Date().toISOString(), actor: req.user.username };
+    broadcasts.unshift(broadcast);
+    addAuditEntry(req.user.username, 'auditBroadcast', message.trim());
+    res.json({ success: true, broadcast });
+});
+
+app.get('/api/command/broadcasts/latest', requireAuth, (req, res) => {
+    res.json({ success: true, broadcast: broadcasts[0] || null });
+});
+
+app.get('/api/command/audit-log', requireAuth, (req, res) => {
+    res.json({ success: true, entries: auditLog });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Yozma API Server is running on port ${PORT}`));
