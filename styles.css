@@ -313,6 +313,18 @@ body {
 .tag-chip button { background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; padding: 2px; border-radius: 50%; }
 .tag-chip button:hover { background: rgba(56,189,248,0.2); }
 
+/* ---------- Field documentation tools (Initiative tab) ---------- */
+.module-content .field-label:first-child { margin-top: 0; }
+.sub-block { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
+.sub-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.sub-block-title { font-size: 12.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; }
+.sub-block-remove { background: none; border: none; color: var(--text-mute); cursor: pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
+.sub-block-remove:hover { background: var(--danger-bg); color: var(--danger); }
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text-dim); padding: 7px 2px; cursor: pointer; }
+.check-row input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
+.lpr-result { margin-top: 10px; padding: 10px; background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+.lpr-result strong { color: var(--text); }
+
 /* ---------- Commander Dashboard (tablet/desktop) ---------- */
 #command.content { max-width: none; padding: 0; }
 .cmd-context-line { padding: 12px 16px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.3px; color: var(--text-mute); text-transform: uppercase; }

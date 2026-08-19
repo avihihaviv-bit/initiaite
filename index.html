@@ -223,6 +223,123 @@
         </button>
         <div id="location-status" class="status-line"></div>
         <div id="initiative-list"></div>
+
+        <div class="section-heading" style="margin-top:22px;">
+            <h2 data-i18n="fieldToolsHeader">כלי תיעוד שטח</h2>
+        </div>
+
+        <!-- Module A: Suspect & Vehicle Documentation -->
+        <div class="sidebar-item" onclick="populateRecentQueries(); toggleSection(this, 'module-suspect')">
+            <span data-icon="user"></span><span data-i18n="moduleSuspectHeader">תיעוד חשוד ורכב</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="module-suspect" class="sidebar-content module-content">
+            <label class="field-label" data-i18n="recentQueryLabel">קישור לבדיקה אחרונה</label>
+            <select id="suspect-recent-query" class="modal-input" onchange="onRecentQuerySelected(this.value)"></select>
+            <div id="recent-query-note" class="field-hint" style="display:none;"></div>
+
+            <div id="suspects-container"></div>
+            <button type="button" class="btn btn-ghost btn-sm btn-auto" onclick="addSuspect()">
+                <span data-icon="plus" class="icon-sm"></span><span data-i18n="addSuspectBtn">הוסף חשוד נוסף</span>
+            </button>
+
+            <label class="field-label" style="margin-top:18px;" data-i18n="attachedVehiclesLabel">רכבים מעורבים</label>
+            <div id="suspect-vehicles-container"></div>
+            <button type="button" class="btn btn-ghost btn-sm btn-auto" onclick="addSuspectVehicle()">
+                <span data-icon="plus" class="icon-sm"></span><span data-i18n="addVehicleBtn">הוסף רכב</span>
+            </button>
+
+            <button type="button" class="btn btn-success" style="margin-top:18px;" onclick="saveSuspectModule()">
+                <span data-icon="checkCircle"></span><span data-i18n="saveDocBtn">שמור תיעוד</span>
+            </button>
+        </div>
+
+        <!-- Module B: Checkpoint & Vehicle Checks -->
+        <div class="sidebar-item" onclick="toggleSection(this, 'module-checkpoint')">
+            <span data-icon="car"></span><span data-i18n="moduleCheckpointHeader">תיעוד מחסומים ובדיקות רכב</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="module-checkpoint" class="sidebar-content module-content">
+            <label class="field-label" data-i18n="driverDetailsLabel">פרטי נהג</label>
+            <input type="text" id="cp-driver-id" class="modal-input" data-i18n-placeholder="driverIdPlaceholder" placeholder="ת.ז. נהג">
+            <input type="text" id="cp-driver-name" class="modal-input" data-i18n-placeholder="driverNamePlaceholder" placeholder="שם נהג">
+            <label class="field-label" data-i18n="licenseStatusLabel">סטטוס רישיון</label>
+            <select id="cp-license-status" class="modal-input">
+                <option value="valid" data-i18n="licenseValid">תקף</option>
+                <option value="expired" data-i18n="licenseExpired">פקוע</option>
+                <option value="suspended" data-i18n="licenseSuspended">מושעה</option>
+            </select>
+
+            <button type="button" class="btn btn-primary" style="margin-top:12px;" id="lpr-scan-btn" onclick="scanLPR()">
+                <span data-icon="search" class="icon-sm"></span><span data-i18n="lprScanBtn">סרוק לוחית רישוי (LPR)</span>
+            </button>
+            <div id="lpr-result" class="lpr-result" style="display:none;"></div>
+
+            <label class="field-label" style="margin-top:12px;" data-i18n="searchFindingsLabel">ממצאי חיפוש</label>
+            <label class="check-row"><input type="checkbox" id="finding-clear"><span data-i18n="findingClear">נקי</span></label>
+            <label class="check-row"><input type="checkbox" id="finding-contraband"><span data-i18n="findingContraband">נמצא רכוש חשוד</span></label>
+            <label class="check-row"><input type="checkbox" id="finding-weapons"><span data-i18n="findingWeapons">נמצא נשק</span></label>
+
+            <button type="button" class="btn btn-success" style="margin-top:14px;" onclick="saveCheckpointModule()">
+                <span data-icon="checkCircle"></span><span data-i18n="saveDocBtn">שמור תיעוד</span>
+            </button>
+        </div>
+
+        <!-- Module C: Citations & Tickets -->
+        <div class="sidebar-item" onclick="toggleSection(this, 'module-citations')">
+            <span data-icon="clipboard"></span><span data-i18n="moduleCitationsHeader">דוחות אכיפה</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="module-citations" class="sidebar-content module-content">
+            <label class="field-label" data-i18n="trafficTicketHeader">דוח תנועה</label>
+            <select id="ticket-offense-type" class="modal-input">
+                <option value="speeding" data-i18n="offenseSpeeding">מהירות מופרזת</option>
+                <option value="phone" data-i18n="offensePhone">שימוש בטלפון נייד</option>
+                <option value="stopsign" data-i18n="offenseStopSign">אי עצירה בתמרור עצור</option>
+            </select>
+            <input type="text" id="ticket-driver-id" class="modal-input" data-i18n-placeholder="driverIdPlaceholder" placeholder="ת.ז. נהג">
+            <input type="text" id="ticket-driver-name" class="modal-input" data-i18n-placeholder="driverNamePlaceholder" placeholder="שם נהג">
+            <input type="number" id="ticket-fine-amount" class="modal-input" data-i18n-placeholder="fineAmountPlaceholder" placeholder="סכום הקנס (₪)">
+            <button type="button" class="btn btn-success" onclick="saveTrafficTicket()">
+                <span data-icon="checkCircle"></span><span data-i18n="saveDocBtn">שמור תיעוד</span>
+            </button>
+
+            <hr style="border:0; border-top:1px solid var(--border); margin:18px 0;">
+
+            <label class="field-label" data-i18n="envTicketHeader">דוח איכות סביבה</label>
+            <select id="env-offense-type" class="modal-input">
+                <option value="littering" data-i18n="offenseLittering">השלכת פסולת</option>
+                <option value="noise" data-i18n="offenseNoise">הקמת רעש</option>
+            </select>
+            <input type="text" id="env-location" class="modal-input" data-i18n-placeholder="ticketLocationPlaceholder" placeholder="מיקום העבירה">
+            <input type="text" id="env-citizen-id" class="modal-input" data-i18n-placeholder="driverIdPlaceholder" placeholder="ת.ז. נהג">
+            <input type="text" id="env-citizen-name" class="modal-input" data-i18n-placeholder="driverNamePlaceholder" placeholder="שם נהג">
+            <button type="button" class="btn btn-success" onclick="saveEnvTicket()">
+                <span data-icon="checkCircle"></span><span data-i18n="saveDocBtn">שמור תיעוד</span>
+            </button>
+        </div>
+
+        <!-- Module D: Intelligence & Field Reports -->
+        <div class="sidebar-item" onclick="toggleSection(this, 'module-intel')">
+            <span data-icon="fileText"></span><span data-i18n="moduleIntelHeader">דוח ידיעה / קשר עם אזרח</span><span class="chevron" data-icon="chevronDown"></span>
+        </div>
+        <div id="module-intel" class="sidebar-content module-content">
+            <label class="field-label" data-i18n="intelReportHeader">דוח ידיעה</label>
+            <textarea id="intel-text" class="modal-textarea" rows="3" data-i18n-placeholder="intelPlaceholder" placeholder="תעד ידיעה מודיעינית..."></textarea>
+            <button type="button" class="btn btn-success" onclick="saveIntelReport()">
+                <span data-icon="checkCircle"></span><span data-i18n="saveDocBtn">שמור תיעוד</span>
+            </button>
+
+            <hr style="border:0; border-top:1px solid var(--border); margin:18px 0;">
+
+            <label class="field-label" data-i18n="businessCheckHeader">ביקורת עסקים</label>
+            <input type="text" id="biz-name" class="modal-input" data-i18n-placeholder="businessNamePlaceholder" placeholder="שם העסק">
+            <input type="text" id="biz-owner-id" class="modal-input" data-i18n-placeholder="ownerIdPlaceholder" placeholder="ת.ז. בעל העסק">
+            <label class="field-label" data-i18n="complianceLabel">בדיקת עמידה בתנאים</label>
+            <label class="check-row"><input type="checkbox" id="biz-license"><span data-i18n="complianceBusinessLicense">רישיון עסק בתוקף</span></label>
+            <label class="check-row"><input type="checkbox" id="biz-alcohol"><span data-i18n="complianceAlcohol">רישיון מכירת אלכוהול</span></label>
+            <label class="check-row"><input type="checkbox" id="biz-hours"><span data-i18n="complianceHours">עמידה בשעות פעילות מותרות</span></label>
+            <button type="button" class="btn btn-success" style="margin-top:6px;" onclick="saveBusinessCheck()">
+                <span data-icon="checkCircle"></span><span data-i18n="saveDocBtn">שמור תיעוד</span>
+            </button>
+        </div>
     </div>
 
     <!-- Command Tab (commanders only — call sign containing "401") -->
@@ -296,5 +413,6 @@
 
     <script src="app.js"></script>
     <script src="command.js"></script>
+    <script src="fieldtools.js"></script>
 </body>
 </html>
