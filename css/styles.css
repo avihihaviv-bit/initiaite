@@ -248,10 +248,6 @@ p {
   stroke: none;
 }
 
-.brand-mark {
-  color: var(--color-tomato);
-}
-
 /* ---------- 3. Typography helpers ---------- */
 .eyebrow {
   display: inline-flex;
@@ -526,10 +522,11 @@ p {
   color: var(--color-charcoal);
 }
 
-.brand-mark {
-  width: 42px;
-  height: 42px;
+.brand-logo {
+  height: 44px;
+  width: auto;
   flex-shrink: 0;
+  border-radius: var(--radius-sm);
 }
 
 .brand-text small {
@@ -869,6 +866,7 @@ p {
 /* ---------- 9. 3D Hero Pizza ---------- */
 .hero-visual {
   position: relative;
+  z-index: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -890,7 +888,7 @@ p {
   transform-style: preserve-3d;
   transform: rotateX(52deg) rotateZ(0deg);
   transition: transform 120ms linear;
-  animation: pizza-idle-spin 22s linear infinite;
+  animation: pizza-idle-sway 6s ease-in-out infinite;
   will-change: transform;
 }
 
@@ -899,59 +897,26 @@ p {
   animation-play-state: paused;
 }
 
-@keyframes pizza-idle-spin {
-  from {
-    transform: rotateX(52deg) rotateZ(0deg);
+@keyframes pizza-idle-sway {
+  0%,
+  100% {
+    transform: rotateX(52deg) rotateZ(-3deg);
   }
-  to {
-    transform: rotateX(52deg) rotateZ(360deg);
+  50% {
+    transform: rotateX(52deg) rotateZ(3deg);
   }
 }
 
-.pizza-layer {
+.pizza-photo {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  transform-style: preserve-3d;
-}
-
-.pizza-layer.crust {
-  background: radial-gradient(circle at 40% 35%, #e7b573, #c9853f 62%, #a8672c 100%);
-  box-shadow: 0 18px 0 -6px rgba(90, 55, 20, 0.5), var(--shadow-lg);
-}
-
-.pizza-layer.sauce {
-  inset: 5.5%;
-  background: radial-gradient(circle at 42% 38%, #d5502f, #b93a1f 70%);
-  transform: translateZ(6px);
-}
-
-.pizza-layer.cheese {
-  inset: 8.5%;
-  background: radial-gradient(circle at 38% 32%, #f6dd9e, #eec877 60%, #e0b45c 100%);
-  transform: translateZ(11px);
-  box-shadow: inset 0 0 30px rgba(168, 103, 44, 0.25);
-}
-
-.pizza-topping {
-  position: absolute;
-  border-radius: 50%;
-  transform: translateZ(16px);
-}
-
-.pizza-topping.pepperoni {
-  width: 13%;
-  aspect-ratio: 1;
-  background: radial-gradient(circle at 35% 30%, #d8543a, #a52d1c 75%);
-  box-shadow: inset -2px -3px 4px rgba(0, 0, 0, 0.25);
-}
-
-.pizza-topping.basil {
-  width: 9%;
-  aspect-ratio: 1;
-  border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%;
-  background: linear-gradient(135deg, #4c7c4f, #33562f);
-  transform: translateZ(17px) rotate(var(--r, 0deg));
+  object-fit: cover;
+  transform: translateZ(10px);
+  box-shadow: 0 0 0 10px var(--color-paper), 0 18px 0 -4px rgba(90, 55, 20, 0.35),
+    var(--shadow-lg);
 }
 
 .pizza-steam {
@@ -1007,15 +972,46 @@ p {
   white-space: nowrap;
 }
 
-@media (max-width: 600px), (prefers-reduced-motion: reduce) {
+@media (max-width: 600px) {
   .pizza-3d {
-    animation-duration: 34s;
+    animation-duration: 9s;
   }
 }
 
 .no-3d .pizza-3d {
   animation: none;
-  transform: rotateX(52deg) rotateZ(20deg);
+  transform: rotateX(52deg) rotateZ(0deg);
+}
+
+/* ---------- 9b. Waving Italian flag backdrop ---------- */
+.hero-flag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 128%;
+  max-width: none;
+  height: 128%;
+  translate: -50% -50%;
+  opacity: 0.4;
+  filter: blur(1px) saturate(0.85);
+  animation: flag-wave 5s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes flag-wave {
+  0%,
+  100% {
+    transform: skewY(-1.2deg) scaleX(1);
+  }
+  50% {
+    transform: skewY(1.2deg) scaleX(1.015);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-flag {
+    animation: none;
+  }
 }
 
 /* ---------- 10. Scroll reveal utilities ---------- */
@@ -2204,10 +2200,11 @@ section {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: var(--color-cream);
   margin-bottom: var(--space-3);
+}
+
+.brand-logo-footer {
+  height: 52px;
 }
 
 .footer-tagline {

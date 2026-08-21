@@ -21,7 +21,7 @@
 <meta property="og:title" content="פיצה איטליאנה — פיצריה איטלקית בחולון">
 <meta property="og:description" content="דירוג 4.8 מתוך 83 ביקורות. הזמינו משלוח דרך וולט, אספו עצמאית או התקשרו אלינו.">
 <meta property="og:locale" content="he_IL">
-<meta property="og:image" content="icon-512.png">
+<meta property="og:image" content="assets/images/hero-pizza.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -128,8 +128,8 @@
 <header class="site-header" id="site-header">
   <div class="container header-inner">
     <a class="brand" href="#top">
-      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><use href="#i-pizza-mark"/></svg>
-      <span class="brand-text">פיצה איטליאנה<small>Pizza Italiana · חולון</small></span>
+      <img class="brand-logo" src="assets/images/logo.png" alt="פיצה איטליאנה — Pizza Italiana" width="367" height="104">
+      <span class="brand-text visually-hidden">פיצה איטליאנה, חולון</span>
     </a>
 
     <nav class="main-nav" aria-label="ניווט ראשי">
@@ -246,23 +246,26 @@
       </div>
 
       <div class="hero-visual" id="hero-visual">
+        <svg class="hero-flag" id="hero-flag" viewBox="0 0 300 240" aria-hidden="true" preserveAspectRatio="none">
+          <defs>
+            <clipPath id="flagClip">
+              <path d="M0,14 C36,2 54,26 90,14 C126,2 144,26 180,14 C210,4 228,20 246,10 C256,5 262,9 270,6 L270,232 C262,229 256,233 246,228 C228,218 210,234 180,224 C144,212 126,236 90,224 C54,212 36,236 0,224 Z"/>
+            </clipPath>
+          </defs>
+          <g clip-path="url(#flagClip)">
+            <rect x="0" y="0" width="90" height="240" fill="#009246"/>
+            <rect x="90" y="0" width="90" height="240" fill="#f4f2ee"/>
+            <rect x="180" y="0" width="90" height="240" fill="#ce2b37"/>
+          </g>
+        </svg>
+
         <div class="pizza-stage intro-pizza" id="pizza-stage" style="--d:.3s">
           <div class="pizza-plate-shadow" aria-hidden="true"></div>
           <div class="pizza-steam" aria-hidden="true"></div>
-          <div class="pizza-3d" id="pizza-3d" role="img" aria-label="איור תלת ממדי של פיצה איטלקית טרייה">
-            <div class="pizza-layer crust"></div>
-            <div class="pizza-layer sauce"></div>
-            <div class="pizza-layer cheese"></div>
-            <div class="pizza-topping pepperoni" style="top:20%;inset-inline-start:28%"></div>
-            <div class="pizza-topping pepperoni" style="top:32%;inset-inline-start:58%"></div>
-            <div class="pizza-topping pepperoni" style="top:55%;inset-inline-start:22%"></div>
-            <div class="pizza-topping pepperoni" style="top:62%;inset-inline-start:48%"></div>
-            <div class="pizza-topping pepperoni" style="top:40%;inset-inline-start:40%"></div>
-            <div class="pizza-topping basil" style="top:26%;inset-inline-start:44%;--r:12deg"></div>
-            <div class="pizza-topping basil" style="top:48%;inset-inline-start:64%;--r:-18deg"></div>
-            <div class="pizza-topping basil" style="top:66%;inset-inline-start:34%;--r:30deg"></div>
+          <div class="pizza-3d" id="pizza-3d">
+            <img class="pizza-photo" src="assets/images/hero-pizza.png" alt="פיצה איטליאנה טרייה מהתנור, עם פפרוני ובזיליקום" width="436" height="347">
           </div>
-          <span class="pizza-hint">גררו לסובב · תלת ממד</span>
+          <span class="pizza-hint">זוזו כדי לסובב · תלת ממד</span>
         </div>
       </div>
     </div>
@@ -470,8 +473,7 @@
   <div class="container footer-grid">
     <div>
       <div class="footer-brand">
-        <svg class="brand-mark" viewBox="0 0 64 64" style="width:36px;height:36px" aria-hidden="true"><use href="#i-pizza-mark"></use></svg>
-        פיצה איטליאנה
+        <img class="brand-logo brand-logo-footer" src="assets/images/logo.png" alt="פיצה איטליאנה — Pizza Italiana" width="367" height="104">
       </div>
       <p class="footer-tagline">פיצריה איטלקית בחולון — פיצה על אבן, פסטות ופוקאצ׳ות טריות. הזמנות באמצעות וולט.</p>
     </div>
