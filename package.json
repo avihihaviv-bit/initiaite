@@ -1,18 +1,10 @@
 {
-  "name": "initiate-patrol-c2",
+  "name": "pizza-italiana-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Initiate // Patrol C2 - tactical dispatch and field terminal POC",
-  "main": "server.js",
+  "description": "פיצה איטליאנה — premium static restaurant website (ordering via Wolt)",
   "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "geolib": "^3.3.14"
+    "dev": "serve . -l 5173",
+    "start": "serve . -l 5173"
   }
 }

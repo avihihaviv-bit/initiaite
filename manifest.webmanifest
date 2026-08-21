@@ -1,17 +1,15 @@
 {
-    "name": "Initiate // Patrol C2",
-    "short_name": "Initiate",
-    "description": "Tactical dispatch and field terminal for patrol units",
-    "start_url": "index.html",
-    "scope": ".",
-    "display": "standalone",
-    "orientation": "portrait",
-    "background_color": "#0a0e17",
-    "theme_color": "#121a2b",
-    "lang": "he",
-    "dir": "rtl",
-    "icons": [
-        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-        { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
-    ]
+  "name": "פיצה איטליאנה",
+  "short_name": "פיצה איטליאנה",
+  "description": "פיצריה איטלקית בחולון — הזמנות באמצעות וולט",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf3e6",
+  "theme_color": "#c1391f",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
 }
