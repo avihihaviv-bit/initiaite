@@ -9,7 +9,6 @@ const MAX_RECENT = 6;
 
 let activeCategory = "all";
 let activeQuery = "";
-let activeTagFilters = new Set();
 
 function getRecentlyViewed() {
   try {
@@ -89,11 +88,7 @@ function applyMenuFilters() {
       !activeQuery ||
       item.name.includes(activeQuery) ||
       item.desc.includes(activeQuery);
-    const matchesTags =
-      activeTagFilters.size === 0 ||
-      Array.from(activeTagFilters).every((t) => item.tags.includes(t));
-
-    const visible = matchesCategory && matchesQuery && matchesTags;
+    const visible = matchesCategory && matchesQuery;
     card.hidden = !visible;
     if (visible) visibleCount++;
   });
@@ -111,15 +106,6 @@ export function initMenuControls() {
     }, 180)
   );
 
-  qs("#menu-filters")?.addEventListener("click", (e) => {
-    const chip = e.target.closest(".filter-chip");
-    if (!chip) return;
-    const filter = chip.dataset.filter;
-    chip.classList.toggle("is-active");
-    if (activeTagFilters.has(filter)) activeTagFilters.delete(filter);
-    else activeTagFilters.add(filter);
-    applyMenuFilters();
-  });
 }
 
 // ---------- Product modal ----------

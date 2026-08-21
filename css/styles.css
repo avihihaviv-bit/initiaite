@@ -701,7 +701,7 @@ p {
   /* visible so the halo and the hover label can escape the tile */
   overflow: visible;
   isolation: isolate;
-  background: var(--color-paper);
+  background: transparent;
   box-shadow: var(--shadow-md);
   transition: transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
@@ -745,6 +745,12 @@ p {
 .rail-wolt { --halo: rgba(0, 168, 225, 0.75); }
 .rail-whatsapp { --halo: rgba(37, 211, 102, 0.75); }
 .rail-waze { --halo: rgba(51, 204, 255, 0.75); }
+
+/* Waze ships on a white plate — crop it to the circular mark itself */
+.rail-waze img {
+  border-radius: 50%;
+  transform: scale(1.02);
+}
 
 @keyframes rail-halo {
   0%, 100% { opacity: 0.4; transform: scale(0.96); }
@@ -826,6 +832,7 @@ p {
   position: fixed;
   /* Sits directly above the back-to-top button, never on top of it */
   bottom: calc(var(--space-4) + 58px + env(safe-area-inset-bottom));
+  /* Same 16px gutter as the rail above, so the left column reads as one line */
   left: var(--space-4);
   z-index: var(--z-toast);
 }
@@ -839,21 +846,55 @@ p {
 }
 
 .a11y-toggle {
-  width: 52px;
-  height: 52px;
+  position: relative;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: #1552b5;
   color: #fff;
   display: grid;
   place-items: center;
   box-shadow: var(--shadow-md);
+  animation: a11y-bounce 3.4s ease-in-out infinite;
   transition: transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
 }
 
+.a11y-toggle::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  z-index: -1;
+  background: rgba(59, 130, 246, 0.8);
+  filter: blur(10px);
+  animation: a11y-halo 3.4s ease-in-out infinite;
+}
+
+@keyframes a11y-bounce {
+  0%, 82%, 100% { transform: translateY(0) scale(1); }
+  88% { transform: translateY(-9px) scale(1.05); }
+  94% { transform: translateY(-3px) scale(0.99); }
+}
+
+@keyframes a11y-halo {
+  0%, 100% { opacity: 0.35; transform: scale(0.95); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a11y-toggle,
+  .a11y-toggle::before { animation: none; }
+}
+
 .a11y-toggle svg {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
+}
+
+.a11y-toggle:hover,
+.a11y-toggle:focus-visible {
+  animation-play-state: paused;
 }
 
 .a11y-toggle:hover,
@@ -991,6 +1032,7 @@ html.a11y-no-motion *::after {
 /* ---------- 7. Header / Nav ---------- */
 .site-header {
   position: fixed;
+  overflow: hidden;
   inset-inline: 0;
   top: 0;
   height: var(--header-h);
@@ -1004,6 +1046,42 @@ html.a11y-no-motion *::after {
   transition: background var(--dur-med) var(--ease-out),
     border-color var(--dur-med) var(--ease-out),
     box-shadow var(--dur-med) var(--ease-out);
+}
+
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(216, 172, 92, 0.16) 50%,
+    transparent 62%
+  );
+  background-size: 240% 100%;
+  animation: header-shine 9s ease-in-out infinite;
+}
+
+@keyframes header-shine {
+  0%, 100% { background-position: 130% 0; }
+  50% { background-position: -30% 0; }
+}
+
+/* Tricolour hairline along the bottom edge of the bar */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(to left, #009246, #f4ede2 50%, var(--color-tomato));
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header::after { animation: none; }
 }
 
 .site-header.is-scrolled {
@@ -1031,10 +1109,30 @@ html.a11y-no-motion *::after {
 }
 
 .brand-logo {
-  height: 44px;
+  height: 54px;
   width: auto;
   flex-shrink: 0;
-  border-radius: var(--radius-sm);
+  /* The badge is nearly black; on a dark bar it needs a light behind it and a
+     rim on the neon strokes to separate from the background. */
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.65))
+    drop-shadow(0 0 14px rgba(216, 172, 92, 0.45));
+}
+
+.brand {
+  position: relative;
+}
+
+.brand::before {
+  content: "";
+  position: absolute;
+  inset: -8px -14px;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(244, 233, 216, 0.14),
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 .brand-text small {
@@ -1054,16 +1152,30 @@ html.a11y-no-motion *::after {
 .main-nav ul {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
+  gap: clamp(var(--space-3), 1.6vw, var(--space-6));
+}
+
+.main-nav li {
+  display: flex;
+  align-items: center;
 }
 
 .main-nav a {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  /* One line each — "הכי נמכרים" was wrapping and pushing its baseline */
+  white-space: nowrap;
   font-weight: 600;
-  font-size: 0.98rem;
+  font-size: clamp(0.86rem, 0.92vw, 0.98rem);
   color: var(--color-charcoal-soft);
   padding-block: var(--space-2);
-  transition: color var(--dur-fast);
+  transition: color var(--dur-fast), text-shadow var(--dur-fast);
+}
+
+.main-nav a:hover,
+.main-nav a.is-active {
+  text-shadow: 0 0 16px rgba(216, 172, 92, 0.55);
 }
 
 .main-nav a::after {
@@ -1286,6 +1398,57 @@ html.a11y-no-motion *::after {
   color: var(--color-gold);
   display: inline-flex;
   gap: 2px;
+}
+
+.kosher-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  padding: 0.55rem 1rem 0.55rem 0.6rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-basil);
+  background: linear-gradient(
+    100deg,
+    rgba(76, 122, 84, 0.28),
+    rgba(76, 122, 84, 0.1)
+  );
+  box-shadow: 0 0 22px rgba(127, 191, 135, 0.22);
+}
+
+.kosher-line strong {
+  font-size: 1rem;
+  color: #a9e0b1;
+  letter-spacing: 0.01em;
+}
+
+.kosher-sub {
+  font-size: var(--fs-small);
+  color: var(--color-charcoal-soft);
+}
+
+.kosher-seal {
+  width: 30px;
+  height: 30px;
+  color: #7fbf87;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 8px rgba(127, 191, 135, 0.6));
+  animation: seal-pulse 3.2s ease-in-out infinite;
+}
+
+.kosher-seal svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes seal-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.09); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kosher-seal { animation: none; }
 }
 
 .hero-badges {
@@ -2866,7 +3029,7 @@ section {
 }
 
 .brand-logo-footer {
-  height: 52px;
+  height: 66px;
 }
 
 .footer-tagline {
@@ -3555,5 +3718,116 @@ section {
   .hero-badge {
     font-size: 0.68rem;
     padding: 0.3rem 0.6rem;
+  }
+}
+
+
+/* ==========================================================================
+   30. Site-wide light system
+   Section headings, eyebrows, prices and CTAs all catch light, so the page
+   reads as one lit surface rather than a set of separate glowing bits.
+   ========================================================================== */
+
+/* Eyebrow rule sweeps a highlight along itself */
+.eyebrow::before {
+  background: linear-gradient(to left, var(--color-gold), var(--color-tomato));
+  background-size: 220% 100%;
+  animation: rule-shine 5.5s ease-in-out infinite;
+}
+
+@keyframes rule-shine {
+  0%, 100% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
+}
+
+/* Section headings pick up a soft warm halo as they enter */
+.section-title {
+  text-shadow: 0 0 34px rgba(216, 172, 92, 0.16);
+}
+
+/* Prices glow gently — they are the thing people scan for */
+.dish-price,
+.modal-price {
+  text-shadow: 0 0 14px rgba(226, 73, 44, 0.4);
+}
+
+/* A slow light drifts across each section band */
+.section-alt::before,
+#menu::before,
+#location::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    50% 60% at var(--sweep-x, 50%) 0%,
+    rgba(216, 172, 92, 0.09),
+    transparent 70%
+  );
+  animation: band-sweep 16s ease-in-out infinite;
+}
+
+@keyframes band-sweep {
+  0%, 100% { --sweep-x: 18%; opacity: 0.5; }
+  50% { --sweep-x: 82%; opacity: 1; }
+}
+
+@property --sweep-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+/* Cards lift into a pool of light on hover, matching the tilt system */
+.dish-card::after,
+.why-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 12% -14px 12%;
+  height: 26px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(226, 73, 44, 0.4), transparent 70%);
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity var(--dur-med) var(--ease-premium);
+}
+
+.dish-card:hover::after,
+.why-card:hover::after {
+  opacity: 1;
+}
+
+/* Category chips light up when selected */
+.category-chip.is-active {
+  box-shadow: 0 0 0 1px rgba(216, 172, 92, 0.5), 0 0 22px rgba(226, 73, 44, 0.28);
+}
+
+/* Star ratings shimmer */
+.hero-rating .stars,
+.reviews-score-meta .stars {
+  filter: drop-shadow(0 0 7px rgba(216, 172, 92, 0.55));
+}
+
+/* Section divider: a lit tricolour hairline between bands */
+.section-alt {
+  border-block: 1px solid transparent;
+  border-image: linear-gradient(
+      to left,
+      transparent,
+      rgba(0, 146, 70, 0.5),
+      rgba(244, 237, 226, 0.4),
+      rgba(226, 73, 44, 0.5),
+      transparent
+    )
+    1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow::before,
+  .section-alt::before,
+  #menu::before,
+  #location::before {
+    animation: none;
   }
 }

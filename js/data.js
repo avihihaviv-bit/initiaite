@@ -91,10 +91,6 @@ export const FAQS = [
     q: "מה שעות הפעילות?",
     a: "ראשון 15:00–23:00, שני עד חמישי 14:00–23:00, שבת 20:00–00:00. בימי שישי אנחנו סגורים. הסטטוס פתוח/סגור באתר מתעדכן בזמן אמת.",
   },
-  {
-    q: "אפשר להוסיף תוספות לפיצה?",
-    a: "בהחלט. הפיצות בהרכבה מגיעות עם רוטב עגבניות וגבינה, וניתן להוסיף תוספות לבחירתכם בעת ההזמנה בוולט.",
-  },
 ];
 
 export const MENU_CATEGORIES = [
@@ -120,7 +116,7 @@ export const MENU_ITEMS = [
     name: "פיצה אישית",
     desc: "רוטב עגבניות וגבינה. ניתן להוסיף תוספות.",
     price: "₪27",
-    tags: ["veg"],
+    tags: [],
     bestseller: true,
     img: "assets/images/menu/pizza-ishit.png",
   },
@@ -130,7 +126,7 @@ export const MENU_ITEMS = [
     name: "פיצה משפחתית",
     desc: "רוטב עגבניות וגבינה. ניתן להוסיף תוספות.",
     price: "₪70",
-    tags: ["veg"],
+    tags: [],
     bestseller: true,
     img: "assets/images/menu/pizza-mishpahtit.png",
   },
@@ -141,7 +137,7 @@ export const MENU_ITEMS = [
     name: "פיצה לבנה | אישית",
     desc: "על בסיס אלפרדו, מוצרלה, בולגרית, פרמזן ופטריות.",
     price: "₪40",
-    tags: ["veg"],
+    tags: [],
     recommended: true,
     img: "assets/images/menu/pizza-levana.png",
   },
@@ -151,7 +147,7 @@ export const MENU_ITEMS = [
     name: "פיצה לבנה | משפחתית",
     desc: "על בסיס אלפרדו, מוצרלה, בולגרית, פרמזן ופטריות.",
     price: "₪80",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/pizza-levana.png",
   },
   {
@@ -160,7 +156,7 @@ export const MENU_ITEMS = [
     name: "פיצה יוונית | אישית",
     desc: "על בסיס רוטב עגבניות, בצל, זיתי קלמטה, בולגרית ועגבניות שרי.",
     price: "₪40",
-    tags: ["veg"],
+    tags: [],
     recommended: true,
     img: "assets/images/menu/pizza-yevanit.png",
   },
@@ -170,7 +166,7 @@ export const MENU_ITEMS = [
     name: "פיצה יוונית | משפחתית",
     desc: "על בסיס רוטב עגבניות, בצל, זיתי קלמטה, בולגרית ועגבניות שרי.",
     price: "₪80",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/pizza-yevanit.png",
   },
   // ---- הפסטיליאנה ----
@@ -199,7 +195,7 @@ export const MENU_ITEMS = [
     name: 'תפו"א מוקרם',
     desc: "בחרו תוספות.",
     price: "₪40",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/potato-mukram.png",
   },
   {
@@ -208,7 +204,7 @@ export const MENU_ITEMS = [
     name: "רביולי גבינה",
     desc: "בחרו רוטב.",
     price: "₪50",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/ravioli-gvina.png",
   },
   {
@@ -217,7 +213,7 @@ export const MENU_ITEMS = [
     name: "רביולי בטטה",
     desc: "בחרו רוטב.",
     price: "₪50",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/ravioli-batata.png",
   },
   // ---- תימניאלה ----
@@ -227,7 +223,7 @@ export const MENU_ITEMS = [
     name: "זיווה בהרכבה",
     desc: "מוגש עם 2 תוספות לבחירה, רסק, ביצה וטחינה.",
     price: "₪38",
-    tags: ["veg"],
+    tags: [],
     bestseller: true,
     img: "assets/images/menu/ziva-harkava.png",
   },
@@ -237,7 +233,7 @@ export const MENU_ITEMS = [
     name: "מלווח פתוח",
     desc: "מוגש עם רסק, ביצה וטחינה.",
     price: "₪30",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/malawach-patuach.png",
   },
   {
@@ -246,7 +242,7 @@ export const MENU_ITEMS = [
     name: "מלווח מגולגל",
     desc: "מוגש עם רסק, ביצה וטחינה.",
     price: "₪27",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/malawach-megulgal.png",
   },
   {
@@ -255,7 +251,7 @@ export const MENU_ITEMS = [
     name: "זיווה זיתים",
     desc: "מוגש עם רסק, ביצה וטחינה.",
     price: "₪38",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/ziva-zeitim.png",
   },
   {
@@ -264,7 +260,7 @@ export const MENU_ITEMS = [
     name: "זיווה פטריות",
     desc: "מוגש עם רסק, ביצה וטחינה.",
     price: "₪38",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/ziva-pitriot.png",
   },
   {
@@ -273,7 +269,7 @@ export const MENU_ITEMS = [
     name: "מלווח פיצה",
     desc: "מוגש עם שתי תוספות.",
     price: "₪33",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/malawach-pizza.png",
   },
   // ---- טוסטים ----
@@ -283,20 +279,37 @@ export const MENU_ITEMS = [
     name: "טוסט",
     desc: "מוגש עם 3 תוספות לבחירה ו-2 רטבים בצד.",
     price: "₪35",
-    tags: ["veg"],
+    tags: [],
     bestseller: true,
     img: "assets/images/menu/toast.png",
   },
+  {
+    id: "toast-habait",
+    category: "toast",
+    name: "טוסט הבית",
+    desc: "רוטב פיצה, זיתים ובולגרית. מוגש עם 2 רטבים לבחירה בצד.",
+    price: "₪35",
+    tags: [],
+    img: "assets/images/menu/toast-habait.png",
+  },
+  {
+    id: "toast-alfredo",
+    category: "toast",
+    name: "טוסט על בסיס אלפרדו",
+    desc: "מוגש עם 3 תוספות ו-2 רטבים לבחירה בצד.",
+    price: "₪38",
+    tags: [],
+    img: "assets/images/menu/toast-alfredo.png",
+  },
   // ---- קינוחים ----
-  // Photos for these two are still missing — the desserts screenshot did not
-  // come through. They render with the illustrated placeholder until it does.
   {
     id: "ziva-chocolate",
     category: "dessert",
     name: "זיווה שוקולד קטן",
     desc: "זיווה חמה במילוי שוקולד.",
     price: "₪30",
-    tags: ["veg"],
+    tags: [],
+    img: "assets/images/menu/ziva-chocolate.png",
   },
   {
     id: "sambusak-chocolate",
@@ -304,7 +317,8 @@ export const MENU_ITEMS = [
     name: "סמבוסק שוקולד",
     desc: "סמבוסק חם במילוי שוקולד.",
     price: "₪24",
-    tags: ["veg"],
+    tags: [],
+    img: "assets/images/menu/sambusak-chocolate.png",
   },
   // ---- שתיה קלה ----
   {
@@ -313,7 +327,7 @@ export const MENU_ITEMS = [
     name: "פחית קוקה קולה",
     desc: "0.33 ליטר.",
     price: "₪10",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/coke-can.png",
   },
   {
@@ -322,7 +336,7 @@ export const MENU_ITEMS = [
     name: "פחית קולה זירו",
     desc: "0.33 ליטר.",
     price: "₪10",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/coke-zero-can.png",
   },
   {
@@ -331,7 +345,7 @@ export const MENU_ITEMS = [
     name: "פחית ספרייט",
     desc: "0.33 ליטר.",
     price: "₪10",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/sprite-can.png",
   },
   {
@@ -340,7 +354,7 @@ export const MENU_ITEMS = [
     name: "פחית פאנטה",
     desc: "0.33 ליטר.",
     price: "₪10",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/fanta-can.png",
   },
   {
@@ -349,7 +363,7 @@ export const MENU_ITEMS = [
     name: "קוקה קולה - גדול",
     desc: "1.5 ליטר.",
     price: "₪15",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/coke-big.png",
   },
   {
@@ -358,7 +372,7 @@ export const MENU_ITEMS = [
     name: "קולה זירו - גדול",
     desc: "1.5 ליטר.",
     price: "₪15",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/coke-zero-big.png",
   },
   {
@@ -367,7 +381,7 @@ export const MENU_ITEMS = [
     name: "ספרייט - גדול",
     desc: "1.5 ליטר.",
     price: "₪15",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/sprite-big.png",
   },
   {
@@ -376,7 +390,7 @@ export const MENU_ITEMS = [
     name: "ספרייט זירו - גדול",
     desc: "1.5 ליטר.",
     price: "₪15",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/sprite-zero-big.png",
   },
   {
@@ -385,7 +399,7 @@ export const MENU_ITEMS = [
     name: "פאנטה תפוזים - גדול",
     desc: "1.5 ליטר.",
     price: "₪15",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/fanta-big.png",
   },
   {
@@ -394,7 +408,7 @@ export const MENU_ITEMS = [
     name: "פיוזטי אפרסק - גדול",
     desc: "1.5 ליטר.",
     price: "₪15",
-    tags: ["veg"],
+    tags: [],
     img: "assets/images/menu/fuzetea-big.png",
   },
 ];

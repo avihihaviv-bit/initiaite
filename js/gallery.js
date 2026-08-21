@@ -6,7 +6,7 @@ import { revealStaggerChildren } from "./reveal.js";
  * Ordered so the largest tile (first) carries the strongest hero shot.
  */
 const GALLERY = [
-  { src: "assets/images/hero-pizza.png", alt: "פיצה טרייה עם פפרוני ובזיליקום, פיצה איטליאנה חולון" },
+  { src: "assets/images/menu/pizza-mishpahtit.png", alt: "פיצה משפחתית טרייה מהתנור, פיצה איטליאנה חולון" },
   { src: "assets/images/menu/pizza-levana.png", alt: "פיצה לבנה על בסיס אלפרדו עם פטריות" },
   { src: "assets/images/menu/malawach-patuach.png", alt: "מלווח פתוח מוגש עם ביצה, רסק וטחינה" },
   { src: "assets/images/menu/pasta-penne.png", alt: "פסטה פנה ברוטב שמנת ופטריות" },
