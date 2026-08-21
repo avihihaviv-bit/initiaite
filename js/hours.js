@@ -61,10 +61,7 @@ function findNextOpen(day, minutes) {
 
 export function renderHoursStatus() {
   const status = getOpenStatus();
-  const texts = qsa(
-    "#hero-hours-status, #header-status-text, #mobile-nav-status"
-  );
-  const pills = qsa("#header-status");
+  const texts = qsa("#hero-hours-status, #mobile-nav-status");
   const locationStatus = qs("#location-status");
 
   let label;
@@ -77,7 +74,6 @@ export function renderHoursStatus() {
   }
 
   texts.forEach((el) => (el.textContent = label));
-  pills.forEach((el) => el.classList.toggle("is-closed", !status.open));
   if (locationStatus) {
     locationStatus.textContent = status.open ? "· פתוח עכשיו" : "· סגור עכשיו";
     locationStatus.style.color = status.open

@@ -1,7 +1,12 @@
 import { renderHoursStatus, renderHoursTable } from "./hours.js";
 import { initHeaderScroll, initMobileNav, initActiveNavHighlight, initPageLoader } from "./nav.js";
 import { initHero3D } from "./hero3d.js";
-import { initScrollReveal, initMagneticButtons } from "./reveal.js";
+import {
+  initScrollReveal,
+  initMagneticButtons,
+  initParallax,
+  revealStaggerChildren,
+} from "./reveal.js";
 import {
   renderBestsellers,
   renderMenuTabs,
@@ -13,7 +18,7 @@ import {
 import { renderGallery, initLightbox } from "./gallery.js";
 import { renderReviews } from "./reviews.js";
 import { renderFAQ } from "./faq.js";
-import { qs } from "./utils.js";
+import { qs, qsa } from "./utils.js";
 
 function init() {
   initPageLoader();
@@ -39,9 +44,12 @@ function init() {
   renderReviews();
   renderFAQ();
 
+  qsa(".why-grid, .footer-grid").forEach(revealStaggerChildren);
+
   initHero3D();
   initScrollReveal();
   initMagneticButtons();
+  initParallax();
 
   const year = qs("#footer-year");
   if (year) year.textContent = new Date().getFullYear();

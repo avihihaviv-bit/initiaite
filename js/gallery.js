@@ -15,10 +15,28 @@ const GALLERY_LABELS = [
 
 let currentIndex = 0;
 
+// Real photography supplied by the owner, keyed by gallery slot.
+const GALLERY_PHOTOS = {
+  0: {
+    src: "assets/images/hero-pizza.png",
+    alt: "פיצה טרייה של פיצה איטליאנה עם פפרוני ובזיליקום",
+  },
+};
+
 export function renderGallery() {
   const grid = qs("#gallery-grid");
   if (!grid) return;
-  grid.innerHTML = GALLERY_LABELS.map((label, i) => galleryItemHTML(i, label)).join("");
+  grid.innerHTML = GALLERY_LABELS.map((label, i) => {
+    const photo = GALLERY_PHOTOS[i];
+    if (photo) {
+      return `
+        <div class="gallery-item" data-index="${i}">
+          <img src="${photo.src}" alt="${photo.alt}" loading="lazy" decoding="async">
+          <span class="zoom-icon"><svg class="icon" style="width:16px;height:16px"><use href="#i-zoom"></use></svg></span>
+        </div>`;
+    }
+    return galleryItemHTML(i, label);
+  }).join("");
   revealStaggerChildren(grid);
 }
 
@@ -30,7 +48,10 @@ function openLightbox(index) {
   if (!lightbox || !content) return;
 
   const icons = ["pizza", "pasta", "bread", "garlic", "drink", "deal", "pizza", "pasta"];
-  content.innerHTML = `
+  const photo = GALLERY_PHOTOS[currentIndex];
+  content.innerHTML = photo
+    ? `<img src="${photo.src}" alt="${photo.alt}">`
+    : `
     <div class="art-placeholder" style="width:100%;height:100%;border-radius: var(--radius-md);">
       <svg class="icon icon-fill" style="width:22%;height:22%"><use href="#i-${icons[currentIndex]}"></use></svg>
       <span class="art-label">${GALLERY_LABELS[currentIndex]}</span>

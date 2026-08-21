@@ -52,6 +52,41 @@ function initScrollRevealFor(elements) {
   elements.forEach((el) => observer.observe(el));
 }
 
+/**
+ * Very light parallax: elements with [data-parallax] drift at a fraction of
+ * scroll speed. Disabled on touch/small screens and under reduced motion, and
+ * only updated while the element is on screen.
+ */
+export function initParallax() {
+  const targets = qsa("[data-parallax]");
+  if (!targets.length || prefersReducedMotion()) return;
+  if (window.matchMedia("(max-width: 860px)").matches) return;
+
+  let ticking = false;
+
+  const update = () => {
+    ticking = false;
+    const vh = window.innerHeight;
+    targets.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.bottom < -200 || rect.top > vh + 200) return;
+      const speed = parseFloat(el.dataset.parallax) || 0.06;
+      const offset = (rect.top + rect.height / 2 - vh / 2) * speed;
+      el.style.setProperty("--parallax-y", `${offset.toFixed(1)}px`);
+    });
+  };
+
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+  update();
+}
+
 /** Subtle magnetic pull toward the pointer, desktop fine-pointer only. */
 export function initMagneticButtons() {
   if (!isFinePointer() || prefersReducedMotion()) return;

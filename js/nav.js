@@ -4,6 +4,7 @@ export function initHeaderScroll() {
   const header = qs("#site-header");
   const backToTop = qs("#back-to-top");
   const stickyCta = qs("#sticky-cta");
+  const progress = qs("#scroll-progress span");
   if (!header) return;
 
   let lastY = window.scrollY;
@@ -11,6 +12,11 @@ export function initHeaderScroll() {
   const onScroll = () => {
     const y = window.scrollY;
     header.classList.toggle("is-scrolled", y > 12);
+
+    if (progress) {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = `${max > 0 ? Math.min(100, (y / max) * 100) : 0}%`;
+    }
 
     if (backToTop) backToTop.classList.toggle("is-visible", y > 640);
 
@@ -77,17 +83,37 @@ export function initActiveNavHighlight() {
   sections.forEach((s) => observer.observe(s));
 }
 
+/**
+ * Cinematic intro: logo + wordmark settle, then a circular curtain opens onto
+ * the hero, which runs its own staggered entrance. Capped so the site is
+ * usable in well under 2.5s even if `load` is slow.
+ */
 export function initPageLoader() {
-  const loader = qs("#page-loader");
-  if (!loader) return;
+  const intro = qs("#intro");
+  if (!intro) {
+    document.body.classList.add("is-ready");
+    return;
+  }
+
+  let started = false;
 
   const reveal = () => {
-    if (document.body.classList.contains("is-ready")) return;
-    loader.classList.add("is-hidden");
-    document.body.classList.add("is-ready");
+    if (started) return;
+    started = true;
+
+    intro.classList.add("is-leaving");
+    // Hero entrance begins while the curtain is still opening.
+    setTimeout(() => document.body.classList.add("is-ready"), 320);
+    setTimeout(() => intro.classList.add("is-done"), 1200);
   };
 
-  window.addEventListener("load", () => setTimeout(reveal, 350));
-  // Safety net in case the load event already fired or is slow to register.
-  setTimeout(reveal, 2200);
+  const minHold = new Promise((r) => setTimeout(r, 1700));
+  const loaded = new Promise((r) => {
+    if (document.readyState === "complete") r();
+    else window.addEventListener("load", r, { once: true });
+  });
+
+  Promise.all([minHold, loaded]).then(reveal);
+  // Safety net: never keep the visitor waiting on a slow asset.
+  setTimeout(reveal, 2500);
 }
