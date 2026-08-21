@@ -71,7 +71,6 @@ export function dishCardHTML(item) {
 export function categoryChipHTML(cat, isActive) {
   return `
     <button class="category-chip ${isActive ? "is-active" : ""}" data-category="${cat.id}" role="tab" aria-selected="${isActive}">
-      <span class="icon-wrap"><svg class="icon icon-fill"><use href="#i-${cat.icon}"></use></svg></span>
       <span>${escapeHtml(cat.name)}</span>
     </button>
   `;

@@ -606,6 +606,308 @@ p {
   }
 }
 
+/* Ambient drifting light orbs above the flag, below the content */
+.ambient-lights {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.light {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.light-1 {
+  width: 42vmax;
+  height: 42vmax;
+  top: -12%;
+  right: -8%;
+  background: radial-gradient(circle, rgba(226, 73, 44, 0.5), transparent 68%);
+  animation: drift-1 26s ease-in-out infinite;
+}
+
+.light-2 {
+  width: 36vmax;
+  height: 36vmax;
+  bottom: -14%;
+  left: -6%;
+  background: radial-gradient(circle, rgba(76, 122, 84, 0.45), transparent 68%);
+  animation: drift-2 32s ease-in-out infinite;
+}
+
+.light-3 {
+  width: 28vmax;
+  height: 28vmax;
+  top: 34%;
+  left: 42%;
+  background: radial-gradient(circle, rgba(216, 172, 92, 0.35), transparent 70%);
+  animation: drift-3 38s ease-in-out infinite;
+}
+
+@keyframes drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-7vw, 6vh, 0) scale(1.14); }
+}
+
+@keyframes drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.06); }
+  50% { transform: translate3d(8vw, -5vh, 0) scale(0.92); }
+}
+
+@keyframes drift-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.95); }
+  50% { transform: translate3d(-5vw, -7vh, 0) scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light {
+    animation: none;
+  }
+}
+
+/* Orbs are the most expensive blur on the page — drop one on small screens. */
+@media (max-width: 700px) {
+  .light {
+    filter: blur(52px);
+    opacity: 0.42;
+  }
+  .light-3 {
+    display: none;
+  }
+}
+
+/* ---------- 6a2. Floating brand rail (Wolt / WhatsApp / Waze) ---------- */
+.brand-rail {
+  position: fixed;
+  top: calc(var(--header-h) + var(--space-4));
+  left: var(--space-4);
+  z-index: var(--z-sticky-cta);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rail-btn {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-paper);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.rail-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rail-waze {
+  background: #33ccff;
+  color: #33ccff;
+}
+
+.rail-waze-icon {
+  width: 62%;
+  height: 62%;
+  color: #fff;
+}
+
+.rail-btn:hover,
+.rail-btn:focus-visible {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: var(--shadow-lg), 0 0 0 3px rgba(216, 172, 92, 0.55);
+}
+
+.rail-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Label slides out on hover, on the inline-end side (towards the content) */
+.rail-btn::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  translate: 0 -50%;
+  background: var(--color-charcoal);
+  color: var(--color-cream);
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast), translate var(--dur-fast);
+}
+
+.rail-btn:hover::after,
+.rail-btn:focus-visible::after {
+  opacity: 1;
+  translate: 4px -50%;
+}
+
+@media (max-width: 960px) {
+  .brand-rail {
+    top: calc(var(--header-h) + var(--space-2));
+    left: var(--space-2);
+    gap: var(--space-2);
+  }
+  .rail-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+  }
+  .rail-btn::after {
+    display: none;
+  }
+}
+
+/* ---------- 6a3. Accessibility widget ---------- */
+.a11y {
+  position: fixed;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  left: var(--space-4);
+  z-index: var(--z-toast);
+}
+
+@media (max-width: 960px) {
+  .a11y {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    left: var(--space-3);
+  }
+}
+
+.a11y-toggle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1552b5;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.a11y-toggle svg {
+  width: 28px;
+  height: 28px;
+}
+
+.a11y-toggle:hover,
+.a11y-toggle:focus-visible {
+  transform: scale(1.07);
+  box-shadow: var(--shadow-lg), 0 0 0 3px rgba(21, 82, 181, 0.4);
+}
+
+.a11y-panel {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  width: 250px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-cream-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.a11y-panel[hidden] {
+  display: none;
+}
+
+.a11y-panel h4 {
+  font-size: 0.95rem;
+  margin-bottom: var(--space-1);
+}
+
+.a11y-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-small);
+}
+
+.a11y-buttons {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.a11y-buttons button,
+.a11y-item {
+  border: 1px solid var(--color-cream-line);
+  background: transparent;
+  color: var(--color-charcoal);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.7rem;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.a11y-item {
+  text-align: start;
+  width: 100%;
+}
+
+.a11y-buttons button:hover,
+.a11y-item:hover {
+  background: rgba(244, 233, 216, 0.08);
+  border-color: var(--color-gold);
+}
+
+.a11y-item[aria-pressed="true"] {
+  background: var(--color-basil-tint);
+  border-color: var(--color-basil);
+  color: var(--color-basil-dark);
+}
+
+.a11y-reset {
+  color: var(--color-tomato);
+}
+
+/* Accessibility modes applied to <html> */
+html.a11y-contrast {
+  --color-charcoal: #ffffff;
+  --color-charcoal-soft: #ececec;
+  --color-cream: #000000;
+  --color-cream-dim: #0b0b0b;
+  --color-paper: #101010;
+  --color-cream-line: #6d6d6d;
+}
+
+html.a11y-contrast .flag-backdrop {
+  display: none;
+}
+
+html.a11y-links a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
 /* ---------- 6b. Scroll progress (grows right-to-left) ---------- */
 .scroll-progress {
   position: fixed;
@@ -936,6 +1238,28 @@ p {
   gap: 2px;
 }
 
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hero-badge {
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-cream-line);
+  color: var(--color-charcoal-soft);
+  background: rgba(20, 14, 9, 0.5);
+}
+
+.hero-badge.is-kosher {
+  border-color: var(--color-basil);
+  background: var(--color-basil-tint);
+  color: var(--color-basil-dark);
+}
+
 .hero-title {
   font-size: var(--fs-display-xl);
   letter-spacing: -0.01em;
@@ -1029,11 +1353,21 @@ p {
 @keyframes pizza-idle-sway {
   0%,
   100% {
-    transform: rotateX(52deg) rotateZ(-3deg);
+    transform: rotateX(52deg) rotateZ(-4deg) translateY(0);
   }
   50% {
-    transform: rotateX(52deg) rotateZ(3deg);
+    transform: rotateX(52deg) rotateZ(4deg) translateY(-12px);
   }
+}
+
+/* Lift and light the pizza while the pointer is over it */
+.pizza-stage:hover .pizza-photo {
+  box-shadow: 0 0 0 12px #f4ede2, 0 26px 0 -4px rgba(0, 0, 0, 0.5),
+    var(--shadow-lg), 0 0 44px rgba(226, 73, 44, 0.3);
+}
+
+.pizza-photo {
+  transition: box-shadow 320ms var(--ease-premium);
 }
 
 .pizza-photo {
@@ -1110,6 +1444,76 @@ p {
 .no-3d .pizza-3d {
   animation: none;
   transform: rotateX(52deg) rotateZ(0deg);
+}
+
+/* ---------- 9c. Cursor-tracked tilt + glow ---------- */
+[data-tilt] {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  transform-style: preserve-3d;
+  transition: transform 260ms var(--ease-premium),
+    box-shadow 260ms var(--ease-premium);
+}
+
+[data-tilt].is-tilting {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry))
+    translateZ(6px);
+  transition: transform 90ms linear, box-shadow 260ms var(--ease-premium);
+}
+
+/* Glow that tracks the pointer across the surface */
+[data-tilt]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 260ms var(--ease-premium);
+  background: radial-gradient(
+    340px circle at var(--mx) var(--my),
+    rgba(216, 172, 92, 0.22),
+    transparent 62%
+  );
+}
+
+[data-tilt].is-tilting::before {
+  opacity: 1;
+}
+
+/* Rim light on the hovered element */
+[data-tilt].is-tilting {
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(216, 172, 92, 0.5),
+    0 0 26px rgba(226, 73, 44, 0.18);
+}
+
+.dish-card,
+.why-card,
+.review-card,
+.gallery-item,
+.location-card {
+  position: relative;
+}
+
+/* Focus-visible gets the same rim so keyboard users see it too */
+.dish-card:focus-within,
+.why-card:focus-within,
+.gallery-item:focus-within {
+  box-shadow: var(--shadow-md), 0 0 0 2px var(--color-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tilt],
+  [data-tilt].is-tilting {
+    transform: none;
+    transition: none;
+  }
+  [data-tilt]::before {
+    display: none;
+  }
 }
 
 /* ---------- 10. Scroll reveal utilities ---------- */
@@ -1817,7 +2221,8 @@ section {
 
 @media (min-width: 640px) {
   .gallery-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
   }
   /* Only the opening shot gets the large tile, so the grid stays gapless. */
   .gallery-grid > :first-child {
@@ -1828,10 +2233,13 @@ section {
 
 .gallery-item {
   position: relative;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   aspect-ratio: 1;
   cursor: zoom-in;
+  margin: 0;
+  background: var(--color-cream-dim);
+  box-shadow: var(--shadow-sm);
 }
 
 .gallery-grid > :nth-child(4n + 1) .gallery-item {
@@ -2021,14 +2429,63 @@ section {
   gap: 2px;
 }
 
+.reviews-viewport {
+  position: relative;
+}
+
 .reviews-track {
   display: flex;
   gap: var(--space-5);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-padding-inline-start: var(--container-pad);
   padding-bottom: var(--space-3);
   margin-inline: calc(var(--container-pad) * -1);
   padding-inline: var(--container-pad);
+  scrollbar-width: none;
+}
+
+.reviews-track::-webkit-scrollbar {
+  display: none;
+}
+
+.reviews-arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-paper);
+  border: 1px solid var(--color-cream-line);
+  color: var(--color-charcoal);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.reviews-arrow:hover,
+.reviews-arrow:focus-visible {
+  transform: translateY(-50%) scale(1.08);
+  border-color: var(--color-gold);
+  background: var(--color-cream-dim);
+}
+
+.reviews-prev {
+  inset-inline-start: calc(var(--container-pad) * -0.5);
+}
+
+.reviews-next {
+  inset-inline-end: calc(var(--container-pad) * -0.5);
+}
+
+@media (max-width: 860px) {
+  .reviews-arrow {
+    display: none;
+  }
 }
 
 .review-card {
@@ -2832,5 +3289,218 @@ section {
     opacity: 1;
     transform: none;
     animation: none;
+  }
+}
+
+
+/* ==========================================================================
+   29. Mobile refinement pass
+   ========================================================================== */
+@media (max-width: 700px) {
+  :root {
+    --container-pad: 1.1rem;
+    --space-9: 4rem;
+    --space-10: 4.5rem;
+  }
+
+  /* Reserve a lane for the fixed rail. It sits on the physical left in both
+     directions, so this must be padding-left, not the logical property. */
+  .container {
+    padding-left: 62px;
+    padding-right: var(--container-pad);
+  }
+
+  /* Full-bleed scrollers keep their own edge padding */
+  .reviews-track {
+    margin-left: -62px;
+    padding-left: 62px;
+  }
+
+  .hero {
+    padding-top: calc(var(--header-h) + var(--space-6));
+    padding-bottom: var(--space-7);
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 8.5vw, 2.9rem);
+    line-height: 1.15;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  /* Full-width, thumb-sized CTAs */
+  .hero-ctas .btn,
+  .cta-banner .btn {
+    width: 100%;
+    min-height: 52px;
+  }
+
+  .hero-meta {
+    gap: var(--space-3);
+  }
+
+  .hero-meta-item {
+    font-size: 0.82rem;
+  }
+
+  /* Two dishes per row reads better than one giant card */
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .dish-body {
+    padding: var(--space-3);
+    gap: var(--space-1);
+  }
+
+  .dish-name {
+    font-size: 0.95rem;
+  }
+
+  .dish-price {
+    font-size: 0.92rem;
+  }
+
+  .dish-desc {
+    font-size: 0.78rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .section-title {
+    font-size: clamp(1.5rem, 6.5vw, 2rem);
+  }
+
+  .why-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .why-card {
+    padding: var(--space-4);
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .why-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+  }
+
+  .about-stats {
+    gap: var(--space-2);
+  }
+
+  .about-stat strong {
+    font-size: 1.3rem;
+  }
+
+  .menu-notice {
+    padding: var(--space-3) var(--space-4);
+    font-size: 0.82rem;
+  }
+
+  .menu-notice .btn {
+    width: 100%;
+  }
+
+  .hours-table {
+    font-size: 0.82rem;
+  }
+
+  /* Keep the sticky bar clear of the iOS home indicator */
+  .sticky-cta {
+    padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  }
+
+  .sticky-cta .btn {
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .back-to-top {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    inset-inline-end: var(--space-3);
+  }
+
+  .toast-region {
+    inset-inline: var(--space-3);
+    width: auto;
+  }
+
+  .gallery-grid {
+    gap: var(--space-2);
+  }
+
+  .review-card {
+    width: 86vw;
+    padding: var(--space-4);
+  }
+
+  .faq-question {
+    padding: var(--space-4);
+    font-size: 0.95rem;
+  }
+
+  .faq-answer-inner p {
+    padding: 0 var(--space-4) var(--space-4);
+    font-size: 0.88rem;
+  }
+}
+
+/* Every tappable target clears the 44px minimum */
+@media (pointer: coarse) {
+  .btn,
+  .category-chip,
+  .filter-chip,
+  .menu-tab,
+  .faq-question,
+  .nav-toggle,
+  .rail-btn,
+  .a11y-toggle,
+  .reviews-dot {
+    min-height: 44px;
+  }
+
+  .reviews-dot {
+    min-width: 44px;
+    background: transparent;
+    position: relative;
+  }
+
+  /* Dot is drawn inside the larger hit area */
+  .reviews-dot::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-cream-line);
+  }
+
+  .reviews-dot.is-active::after {
+    background: var(--color-tomato);
+    width: 22px;
+    border-radius: var(--radius-full);
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-badge {
+    font-size: 0.68rem;
+    padding: 0.3rem 0.6rem;
   }
 }

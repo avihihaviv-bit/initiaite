@@ -37,4 +37,15 @@ export function renderReviews() {
   }, 100);
 
   track.addEventListener("scroll", syncDots, { passive: true });
+
+  // Arrow navigation — one card per press, RTL aware.
+  const step = (dir) => {
+    const card = cards[0];
+    if (!card) return;
+    const gap = parseFloat(getComputedStyle(track).columnGap || "0") || 0;
+    track.scrollBy({ left: dir * (card.offsetWidth + gap), behavior: "smooth" });
+  };
+  // In RTL the visual "next" is a negative scrollLeft delta.
+  qs("#reviews-next")?.addEventListener("click", () => step(-1));
+  qs("#reviews-prev")?.addEventListener("click", () => step(1));
 }

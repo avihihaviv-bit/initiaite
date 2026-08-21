@@ -92,10 +92,6 @@ export const FAQS = [
     a: "ראשון 15:00–23:00, שני עד חמישי 14:00–23:00, שבת 20:00–00:00. בימי שישי אנחנו סגורים. הסטטוס פתוח/סגור באתר מתעדכן בזמן אמת.",
   },
   {
-    q: "האם יש אפשרויות צמחוניות?",
-    a: "כן, חלק גדול מהתפריט צמחוני — פיצות, פוקאצ׳ות, לחמי שום, פסטות ומנות תימניאלה. אפשר לסנן מנות צמחוניות בתפריט שבאתר.",
-  },
-  {
     q: "אפשר להוסיף תוספות לפיצה?",
     a: "בהחלט. הפיצות בהרכבה מגיעות עם רוטב עגבניות וגבינה, וניתן להוסיף תוספות לבחירתכם בעת ההזמנה בוולט.",
   },
@@ -106,8 +102,6 @@ export const MENU_CATEGORIES = [
   { id: "house-pizza", name: "פיצות הבית", icon: "pizza" },
   { id: "pasta", name: "הפסטיליאנה", icon: "pasta" },
   { id: "yemenite", name: "תימניאלה", icon: "bread" },
-  { id: "focaccia", name: "פוקאצ׳ות", icon: "bread" },
-  { id: "garlic-bread", name: "לחמי שום", icon: "garlic" },
   { id: "toast", name: "טוסטים", icon: "bread" },
   { id: "dessert", name: "קינוחים", icon: "deal" },
   { id: "drinks", name: "שתיה קלה", icon: "drink" },
@@ -140,7 +134,6 @@ export const MENU_ITEMS = [
     bestseller: true,
     img: "assets/images/menu/pizza-mishpahtit.png",
   },
-
   // ---- פיצות הבית ----
   {
     id: "pizza-levana-ishit",
@@ -180,7 +173,6 @@ export const MENU_ITEMS = [
     tags: ["veg"],
     img: "assets/images/menu/pizza-yevanit.png",
   },
-
   // ---- הפסטיליאנה ----
   {
     id: "pasta-penne",
@@ -228,7 +220,6 @@ export const MENU_ITEMS = [
     tags: ["veg"],
     img: "assets/images/menu/ravioli-batata.png",
   },
-
   // ---- תימניאלה ----
   {
     id: "ziva-harkava",
@@ -285,75 +276,6 @@ export const MENU_ITEMS = [
     tags: ["veg"],
     img: "assets/images/menu/malawach-pizza.png",
   },
-  {
-    id: "malawach-pizza-megulgal",
-    category: "yemenite",
-    name: "מלווח פיצה מגולגל",
-    desc: "מוגש עם רסק, ביצה וטחינה.",
-    price: "₪30",
-    tags: ["veg"],
-  },
-
-  // ---- פוקאצ׳ות ----
-  {
-    id: "focaccia-kfarit",
-    category: "focaccia",
-    name: "פוקאצ׳ה כפרית",
-    desc: "פסטו, טונה, זיתים ירוקים, תירס.",
-    price: "₪32",
-    tags: [],
-  },
-  {
-    id: "focaccia-sabich",
-    category: "focaccia",
-    name: "פוקאצ׳ה סביח",
-    desc: "חציל, ביצה ועגבניה.",
-    price: "₪32",
-    tags: ["veg"],
-  },
-  {
-    id: "focaccia-yevanit",
-    category: "focaccia",
-    name: "פוקאצ׳ה יוונית",
-    desc: "פסטו, בצל, קלמטה, שרי ובולגרית.",
-    price: "₪32",
-    tags: ["veg"],
-  },
-
-  // ---- לחמי שום ----
-  {
-    id: "garlic-bread-small",
-    category: "garlic-bread",
-    name: "לחם שום קטן",
-    desc: "לחם שום אפוי במקום.",
-    price: "₪25",
-    tags: ["veg"],
-  },
-  {
-    id: "garlic-bread-family",
-    category: "garlic-bread",
-    name: "לחם שום משפחתי",
-    desc: "לחם שום אפוי במקום, בגודל משפחתי.",
-    price: "₪50",
-    tags: ["veg"],
-  },
-  {
-    id: "garlic-sticks",
-    category: "garlic-bread",
-    name: "3 מקלות שום",
-    desc: "שלושה מקלות שום אפויים.",
-    price: "₪12",
-    tags: ["veg"],
-  },
-  {
-    id: "cheese-sticks",
-    category: "garlic-bread",
-    name: "3 מקלות גבינה",
-    desc: "שלושה מקלות במילוי גבינה.",
-    price: "₪20",
-    tags: ["veg"],
-  },
-
   // ---- טוסטים ----
   {
     id: "toast",
@@ -365,29 +287,14 @@ export const MENU_ITEMS = [
     bestseller: true,
     img: "assets/images/menu/toast.png",
   },
-  {
-    id: "toast-habait",
-    category: "toast",
-    name: "טוסט הבית",
-    desc: "רוטב פיצה, זיתים ובולגרית. מוגש עם 2 רטבים לבחירה בצד.",
-    price: "₪35",
-    tags: ["veg"],
-  },
-  {
-    id: "toast-alfredo",
-    category: "toast",
-    name: "טוסט על בסיס אלפרדו",
-    desc: "מוגש עם 3 תוספות ו-2 רטבים לבחירה בצד.",
-    price: "₪38",
-    tags: ["veg"],
-  },
-
   // ---- קינוחים ----
+  // Photos for these two are still missing — the desserts screenshot did not
+  // come through. They render with the illustrated placeholder until it does.
   {
     id: "ziva-chocolate",
     category: "dessert",
     name: "זיווה שוקולד קטן",
-    desc: "זיווה במילוי שוקולד.",
+    desc: "זיווה חמה במילוי שוקולד.",
     price: "₪30",
     tags: ["veg"],
   },
@@ -399,7 +306,6 @@ export const MENU_ITEMS = [
     price: "₪24",
     tags: ["veg"],
   },
-
   // ---- שתיה קלה ----
   {
     id: "coke-can",
@@ -408,6 +314,7 @@ export const MENU_ITEMS = [
     desc: "0.33 ליטר.",
     price: "₪10",
     tags: ["veg"],
+    img: "assets/images/menu/coke-can.png",
   },
   {
     id: "coke-zero-can",
@@ -416,6 +323,7 @@ export const MENU_ITEMS = [
     desc: "0.33 ליטר.",
     price: "₪10",
     tags: ["veg"],
+    img: "assets/images/menu/coke-zero-can.png",
   },
   {
     id: "sprite-can",
@@ -424,6 +332,7 @@ export const MENU_ITEMS = [
     desc: "0.33 ליטר.",
     price: "₪10",
     tags: ["veg"],
+    img: "assets/images/menu/sprite-can.png",
   },
   {
     id: "fanta-can",
@@ -432,6 +341,7 @@ export const MENU_ITEMS = [
     desc: "0.33 ליטר.",
     price: "₪10",
     tags: ["veg"],
+    img: "assets/images/menu/fanta-can.png",
   },
   {
     id: "coke-big",
@@ -440,6 +350,7 @@ export const MENU_ITEMS = [
     desc: "1.5 ליטר.",
     price: "₪15",
     tags: ["veg"],
+    img: "assets/images/menu/coke-big.png",
   },
   {
     id: "coke-zero-big",
@@ -448,6 +359,7 @@ export const MENU_ITEMS = [
     desc: "1.5 ליטר.",
     price: "₪15",
     tags: ["veg"],
+    img: "assets/images/menu/coke-zero-big.png",
   },
   {
     id: "sprite-big",
@@ -456,6 +368,7 @@ export const MENU_ITEMS = [
     desc: "1.5 ליטר.",
     price: "₪15",
     tags: ["veg"],
+    img: "assets/images/menu/sprite-big.png",
   },
   {
     id: "sprite-zero-big",
@@ -464,6 +377,7 @@ export const MENU_ITEMS = [
     desc: "1.5 ליטר.",
     price: "₪15",
     tags: ["veg"],
+    img: "assets/images/menu/sprite-zero-big.png",
   },
   {
     id: "fanta-big",
@@ -472,6 +386,7 @@ export const MENU_ITEMS = [
     desc: "1.5 ליטר.",
     price: "₪15",
     tags: ["veg"],
+    img: "assets/images/menu/fanta-big.png",
   },
   {
     id: "fuzetea-big",
@@ -480,5 +395,6 @@ export const MENU_ITEMS = [
     desc: "1.5 ליטר.",
     price: "₪15",
     tags: ["veg"],
+    img: "assets/images/menu/fuzetea-big.png",
   },
 ];

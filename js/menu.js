@@ -47,7 +47,6 @@ export function renderMenuTabs() {
   if (!tabs) return;
   const allChip = `
     <button class="category-chip is-active" data-category="all" role="tab" aria-selected="true">
-      <span class="icon-wrap"><svg class="icon icon-fill"><use href="#i-pizza"></use></svg></span>
       <span>הכל</span>
     </button>
   `;
