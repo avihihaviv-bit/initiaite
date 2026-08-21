@@ -1,5 +1,19 @@
 import { qs, qsa, debounce } from "./utils.js";
 
+/** Publish the sticky bar's real height so the floating buttons clear it. */
+export function trackStickyHeight() {
+  const bar = qs("#sticky-cta");
+  if (!bar) return;
+  const update = () =>
+    document.documentElement.style.setProperty(
+      "--sticky-h",
+      `${Math.round(bar.getBoundingClientRect().height)}px`
+    );
+  update();
+  if ("ResizeObserver" in window) new ResizeObserver(update).observe(bar);
+  window.addEventListener("resize", update, { passive: true });
+}
+
 export function initHeaderScroll() {
   const header = qs("#site-header");
   const backToTop = qs("#back-to-top");

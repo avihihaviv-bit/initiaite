@@ -698,7 +698,9 @@ p {
   border-radius: var(--radius-md);
   display: grid;
   place-items: center;
-  overflow: hidden;
+  /* visible so the halo and the hover label can escape the tile */
+  overflow: visible;
+  isolation: isolate;
   background: var(--color-paper);
   box-shadow: var(--shadow-md);
   transition: transform var(--dur-fast) var(--ease-out),
@@ -709,27 +711,73 @@ p {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
 }
 
-.rail-waze {
-  background: #33ccff;
-  color: #33ccff;
+.rail-btn {
+  /* Each tile drifts on its own offset so they never move in lockstep */
+  animation: rail-float 4.6s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
 }
 
-.rail-waze-icon {
-  width: 62%;
-  height: 62%;
-  color: #fff;
+.brand-rail .rail-btn:nth-child(2) { --float-delay: -1.5s; }
+.brand-rail .rail-btn:nth-child(3) { --float-delay: -3s; }
+
+@keyframes rail-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(-1.2deg); }
+}
+
+/* Halo behind each tile, breathing in its own brand colour */
+.rail-btn::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.75;
+  filter: blur(9px);
+  background: var(--halo, rgba(216, 172, 92, 0.6));
+  animation: rail-halo 3.4s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+.rail-wolt { --halo: rgba(0, 168, 225, 0.75); }
+.rail-whatsapp { --halo: rgba(37, 211, 102, 0.75); }
+.rail-waze { --halo: rgba(51, 204, 255, 0.75); }
+
+@keyframes rail-halo {
+  0%, 100% { opacity: 0.4; transform: scale(0.96); }
+  50% { opacity: 0.9; transform: scale(1.06); }
+}
+
+/* Light sweeping across the tile face */
+.rail-btn::after {
+  z-index: 2;
 }
 
 .rail-btn:hover,
 .rail-btn:focus-visible {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: var(--shadow-lg), 0 0 0 3px rgba(216, 172, 92, 0.55);
+  transform: translateY(-4px) scale(1.07);
+  box-shadow: var(--shadow-lg), 0 0 0 3px rgba(216, 172, 92, 0.6);
+  animation-play-state: paused;
+}
+
+.rail-btn:hover::before,
+.rail-btn:focus-visible::before {
+  opacity: 1;
+  filter: blur(14px);
 }
 
 .rail-btn:active {
   transform: translateY(0) scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-btn,
+  .rail-btn::before {
+    animation: none;
+  }
 }
 
 /* Label slides out on hover, on the inline-end side (towards the content) */
@@ -776,14 +824,16 @@ p {
 /* ---------- 6a3. Accessibility widget ---------- */
 .a11y {
   position: fixed;
-  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  /* Sits directly above the back-to-top button, never on top of it */
+  bottom: calc(var(--space-4) + 58px + env(safe-area-inset-bottom));
   left: var(--space-4);
   z-index: var(--z-toast);
 }
 
 @media (max-width: 960px) {
   .a11y {
-    bottom: calc(84px + env(safe-area-inset-bottom));
+    /* --sticky-h is measured from the real sticky bar at runtime */
+    bottom: calc(var(--sticky-h, 84px) + 12px + 54px + env(safe-area-inset-bottom));
     left: var(--space-3);
   }
 }
@@ -2919,8 +2969,10 @@ section {
 /* back to top */
 .back-to-top {
   position: fixed;
-  bottom: calc(88px + env(safe-area-inset-bottom));
-  inset-inline-end: var(--space-4);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  /* Physical left: the logical property resolves to the right under RTL,
+     which would split this away from the accessibility button. */
+  left: var(--space-4);
   width: 46px;
   height: 46px;
   border-radius: 50%;
@@ -2944,9 +2996,10 @@ section {
   transform: none;
 }
 
-@media (min-width: 960px) {
+@media (max-width: 960px) {
   .back-to-top {
-    bottom: var(--space-6);
+    bottom: calc(var(--sticky-h, 84px) + 12px + env(safe-area-inset-bottom));
+    left: var(--space-3);
   }
 }
 

@@ -1,5 +1,5 @@
 import { renderHoursStatus, renderHoursTable } from "./hours.js";
-import { initHeaderScroll, initMobileNav, initActiveNavHighlight, initPageLoader } from "./nav.js";
+import { initHeaderScroll, initMobileNav, initActiveNavHighlight, initPageLoader, trackStickyHeight } from "./nav.js";
 import { initHero3D } from "./hero3d.js";
 import { initFlagBackdrop } from "./flag.js";
 import { initA11y } from "./a11y.js";
@@ -30,6 +30,7 @@ function init() {
   renderHoursTable();
   setInterval(renderHoursStatus, 60_000);
 
+  trackStickyHeight();
   initHeaderScroll();
   initMobileNav();
   initActiveNavHighlight();
