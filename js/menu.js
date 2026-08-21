@@ -1,6 +1,6 @@
 import { MENU_CATEGORIES, MENU_ITEMS, RESTAURANT } from "./data.js";
 import { qs, qsa, escapeHtml, debounce } from "./utils.js";
-import { dishCardHTML, categoryChipHTML, artPlaceholder } from "./render.js";
+import { dishCardHTML, categoryChipHTML, artPlaceholder, dishMedia } from "./render.js";
 import { revealStaggerChildren } from "./reveal.js";
 import { showToast } from "./toast.js";
 
@@ -143,7 +143,7 @@ export function openProductModal(id) {
   const related = relatedItemsFor(item);
 
   content.innerHTML = `
-    <div class="modal-media">${artPlaceholder(item.category, "תמונה אמיתית תתווסף בקרוב")}</div>
+    <div class="modal-media${item.img ? " has-photo" : ""}">${dishMedia(item, "(max-width: 720px) 92vw, 600px")}</div>
     <div class="modal-title-row">
       <h3 id="product-modal-title">${escapeHtml(item.name)}</h3>
       <span class="modal-price">${escapeHtml(item.price)}</span>
@@ -174,7 +174,7 @@ export function openProductModal(id) {
                 .map(
                   (r) => `
                 <div class="related-item" data-open-dish="${r.id}">
-                  <div class="dish-media">${artPlaceholder(r.category)}</div>
+                  <div class="dish-media${r.img ? " has-photo" : ""}">${dishMedia(r, "160px")}</div>
                   <div class="dish-name">${escapeHtml(r.name)}</div>
                   <div class="dish-price">${escapeHtml(r.price)}</div>
                 </div>`
@@ -229,7 +229,7 @@ export function renderRecentlyViewed() {
     .map(
       (item) => `
       <div class="related-item" data-open-dish="${item.id}">
-        <div class="dish-media">${artPlaceholder(item.category)}</div>
+        <div class="dish-media${item.img ? " has-photo" : ""}">${dishMedia(item, "160px")}</div>
         <div class="dish-name">${escapeHtml(item.name)}</div>
         <div class="dish-price">${escapeHtml(item.price)}</div>
       </div>`

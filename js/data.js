@@ -1,38 +1,38 @@
 /**
  * Pizza Italiana — content data.
- * Real business data (name, address, phone, hours, reviews, Wolt link) is
- * confirmed from the restaurant's Google Business listing and Wolt page.
  *
- * MENU ITEMS BELOW ARE PLACEHOLDERS (see isPlaceholder: true).
- * The real category names are confirmed from the restaurant's live Wolt
- * menu, but wolt.com could not be fetched from this environment to read
- * exact dish names/prices. Replace MENU_ITEMS with the real menu before
- * launch — see https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon
+ * All business data (name, address, phone, hours, reviews) is confirmed from
+ * the restaurant's Google Business listing. The full menu below — categories,
+ * dish names, descriptions and prices — is transcribed from the restaurant's
+ * live Wolt menu as supplied by the owner. Nothing here is invented.
+ *
+ * To update the menu later, edit MENU_CATEGORIES / MENU_ITEMS only; the UI
+ * reads everything from here.
  */
 
 export const RESTAURANT = {
   name: "פיצה איטליאנה",
   nameEn: "Pizza Italiana",
-  tagline: "פיצה על אבן, מהלב של חולון",
+  tagline: "פיצה שעושה חשק לעוד",
   phone: "03-622-5040",
   phoneIntl: "+97236225040",
   telHref: "tel:+97236225040",
-  // Landline number reused for WhatsApp per owner's request — may not be
-  // WhatsApp-registered. Swap for a mobile WhatsApp Business number if one
-  // becomes available.
-  whatsappHref: "https://wa.me/97236225040?text=" +
+  // Landline reused for WhatsApp per the owner's instruction.
+  whatsappHref:
+    "https://wa.me/97236225040?text=" +
     encodeURIComponent("היי! רציתי לשאול לגבי הזמנה מפיצה איטליאנה 🍕"),
   address: "אריה שנקר 61, חולון",
   addressFull: "אריה שנקר 61, חולון, 5833323",
   plusCode: "2QCG+4F חולון",
-  woltUrl: "https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon",
+  woltUrl:
+    "https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon",
   mapsQuery: "פיצה איטליאנה, אריה שנקר 61, חולון",
   rating: 4.8,
   reviewCount: 83,
   priceRange: "50–100 ₪ לאדם",
 };
 
-// day: JS Date.getDay() convention — 0 Sunday … 6 Saturday
+// day: JS Date.getDay() — 0 Sunday … 6 Saturday
 export const HOURS = [
   { day: 0, label: "יום ראשון", open: "15:00", close: "23:00", closed: false },
   { day: 1, label: "יום שני", open: "14:00", close: "23:00", closed: false },
@@ -81,153 +81,404 @@ export const REVIEWS = [
 export const FAQS = [
   {
     q: "איך מזמינים מפיצה איטליאנה?",
-    a: "ההזמנות מתבצעות דרך וולט — לוחצים על כפתור \"הזמנה בוולט\" בכל מקום באתר ומגיעים ישר לעמוד המסעדה שלנו באפליקציה/אתר של וולט.",
+    a: 'ההזמנות מתבצעות דרך וולט — לוחצים על "הזמנה בוולט" בכל מקום באתר ומגיעים ישר לעמוד המסעדה שלנו. אפשר גם להתקשר אלינו ישירות ל-03-622-5040.',
   },
   {
-    q: "האם אפשר להזמין טלפונית או להגיע לאסוף עצמאית?",
-    a: "כן, אפשר להתקשר אלינו ישירות למספר 03-622-5040, וגם לבצע איסוף עצמי מהמקום.",
+    q: "האם יש משלוחים ואיסוף עצמי?",
+    a: "כן. אנחנו מציעים משלוחים, משלוח ללא מגע, איסוף עצמי מהסניף באריה שנקר 61 בחולון, וכמובן ישיבה ואכילה במקום.",
   },
   {
     q: "מה שעות הפעילות?",
-    a: "אנחנו פתוחים ראשון עד חמישי ובשבת בשעות משתנות, וסגורים בימי שישי. לוח השעות המדויק מופיע בסעיף המיקום למטה, כולל סטטוס פתוח/סגור בזמן אמת.",
+    a: "ראשון 15:00–23:00, שני עד חמישי 14:00–23:00, שבת 20:00–00:00. בימי שישי אנחנו סגורים. הסטטוס פתוח/סגור באתר מתעדכן בזמן אמת.",
   },
   {
-    q: "האם יש אפשרויות צמחוניות בתפריט?",
-    a: "בתפריט קיימות מנות עם סימון צמחוני. לפרטים המדויקים והעדכניים ביותר על כל מנה ורכיביה מומלץ לבדוק בעמוד התפריט בוולט לפני ההזמנה.",
+    q: "האם יש אפשרויות צמחוניות?",
+    a: "כן, חלק גדול מהתפריט צמחוני — פיצות, פוקאצ׳ות, לחמי שום, פסטות ומנות תימניאלה. אפשר לסנן מנות צמחוניות בתפריט שבאתר.",
+  },
+  {
+    q: "אפשר להוסיף תוספות לפיצה?",
+    a: "בהחלט. הפיצות בהרכבה מגיעות עם רוטב עגבניות וגבינה, וניתן להוסיף תוספות לבחירתכם בעת ההזמנה בוולט.",
   },
 ];
 
 export const MENU_CATEGORIES = [
-  { id: "deals", name: "מבצעים", icon: "deal" },
   { id: "build-pizza", name: "פיצות בהרכבה", icon: "pizza" },
-  { id: "pasta", name: "פסטות", icon: "pasta" },
+  { id: "house-pizza", name: "פיצות הבית", icon: "pizza" },
+  { id: "pasta", name: "הפסטיליאנה", icon: "pasta" },
+  { id: "yemenite", name: "תימניאלה", icon: "bread" },
   { id: "focaccia", name: "פוקאצ׳ות", icon: "bread" },
   { id: "garlic-bread", name: "לחמי שום", icon: "garlic" },
+  { id: "toast", name: "טוסטים", icon: "bread" },
+  { id: "dessert", name: "קינוחים", icon: "deal" },
   { id: "drinks", name: "שתיה קלה", icon: "drink" },
 ];
 
 /**
- * PLACEHOLDER MENU DATA.
- * Generic, universal Italian-pizzeria dish names are used only as
- * structural placeholders (isPlaceholder: true) so the interactive menu
- * (search/filter/modal/badges) is fully functional. None of this should be
- * read as confirmed information about this specific restaurant's dishes,
- * recipes, or current prices — replace with the real Wolt menu before
- * launch.
+ * Real menu, transcribed from the restaurant's Wolt page.
+ * `img` is set only where real photography is available; items without it
+ * fall back to the illustrated category placeholder.
  */
 export const MENU_ITEMS = [
+  // ---- פיצות בהרכבה ----
   {
-    id: "margherita",
+    id: "pizza-ishit",
     category: "build-pizza",
-    name: "מרגריטה",
-    desc: "רוטב עגבניות, מוצרלה ובזיליקום טרי על בצק דק שנאפה על אבן.",
-    price: "—",
+    name: "פיצה אישית",
+    desc: "רוטב עגבניות וגבינה. ניתן להוסיף תוספות.",
+    price: "₪27",
     tags: ["veg"],
     bestseller: true,
-    isPlaceholder: true,
+    img: "assets/images/menu/pizza-ishit.png",
   },
   {
-    id: "pepperoni",
+    id: "pizza-mishpahtit",
     category: "build-pizza",
-    name: "פפרוני",
-    desc: "מוצרלה נדיבה ופרוסות פפרוני פיקנטיות.",
-    price: "—",
-    tags: ["spicy"],
+    name: "פיצה משפחתית",
+    desc: "רוטב עגבניות וגבינה. ניתן להוסיף תוספות.",
+    price: "₪70",
+    tags: ["veg"],
     bestseller: true,
-    isPlaceholder: true,
+    img: "assets/images/menu/pizza-mishpahtit.png",
   },
+
+  // ---- פיצות הבית ----
   {
-    id: "quattro-formaggi",
-    category: "build-pizza",
-    name: "קוואטרו פורמאג׳י",
-    desc: "מיזוג של ארבע גבינות איטלקיות על בצק פריך.",
-    price: "—",
+    id: "pizza-levana-ishit",
+    category: "house-pizza",
+    name: "פיצה לבנה | אישית",
+    desc: "על בסיס אלפרדו, מוצרלה, בולגרית, פרמזן ופטריות.",
+    price: "₪40",
     tags: ["veg"],
     recommended: true,
-    isPlaceholder: true,
+    img: "assets/images/menu/pizza-levana.png",
   },
   {
-    id: "funghi",
-    category: "build-pizza",
-    name: "פטריות ושמנת",
-    desc: "פטריות טריות מוקפצות ברוטב שמנת עדין.",
-    price: "—",
+    id: "pizza-levana-mishpahtit",
+    category: "house-pizza",
+    name: "פיצה לבנה | משפחתית",
+    desc: "על בסיס אלפרדו, מוצרלה, בולגרית, פרמזן ופטריות.",
+    price: "₪80",
     tags: ["veg"],
-    isPlaceholder: true,
+    img: "assets/images/menu/pizza-levana.png",
   },
   {
-    id: "bolognese",
+    id: "pizza-yevanit-ishit",
+    category: "house-pizza",
+    name: "פיצה יוונית | אישית",
+    desc: "על בסיס רוטב עגבניות, בצל, זיתי קלמטה, בולגרית ועגבניות שרי.",
+    price: "₪40",
+    tags: ["veg"],
+    recommended: true,
+    img: "assets/images/menu/pizza-yevanit.png",
+  },
+  {
+    id: "pizza-yevanit-mishpahtit",
+    category: "house-pizza",
+    name: "פיצה יוונית | משפחתית",
+    desc: "על בסיס רוטב עגבניות, בצל, זיתי קלמטה, בולגרית ועגבניות שרי.",
+    price: "₪80",
+    tags: ["veg"],
+    img: "assets/images/menu/pizza-yevanit.png",
+  },
+
+  // ---- הפסטיליאנה ----
+  {
+    id: "pasta-penne",
     category: "pasta",
-    name: "פסטה בולונז",
-    desc: "פסטה טרייה ברוטב בולונז עשיר בבישול איטי.",
-    price: "—",
+    name: "פסטה פנה",
+    desc: "בחרו רוטב.",
+    price: "₪45",
     tags: [],
-    recommended: true,
-    isPlaceholder: true,
+    bestseller: true,
+    img: "assets/images/menu/pasta-penne.png",
   },
   {
-    id: "alfredo",
+    id: "spaghetti",
     category: "pasta",
-    name: "פסטה אלפרדו",
-    desc: "רוטב שמנת וגבינת פרמזן קלאסי.",
-    price: "—",
-    tags: ["veg"],
-    isPlaceholder: true,
+    name: "ספגטי",
+    desc: "בחרו רוטב.",
+    price: "₪45",
+    tags: [],
+    img: "assets/images/menu/spaghetti.png",
   },
   {
-    id: "focaccia-classic",
-    category: "focaccia",
-    name: "פוקאצ׳ה קלאסית",
-    desc: "שמן זית, רוזמרין ומלח ים גס.",
-    price: "—",
+    id: "potato-mukram",
+    category: "pasta",
+    name: 'תפו"א מוקרם',
+    desc: "בחרו תוספות.",
+    price: "₪40",
     tags: ["veg"],
-    isPlaceholder: true,
+    img: "assets/images/menu/potato-mukram.png",
   },
   {
-    id: "focaccia-cheese",
-    category: "focaccia",
-    name: "פוקאצ׳ה בגבינות",
-    desc: "פוקאצ׳ה ביתית עמוסה בגבינות נמסות.",
-    price: "—",
+    id: "ravioli-gvina",
+    category: "pasta",
+    name: "רביולי גבינה",
+    desc: "בחרו רוטב.",
+    price: "₪50",
     tags: ["veg"],
-    new: true,
-    isPlaceholder: true,
+    img: "assets/images/menu/ravioli-gvina.png",
   },
   {
-    id: "garlic-bread-classic",
-    category: "garlic-bread",
-    name: "לחם שום קלאסי",
-    desc: "לחם אפוי טרי עם חמאת שום ופטרוזיליה.",
-    price: "—",
+    id: "ravioli-batata",
+    category: "pasta",
+    name: "רביולי בטטה",
+    desc: "בחרו רוטב.",
+    price: "₪50",
     tags: ["veg"],
-    isPlaceholder: true,
+    img: "assets/images/menu/ravioli-batata.png",
   },
+
+  // ---- תימניאלה ----
   {
-    id: "garlic-bread-cheese",
-    category: "garlic-bread",
-    name: "לחם שום בגבינה",
-    desc: "לחם שום עם שכבת מוצרלה נמסה.",
-    price: "—",
+    id: "ziva-harkava",
+    category: "yemenite",
+    name: "זיווה בהרכבה",
+    desc: "מוגש עם 2 תוספות לבחירה, רסק, ביצה וטחינה.",
+    price: "₪38",
     tags: ["veg"],
     bestseller: true,
-    isPlaceholder: true,
+    img: "assets/images/menu/ziva-harkava.png",
   },
   {
-    id: "cola",
-    category: "drinks",
-    name: "קוקה קולה",
-    desc: "בקבוק/פחית קרה.",
-    price: "—",
+    id: "malawach-patuach",
+    category: "yemenite",
+    name: "מלווח פתוח",
+    desc: "מוגש עם רסק, ביצה וטחינה.",
+    price: "₪30",
     tags: ["veg"],
-    isPlaceholder: true,
+    img: "assets/images/menu/malawach-patuach.png",
   },
   {
-    id: "sprite",
-    category: "drinks",
-    name: "ספרייט",
-    desc: "בקבוק/פחית קרה.",
-    price: "—",
+    id: "malawach-megulgal",
+    category: "yemenite",
+    name: "מלווח מגולגל",
+    desc: "מוגש עם רסק, ביצה וטחינה.",
+    price: "₪27",
     tags: ["veg"],
-    isPlaceholder: true,
+    img: "assets/images/menu/malawach-megulgal.png",
+  },
+  {
+    id: "ziva-zeitim",
+    category: "yemenite",
+    name: "זיווה זיתים",
+    desc: "מוגש עם רסק, ביצה וטחינה.",
+    price: "₪38",
+    tags: ["veg"],
+    img: "assets/images/menu/ziva-zeitim.png",
+  },
+  {
+    id: "ziva-pitriot",
+    category: "yemenite",
+    name: "זיווה פטריות",
+    desc: "מוגש עם רסק, ביצה וטחינה.",
+    price: "₪38",
+    tags: ["veg"],
+    img: "assets/images/menu/ziva-pitriot.png",
+  },
+  {
+    id: "malawach-pizza",
+    category: "yemenite",
+    name: "מלווח פיצה",
+    desc: "מוגש עם שתי תוספות.",
+    price: "₪33",
+    tags: ["veg"],
+    img: "assets/images/menu/malawach-pizza.png",
+  },
+  {
+    id: "malawach-pizza-megulgal",
+    category: "yemenite",
+    name: "מלווח פיצה מגולגל",
+    desc: "מוגש עם רסק, ביצה וטחינה.",
+    price: "₪30",
+    tags: ["veg"],
+  },
+
+  // ---- פוקאצ׳ות ----
+  {
+    id: "focaccia-kfarit",
+    category: "focaccia",
+    name: "פוקאצ׳ה כפרית",
+    desc: "פסטו, טונה, זיתים ירוקים, תירס.",
+    price: "₪32",
+    tags: [],
+  },
+  {
+    id: "focaccia-sabich",
+    category: "focaccia",
+    name: "פוקאצ׳ה סביח",
+    desc: "חציל, ביצה ועגבניה.",
+    price: "₪32",
+    tags: ["veg"],
+  },
+  {
+    id: "focaccia-yevanit",
+    category: "focaccia",
+    name: "פוקאצ׳ה יוונית",
+    desc: "פסטו, בצל, קלמטה, שרי ובולגרית.",
+    price: "₪32",
+    tags: ["veg"],
+  },
+
+  // ---- לחמי שום ----
+  {
+    id: "garlic-bread-small",
+    category: "garlic-bread",
+    name: "לחם שום קטן",
+    desc: "לחם שום אפוי במקום.",
+    price: "₪25",
+    tags: ["veg"],
+  },
+  {
+    id: "garlic-bread-family",
+    category: "garlic-bread",
+    name: "לחם שום משפחתי",
+    desc: "לחם שום אפוי במקום, בגודל משפחתי.",
+    price: "₪50",
+    tags: ["veg"],
+  },
+  {
+    id: "garlic-sticks",
+    category: "garlic-bread",
+    name: "3 מקלות שום",
+    desc: "שלושה מקלות שום אפויים.",
+    price: "₪12",
+    tags: ["veg"],
+  },
+  {
+    id: "cheese-sticks",
+    category: "garlic-bread",
+    name: "3 מקלות גבינה",
+    desc: "שלושה מקלות במילוי גבינה.",
+    price: "₪20",
+    tags: ["veg"],
+  },
+
+  // ---- טוסטים ----
+  {
+    id: "toast",
+    category: "toast",
+    name: "טוסט",
+    desc: "מוגש עם 3 תוספות לבחירה ו-2 רטבים בצד.",
+    price: "₪35",
+    tags: ["veg"],
+    bestseller: true,
+    img: "assets/images/menu/toast.png",
+  },
+  {
+    id: "toast-habait",
+    category: "toast",
+    name: "טוסט הבית",
+    desc: "רוטב פיצה, זיתים ובולגרית. מוגש עם 2 רטבים לבחירה בצד.",
+    price: "₪35",
+    tags: ["veg"],
+  },
+  {
+    id: "toast-alfredo",
+    category: "toast",
+    name: "טוסט על בסיס אלפרדו",
+    desc: "מוגש עם 3 תוספות ו-2 רטבים לבחירה בצד.",
+    price: "₪38",
+    tags: ["veg"],
+  },
+
+  // ---- קינוחים ----
+  {
+    id: "ziva-chocolate",
+    category: "dessert",
+    name: "זיווה שוקולד קטן",
+    desc: "זיווה במילוי שוקולד.",
+    price: "₪30",
+    tags: ["veg"],
+  },
+  {
+    id: "sambusak-chocolate",
+    category: "dessert",
+    name: "סמבוסק שוקולד",
+    desc: "סמבוסק חם במילוי שוקולד.",
+    price: "₪24",
+    tags: ["veg"],
+  },
+
+  // ---- שתיה קלה ----
+  {
+    id: "coke-can",
+    category: "drinks",
+    name: "פחית קוקה קולה",
+    desc: "0.33 ליטר.",
+    price: "₪10",
+    tags: ["veg"],
+  },
+  {
+    id: "coke-zero-can",
+    category: "drinks",
+    name: "פחית קולה זירו",
+    desc: "0.33 ליטר.",
+    price: "₪10",
+    tags: ["veg"],
+  },
+  {
+    id: "sprite-can",
+    category: "drinks",
+    name: "פחית ספרייט",
+    desc: "0.33 ליטר.",
+    price: "₪10",
+    tags: ["veg"],
+  },
+  {
+    id: "fanta-can",
+    category: "drinks",
+    name: "פחית פאנטה",
+    desc: "0.33 ליטר.",
+    price: "₪10",
+    tags: ["veg"],
+  },
+  {
+    id: "coke-big",
+    category: "drinks",
+    name: "קוקה קולה - גדול",
+    desc: "1.5 ליטר.",
+    price: "₪15",
+    tags: ["veg"],
+  },
+  {
+    id: "coke-zero-big",
+    category: "drinks",
+    name: "קולה זירו - גדול",
+    desc: "1.5 ליטר.",
+    price: "₪15",
+    tags: ["veg"],
+  },
+  {
+    id: "sprite-big",
+    category: "drinks",
+    name: "ספרייט - גדול",
+    desc: "1.5 ליטר.",
+    price: "₪15",
+    tags: ["veg"],
+  },
+  {
+    id: "sprite-zero-big",
+    category: "drinks",
+    name: "ספרייט זירו - גדול",
+    desc: "1.5 ליטר.",
+    price: "₪15",
+    tags: ["veg"],
+  },
+  {
+    id: "fanta-big",
+    category: "drinks",
+    name: "פאנטה תפוזים - גדול",
+    desc: "1.5 ליטר.",
+    price: "₪15",
+    tags: ["veg"],
+  },
+  {
+    id: "fuzetea-big",
+    category: "drinks",
+    name: "פיוזטי אפרסק - גדול",
+    desc: "1.5 ליטר.",
+    price: "₪15",
+    tags: ["veg"],
   },
 ];

@@ -1,63 +1,47 @@
-import { qs, qsa } from "./utils.js";
-import { galleryItemHTML } from "./render.js";
+import { qs } from "./utils.js";
 import { revealStaggerChildren } from "./reveal.js";
 
-const GALLERY_LABELS = [
-  "תמונת המנה תתווסף בקרוב",
-  "תמונת החלל תתווסף בקרוב",
-  "תמונת התנור תתווסף בקרוב",
-  "תמונת הצוות תתווסף בקרוב",
-  "תמונת המנה תתווסף בקרוב",
-  "תמונת החומרים תתווסף בקרוב",
-  "תמונת ההגשה תתווסף בקרוב",
-  "תמונת הכניסה תתווסף בקרוב",
+/**
+ * Gallery of real dish photography from the restaurant's Wolt listing.
+ * Ordered so the largest tile (first) carries the strongest hero shot.
+ */
+const GALLERY = [
+  { src: "assets/images/hero-pizza.png", alt: "פיצה טרייה עם פפרוני ובזיליקום, פיצה איטליאנה חולון" },
+  { src: "assets/images/menu/pizza-levana.png", alt: "פיצה לבנה על בסיס אלפרדו עם פטריות" },
+  { src: "assets/images/menu/malawach-patuach.png", alt: "מלווח פתוח מוגש עם ביצה, רסק וטחינה" },
+  { src: "assets/images/menu/pasta-penne.png", alt: "פסטה פנה ברוטב שמנת ופטריות" },
+  { src: "assets/images/menu/ziva-zeitim.png", alt: "זיווה זיתים מוגשת עם רסק, ביצה וטחינה" },
+  { src: "assets/images/menu/ravioli-batata.png", alt: "רביולי בטטה ברוטב עגבניות" },
+  { src: "assets/images/menu/pizza-yevanit.png", alt: "פיצה יוונית עם זיתי קלמטה, בולגרית ועגבניות שרי" },
+  { src: "assets/images/menu/toast.png", alt: "טוסט חם מוגש עם תוספות ורטבים בצד" },
 ];
 
 let currentIndex = 0;
 
-// Real photography supplied by the owner, keyed by gallery slot.
-const GALLERY_PHOTOS = {
-  0: {
-    src: "assets/images/hero-pizza.png",
-    alt: "פיצה טרייה של פיצה איטליאנה עם פפרוני ובזיליקום",
-  },
-};
-
 export function renderGallery() {
   const grid = qs("#gallery-grid");
   if (!grid) return;
-  grid.innerHTML = GALLERY_LABELS.map((label, i) => {
-    const photo = GALLERY_PHOTOS[i];
-    if (photo) {
-      return `
-        <div class="gallery-item" data-index="${i}">
-          <img src="${photo.src}" alt="${photo.alt}" loading="lazy" decoding="async">
-          <span class="zoom-icon"><svg class="icon" style="width:16px;height:16px"><use href="#i-zoom"></use></svg></span>
-        </div>`;
-    }
-    return galleryItemHTML(i, label);
-  }).join("");
+  grid.innerHTML = GALLERY.map(
+    (p, i) => `
+      <figure class="gallery-item" data-index="${i}">
+        <img src="${p.src}" alt="${p.alt}" loading="lazy" decoding="async"
+             sizes="(max-width: 640px) 50vw, 25vw">
+        <span class="zoom-icon"><svg class="icon" style="width:16px;height:16px"><use href="#i-zoom"></use></svg></span>
+      </figure>`
+  ).join("");
   revealStaggerChildren(grid);
 }
 
 function openLightbox(index) {
-  currentIndex = (index + GALLERY_LABELS.length) % GALLERY_LABELS.length;
+  currentIndex = (index + GALLERY.length) % GALLERY.length;
   const lightbox = qs("#lightbox");
   const content = qs("#lightbox-content");
   const counter = qs("#lightbox-counter");
   if (!lightbox || !content) return;
 
-  const icons = ["pizza", "pasta", "bread", "garlic", "drink", "deal", "pizza", "pasta"];
-  const photo = GALLERY_PHOTOS[currentIndex];
-  content.innerHTML = photo
-    ? `<img src="${photo.src}" alt="${photo.alt}">`
-    : `
-    <div class="art-placeholder" style="width:100%;height:100%;border-radius: var(--radius-md);">
-      <svg class="icon icon-fill" style="width:22%;height:22%"><use href="#i-${icons[currentIndex]}"></use></svg>
-      <span class="art-label">${GALLERY_LABELS[currentIndex]}</span>
-    </div>
-  `;
-  if (counter) counter.textContent = `${currentIndex + 1} / ${GALLERY_LABELS.length}`;
+  const p = GALLERY[currentIndex];
+  content.innerHTML = `<img src="${p.src}" alt="${p.alt}">`;
+  if (counter) counter.textContent = `${currentIndex + 1} / ${GALLERY.length}`;
   lightbox.classList.add("is-open");
   document.body.style.overflow = "hidden";
 }
@@ -86,24 +70,22 @@ export function initLightbox() {
   document.addEventListener("keydown", (e) => {
     if (!lightbox?.classList.contains("is-open")) return;
     if (e.key === "Escape") closeLightbox();
+    // RTL: ArrowLeft advances, ArrowRight goes back
     if (e.key === "ArrowLeft") openLightbox(currentIndex + 1);
     if (e.key === "ArrowRight") openLightbox(currentIndex - 1);
   });
 
-  // Swipe support on mobile
+  // Swipe on mobile
   let startX = 0;
-  lightbox?.addEventListener(
-    "touchstart",
-    (e) => (startX = e.touches[0].clientX),
-    { passive: true }
-  );
+  lightbox?.addEventListener("touchstart", (e) => (startX = e.touches[0].clientX), {
+    passive: true,
+  });
   lightbox?.addEventListener(
     "touchend",
     (e) => {
       const dx = e.changedTouches[0].clientX - startX;
       if (Math.abs(dx) < 40) return;
-      if (dx > 0) openLightbox(currentIndex - 1);
-      else openLightbox(currentIndex + 1);
+      openLightbox(currentIndex + (dx > 0 ? -1 : 1));
     },
     { passive: true }
   );

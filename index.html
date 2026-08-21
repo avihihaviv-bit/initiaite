@@ -65,6 +65,12 @@
 
 <a class="skip-link" href="#main">דלג לתוכן הראשי</a>
 
+<!-- Site-wide Italian flag backdrop (canvas + readability veil) -->
+<div class="flag-backdrop" aria-hidden="true">
+  <canvas id="flag-canvas"></canvas>
+  <div class="flag-veil"></div>
+</div>
+
 <div class="intro" id="intro" aria-hidden="true">
   <div class="intro-embers" aria-hidden="true">
     <span style="--x:12%;--d:0s;--t:7s"></span>
@@ -80,7 +86,7 @@
         <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(244,233,216,.14)" stroke-width="1"/>
         <circle class="intro-ring-arc" cx="60" cy="60" r="54" fill="none" stroke="#e2492c" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      <img class="intro-logo" src="assets/images/logo.png" alt="" width="367" height="104">
+      <img class="intro-logo" src="assets/images/logo.png" alt="" width="1468" height="372">
     </div>
     <div class="intro-word">פיצה איטליאנה</div>
     <div class="intro-sub">פיצה שעושה חשק לעוד</div>
@@ -143,7 +149,7 @@
 <header class="site-header" id="site-header">
   <div class="container header-inner">
     <a class="brand" href="#top">
-      <img class="brand-logo" src="assets/images/logo.png" alt="פיצה איטליאנה — Pizza Italiana" width="367" height="104">
+      <img class="brand-logo" src="assets/images/logo.png" alt="פיצה איטליאנה — Pizza Italiana" width="1468" height="372">
       <span class="brand-text visually-hidden">פיצה איטליאנה, חולון</span>
     </a>
 
@@ -260,18 +266,6 @@
       </div>
 
       <div class="hero-visual" id="hero-visual">
-        <svg class="hero-flag" id="hero-flag" viewBox="0 0 300 240" aria-hidden="true" preserveAspectRatio="none">
-          <defs>
-            <clipPath id="flagClip">
-              <path d="M0,14 C36,2 54,26 90,14 C126,2 144,26 180,14 C210,4 228,20 246,10 C256,5 262,9 270,6 L270,232 C262,229 256,233 246,228 C228,218 210,234 180,224 C144,212 126,236 90,224 C54,212 36,236 0,224 Z"/>
-            </clipPath>
-          </defs>
-          <g clip-path="url(#flagClip)">
-            <rect x="0" y="0" width="90" height="240" fill="#009246"/>
-            <rect x="90" y="0" width="90" height="240" fill="#f4f2ee"/>
-            <rect x="180" y="0" width="90" height="240" fill="#ce2b37"/>
-          </g>
-        </svg>
 
         <div class="pizza-stage intro-pizza" id="pizza-stage" style="--d:.3s">
           <div class="pizza-plate-shadow" aria-hidden="true"></div>
@@ -307,7 +301,7 @@
       </div>
 
       <div class="menu-notice" role="note">
-        <span><strong>לתשומת לבכם:</strong> המנות המוצגות כאן הן להמחשת המבנה בלבד. המחירים והמנות המדויקים והמעודכנים ביותר תמיד מופיעים בעמוד שלנו בוולט.</span>
+        <span><strong>מצאתם את מה שאתם אוהבים?</strong> ההזמנה מתבצעת בוולט — שם גם בוחרים תוספות, רטבים וגודל.</span>
         <a class="btn btn-sm btn-wolt" href="https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon" target="_blank" rel="noopener" data-wolt-cta="menu-notice">
           לתפריט המלא ב<span class="wolt-mark">wolt</span>
         </a>
@@ -400,7 +394,7 @@
       <div class="section-head reveal">
         <span class="eyebrow">קצת השראה</span>
         <h2 class="section-title">גלריה</h2>
-        <p class="section-lead">תמונות אמיתיות מהמסעדה ומהמנות יתווספו כאן בקרוב.</p>
+        <p class="section-lead">הצצה למנות שיוצאות מהתנור שלנו כל יום. לחצו על תמונה להגדלה.</p>
       </div>
       <div class="gallery-grid reveal" id="gallery-grid"></div>
     </div>
@@ -517,7 +511,7 @@
   <div class="container footer-grid">
     <div>
       <div class="footer-brand">
-        <img class="brand-logo brand-logo-footer" src="assets/images/logo.png" alt="פיצה איטליאנה — Pizza Italiana" width="367" height="104">
+        <img class="brand-logo brand-logo-footer" src="assets/images/logo.png" alt="פיצה איטליאנה — Pizza Italiana" width="1468" height="372">
       </div>
       <p class="footer-tagline">פיצריה איטלקית בחולון — פיצה על אבן, פסטות ופוקאצ׳ות טריות. הזמנות באמצעות וולט.</p>
     </div>

@@ -1,11 +1,14 @@
 import { escapeHtml } from "./utils.js";
 
 const CATEGORY_ICON = {
-  deals: "deal",
   "build-pizza": "pizza",
+  "house-pizza": "pizza",
   pasta: "pasta",
+  yemenite: "bread",
   focaccia: "bread",
   "garlic-bread": "garlic",
+  toast: "bread",
+  dessert: "deal",
   drinks: "drink",
 };
 
@@ -17,6 +20,19 @@ export function artPlaceholder(categoryId, label) {
       ${label ? `<span class="art-label">${escapeHtml(label)}</span>` : ""}
     </div>
   `;
+}
+
+/**
+ * Dish visual: real photography when we have it, otherwise the illustrated
+ * category placeholder. A failed image swaps itself out for the placeholder
+ * so a missing file never shows a broken-image icon.
+ */
+export function dishMedia(item, sizes = "(max-width: 700px) 50vw, 300px") {
+  if (!item.img) return artPlaceholder(item.category);
+  return `<img src="${item.img}" alt="${escapeHtml(item.name)} — פיצה איטליאנה חולון"
+    loading="lazy" decoding="async" width="320" height="320" sizes="${sizes}"
+    onerror="this.closest('.dish-media')?.classList.add('img-failed');this.remove()">
+    ${artPlaceholder(item.category)}`;
 }
 
 function tagIcon(tag) {
@@ -35,9 +51,9 @@ export function dishCardHTML(item) {
   return `
     <article class="dish-card" data-id="${item.id}">
       <button class="dish-card-btn" data-open-dish="${item.id}" aria-label="פרטים על ${escapeHtml(item.name)}">
-        <div class="dish-media">
+        <div class="dish-media${item.img ? " has-photo" : ""}">
           <div class="dish-badges">${badges.join("")}</div>
-          ${artPlaceholder(item.category)}
+          ${dishMedia(item)}
         </div>
         <div class="dish-body">
           <div class="dish-top-row">
@@ -58,20 +74,6 @@ export function categoryChipHTML(cat, isActive) {
       <span class="icon-wrap"><svg class="icon icon-fill"><use href="#i-${cat.icon}"></use></svg></span>
       <span>${escapeHtml(cat.name)}</span>
     </button>
-  `;
-}
-
-export function galleryItemHTML(index, label) {
-  const icons = ["pizza", "pasta", "bread", "garlic", "drink", "deal", "pizza", "pasta"];
-  const icon = icons[index % icons.length];
-  return `
-    <div class="gallery-item" data-index="${index}">
-      <div class="art-placeholder">
-        <svg class="icon icon-fill"><use href="#i-${icon}"></use></svg>
-        <span class="art-label">${escapeHtml(label)}</span>
-      </div>
-      <span class="zoom-icon"><svg class="icon" style="width:16px;height:16px"><use href="#i-zoom"></use></svg></span>
-    </div>
   `;
 }
 

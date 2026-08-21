@@ -1,6 +1,7 @@
 import { renderHoursStatus, renderHoursTable } from "./hours.js";
 import { initHeaderScroll, initMobileNav, initActiveNavHighlight, initPageLoader } from "./nav.js";
 import { initHero3D } from "./hero3d.js";
+import { initFlagBackdrop } from "./flag.js";
 import {
   initScrollReveal,
   initMagneticButtons,
@@ -46,6 +47,7 @@ function init() {
 
   qsa(".why-grid, .footer-grid").forEach(revealStaggerChildren);
 
+  initFlagBackdrop();
   initHero3D();
   initScrollReveal();
   initMagneticButtons();
