@@ -80,9 +80,14 @@ export function initActiveNavHighlight() {
 export function initPageLoader() {
   const loader = qs("#page-loader");
   if (!loader) return;
-  window.addEventListener("load", () => {
-    setTimeout(() => loader.classList.add("is-hidden"), 250);
-  });
-  // Safety net in case load event already fired or is slow to register.
-  setTimeout(() => loader.classList.add("is-hidden"), 2500);
+
+  const reveal = () => {
+    if (document.body.classList.contains("is-ready")) return;
+    loader.classList.add("is-hidden");
+    document.body.classList.add("is-ready");
+  };
+
+  window.addEventListener("load", () => setTimeout(reveal, 350));
+  // Safety net in case the load event already fired or is slow to register.
+  setTimeout(reveal, 2200);
 }

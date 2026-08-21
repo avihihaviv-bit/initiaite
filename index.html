@@ -66,7 +66,13 @@
 <a class="skip-link" href="#main">דלג לתוכן הראשי</a>
 
 <div class="page-loader" id="page-loader" aria-hidden="true">
-  <svg class="loader-mark" viewBox="0 0 64 64"><use href="#i-pizza-loader"></use></svg>
+  <div class="loader-stack">
+    <div class="loader-ring-wrap">
+      <span class="loader-ring"></span>
+      <svg class="loader-mark" viewBox="0 0 64 64"><use href="#i-pizza-mark"></use></svg>
+    </div>
+    <span class="loader-word">פיצה איטליאנה</span>
+  </div>
 </div>
 
 <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
@@ -192,8 +198,8 @@
   <section class="hero" id="top">
     <div class="hero-texture" aria-hidden="true"></div>
     <div class="container hero-inner">
-      <div class="hero-copy reveal" id="hero-copy">
-        <div class="hero-rating">
+      <div class="hero-copy" id="hero-copy">
+        <div class="hero-rating intro-item" style="--d:.05s">
           <span class="stars" aria-hidden="true">
             <svg class="icon icon-fill" style="width:16px;height:16px"><use href="#i-star"></use></svg>
             <svg class="icon icon-fill" style="width:16px;height:16px"><use href="#i-star"></use></svg>
@@ -204,11 +210,14 @@
           <span>4.8 · 83 ביקורות בגוגל</span>
         </div>
 
-        <h1 class="hero-title">פיצה איטלקית אמיתית,<br><span class="accent">נאפית על אבן</span> בלב חולון</h1>
+        <h1 class="hero-title">
+          <span class="line"><span class="line-inner" style="--d:.16s">פיצה איטלקית אמיתית,</span></span>
+          <span class="line"><span class="line-inner" style="--d:.26s"><span class="accent">נאפית על אבן</span> בלב חולון</span></span>
+        </h1>
 
-        <p class="hero-subtitle">בצק תפוח, רוטב עגבניות ביתי וגבינות איכותיות — פיצה איטליאנה מגישה טעם איטלקי אותנטי כבר שנים, למשלוח, איסוף עצמי או אכילה במקום.</p>
+        <p class="hero-subtitle intro-item" style="--d:.4s">בצק תפוח, רוטב עגבניות ביתי וגבינות איכותיות — פיצה איטליאנה מגישה טעם איטלקי אותנטי כבר שנים, למשלוח, איסוף עצמי או אכילה במקום.</p>
 
-        <div class="hero-ctas">
+        <div class="hero-ctas intro-item" style="--d:.52s">
           <a class="btn btn-wolt btn-lg magnetic" href="https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon" target="_blank" rel="noopener" data-wolt-cta="hero">
             <svg class="icon"><use href="#i-bag"></use></svg> הזמנה בוולט
           </a>
@@ -220,7 +229,7 @@
           </a>
         </div>
 
-        <div class="hero-meta">
+        <div class="hero-meta intro-item" style="--d:.64s">
           <span class="hero-meta-item">
             <svg class="icon"><use href="#i-clock"></use></svg>
             <span id="hero-hours-status">בודק שעות פתיחה...</span>
@@ -236,8 +245,8 @@
         </div>
       </div>
 
-      <div class="hero-visual reveal-scale" id="hero-visual">
-        <div class="pizza-stage" id="pizza-stage">
+      <div class="hero-visual" id="hero-visual">
+        <div class="pizza-stage intro-pizza" id="pizza-stage" style="--d:.3s">
           <div class="pizza-plate-shadow" aria-hidden="true"></div>
           <div class="pizza-steam" aria-hidden="true"></div>
           <div class="pizza-3d" id="pizza-3d" role="img" aria-label="איור תלת ממדי של פיצה איטלקית טרייה">
