@@ -1211,6 +1211,19 @@ html.a11y-no-motion *::after {
   display: none;
 }
 
+.header-call {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-charcoal);
+  border: 1px solid var(--color-cream-line);
+  box-shadow: none;
+}
+
+@media (min-width: 961px) {
+  .header-call {
+    display: none;
+  }
+}
+
 .nav-toggle {
   display: flex;
   align-items: center;
@@ -3824,5 +3837,162 @@ section {
   #menu::before,
   #location::before {
     animation: none;
+  }
+}
+
+
+/* ==========================================================================
+   31. Mobile header — everything lives up top, nothing docked at the bottom
+   ========================================================================== */
+@media (max-width: 960px) {
+  :root {
+    /* Two rows: brand + actions, then the nav strip */
+    --header-h: 116px;
+  }
+
+  /* Height follows content so an extra wrap can never clip the logo. */
+  .site-header {
+    height: auto;
+    min-height: var(--header-h);
+  }
+
+  /* Same three children as desktop; the nav simply wraps to its own row. */
+  .header-inner {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+
+  .brand { order: 1; }
+  .header-actions { order: 2; }
+  .main-nav {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  /* The hamburger is redundant once every link is on the bar */
+  .nav-toggle {
+    display: none;
+  }
+
+  /* Full nav on the bar, scrolled horizontally when it runs long */
+  .main-nav {
+    display: block;
+    margin-inline: calc(-1 * var(--container-pad));
+  }
+
+  .main-nav ul {
+    gap: var(--space-4);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-inline: var(--container-pad);
+    scroll-snap-type: x proximity;
+  }
+
+  .main-nav ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .main-nav li {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .main-nav a {
+    font-size: 0.9rem;
+    padding-block: var(--space-1);
+  }
+
+  .header-actions {
+    gap: var(--space-2);
+  }
+
+  /* The ordering CTA belongs on the bar now, not in a bottom dock */
+  .header-actions .btn-wolt {
+    display: inline-flex;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .brand-logo {
+    height: 44px;
+  }
+
+  /* Bottom dock removed — its actions moved into the header */
+  .sticky-cta {
+    display: none;
+  }
+
+  /* Bigger, easier brand buttons */
+  .brand-rail {
+    top: calc(var(--header-h) + var(--space-3));
+    left: 8px;
+    gap: var(--space-3);
+  }
+
+  .rail-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: var(--radius-md);
+  }
+
+  .container {
+    padding-inline: 74px;
+  }
+
+  /* The rail hangs below the header, so the bar itself needs no lane —
+     reserving one squeezed brand + actions onto separate rows. */
+  .site-header .container {
+    padding-inline: var(--container-pad);
+  }
+
+  .reviews-track {
+    margin-inline: -74px;
+    padding-inline: 74px;
+  }
+
+  /* With no bottom dock the corner buttons drop to the true bottom */
+  .a11y {
+    bottom: calc(var(--space-3) + 62px + env(safe-area-inset-bottom));
+    left: var(--space-3);
+  }
+
+  .back-to-top {
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    left: var(--space-3);
+  }
+}
+
+@media (max-width: 420px) {
+  .container {
+    padding-inline: 68px;
+  }
+  .site-header .container {
+    padding-inline: var(--container-pad);
+  }
+  .reviews-track {
+    margin-inline: -68px;
+    padding-inline: 68px;
+  }
+  .rail-btn {
+    width: 52px;
+    height: 52px;
+  }
+  /* Trim the bar so brand + actions still share one row at 320px */
+  .header-actions {
+    gap: 6px;
+  }
+  .header-actions .btn-wolt {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.78rem;
+  }
+  .header-actions .btn-icon {
+    padding: 0.55rem;
+  }
+  .brand-logo {
+    height: 36px;
+  }
+  .main-nav a {
+    font-size: 0.84rem;
   }
 }
