@@ -814,12 +814,12 @@ p {
 @media (max-width: 960px) {
   .brand-rail {
     top: calc(var(--header-h) + var(--space-2));
-    left: var(--space-2);
+    left: 6px;
     gap: var(--space-2);
   }
   .rail-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-sm);
   }
   .rail-btn::after {
@@ -2432,6 +2432,12 @@ section {
   gap: var(--space-3);
 }
 
+/* Same feature-tile composition as desktop, at mobile scale */
+.gallery-grid > :first-child {
+  grid-row: span 2;
+  grid-column: span 2;
+}
+
 @media (min-width: 640px) {
   .gallery-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -3519,17 +3525,15 @@ section {
     --space-10: 4.5rem;
   }
 
-  /* Reserve a lane for the fixed rail. It sits on the physical left in both
-     directions, so this must be padding-left, not the logical property. */
+  /* Same gutter on both sides so the page stays centred exactly like the
+     desktop composition; the rail lives inside the left gutter. */
   .container {
-    padding-left: 62px;
-    padding-right: var(--container-pad);
+    padding-inline: 50px;
   }
 
-  /* Full-bleed scrollers keep their own edge padding */
   .reviews-track {
-    margin-left: -62px;
-    padding-left: 62px;
+    margin-inline: -50px;
+    padding-inline: 50px;
   }
 
   .hero {
@@ -3593,21 +3597,12 @@ section {
   }
 
   .why-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
   }
 
   .why-card {
-    padding: var(--space-4);
-    flex-direction: row;
-    align-items: flex-start;
-    gap: var(--space-3);
-  }
-
-  .why-icon {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
+    padding: var(--space-5);
   }
 
   .about-stats {
