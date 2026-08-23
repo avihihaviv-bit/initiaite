@@ -6,6 +6,11 @@
 
 /* ---------- 1. Tokens ---------- */
 :root {
+  /* Floating-button column: one left edge and one size, so the rail, the
+     accessibility button and back-to-top all share a centre line. */
+  --rail-left: 1rem;
+  --rail-size: 56px;
+
   /* Color — deep charcoal Italian-night palette */
   --color-cream: #150f0a;
   --color-cream-dim: #1c140d;
@@ -684,7 +689,7 @@ p {
 .brand-rail {
   position: fixed;
   top: calc(var(--header-h) + var(--space-4));
-  left: var(--space-4);
+  left: var(--rail-left);
   z-index: var(--z-sticky-cta);
   display: flex;
   flex-direction: column;
@@ -693,8 +698,8 @@ p {
 
 .rail-btn {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: var(--rail-size);
+  height: var(--rail-size);
   border-radius: var(--radius-md);
   display: grid;
   place-items: center;
@@ -812,16 +817,7 @@ p {
 }
 
 @media (max-width: 960px) {
-  .brand-rail {
-    top: calc(var(--header-h) + var(--space-2));
-    left: 6px;
-    gap: var(--space-2);
-  }
-  .rail-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-sm);
-  }
+  /* Labels are pointless without hover; sizing comes from --rail-* */
   .rail-btn::after {
     display: none;
   }
@@ -830,25 +826,16 @@ p {
 /* ---------- 6a3. Accessibility widget ---------- */
 .a11y {
   position: fixed;
-  /* Sits directly above the back-to-top button, never on top of it */
-  bottom: calc(var(--space-4) + 58px + env(safe-area-inset-bottom));
-  /* Same 16px gutter as the rail above, so the left column reads as one line */
-  left: var(--space-4);
+  /* Directly above back-to-top, sharing its centre line */
+  bottom: calc(var(--space-3) + var(--rail-size) + var(--space-3) + env(safe-area-inset-bottom));
+  left: var(--rail-left);
   z-index: var(--z-toast);
-}
-
-@media (max-width: 960px) {
-  .a11y {
-    /* --sticky-h is measured from the real sticky bar at runtime */
-    bottom: calc(var(--sticky-h, 84px) + 12px + 54px + env(safe-area-inset-bottom));
-    left: var(--space-3);
-  }
 }
 
 .a11y-toggle {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: var(--rail-size);
+  height: var(--rail-size);
   border-radius: 50%;
   background: #1552b5;
   color: #fff;
@@ -982,8 +969,149 @@ html.a11y-contrast {
   --color-cream-line: #6d6d6d;
 }
 
-html.a11y-contrast .flag-backdrop {
+html.a11y-contrast .flag-backdrop,
+html.a11y-contrast .ambient-lights,
+html.a11y-contrast .hero-texture {
   display: none;
+}
+
+/*
+ * High contrast has to override every surface painted with a literal colour
+ * rather than a token — those ignore the palette swap above and were leaving
+ * the header, footer, overlays and floating controls dark and low-contrast.
+ */
+html.a11y-contrast .site-header,
+html.a11y-contrast .site-header.is-scrolled {
+  background: #000;
+  border-bottom: 2px solid #fff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.a11y-contrast .site-header::after,
+html.a11y-contrast .site-header::before,
+html.a11y-contrast .brand::before,
+html.a11y-contrast .dish-card::after,
+html.a11y-contrast .why-card::after,
+html.a11y-contrast [data-tilt]::before,
+html.a11y-contrast .rail-btn::before,
+html.a11y-contrast .a11y-toggle::before,
+html.a11y-contrast .section-alt::before,
+html.a11y-contrast #menu::before,
+html.a11y-contrast #location::before,
+html.a11y-contrast .cta-banner::before,
+html.a11y-contrast .pizza-steam,
+html.a11y-contrast .btn-wolt::after {
+  display: none;
+}
+
+html.a11y-contrast .site-footer,
+html.a11y-contrast .cta-banner,
+html.a11y-contrast .hero,
+html.a11y-contrast .section-alt,
+html.a11y-contrast #menu,
+html.a11y-contrast #location {
+  background: #000;
+  color: #fff;
+}
+
+html.a11y-contrast .site-footer,
+html.a11y-contrast .cta-banner {
+  border: 2px solid #fff;
+}
+
+html.a11y-contrast .dish-card,
+html.a11y-contrast .why-card,
+html.a11y-contrast .review-card,
+html.a11y-contrast .location-card,
+html.a11y-contrast .faq-item,
+html.a11y-contrast .modal,
+html.a11y-contrast .a11y-panel,
+html.a11y-contrast .menu-search input,
+html.a11y-contrast .category-chip {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+  box-shadow: none;
+}
+
+html.a11y-contrast .modal-close,
+html.a11y-contrast .gallery-item .zoom-icon,
+html.a11y-contrast .reviews-arrow {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+html.a11y-contrast .art-placeholder .art-label {
+  background: #000;
+  color: #fff;
+}
+
+html.a11y-contrast .kosher-line,
+html.a11y-contrast .menu-notice,
+html.a11y-contrast .hero-badge {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+  box-shadow: none;
+}
+
+/* Text that was tinted for atmosphere goes back to pure white */
+html.a11y-contrast .section-lead,
+html.a11y-contrast .dish-desc,
+html.a11y-contrast .review-text,
+html.a11y-contrast .why-card p,
+html.a11y-contrast .hero-subtitle,
+html.a11y-contrast .kosher-sub,
+html.a11y-contrast .footer-tagline,
+html.a11y-contrast .footer-links a,
+html.a11y-contrast .cta-banner p,
+html.a11y-contrast .review-sub,
+html.a11y-contrast .hero-meta-item {
+  color: #fff;
+}
+
+/* Accents keep their meaning but at full strength, with no glow */
+html.a11y-contrast .dish-price,
+html.a11y-contrast .modal-price,
+html.a11y-contrast .eyebrow,
+html.a11y-contrast .hero-title .accent {
+  color: #ffd24a;
+  text-shadow: none;
+}
+
+html.a11y-contrast .section-title,
+html.a11y-contrast .kosher-line strong {
+  color: #fff;
+  text-shadow: none;
+}
+
+html.a11y-contrast .category-chip.is-active,
+html.a11y-contrast .menu-tab.is-active {
+  background: #ffd24a;
+  color: #000;
+  border-color: #ffd24a;
+  box-shadow: none;
+}
+
+/* Buttons keep brand colour but gain a visible outline */
+html.a11y-contrast .btn {
+  border: 2px solid #fff;
+  box-shadow: none;
+}
+
+html.a11y-contrast .scroll-progress {
+  background: #333;
+}
+
+html.a11y-contrast .lightbox {
+  background: #000;
+}
+
+html.a11y-contrast .modal-backdrop {
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: none;
 }
 
 html.a11y-links a {
@@ -3151,12 +3279,12 @@ section {
 /* back to top */
 .back-to-top {
   position: fixed;
-  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
   /* Physical left: the logical property resolves to the right under RTL,
      which would split this away from the accessibility button. */
-  left: var(--space-4);
-  width: 46px;
-  height: 46px;
+  left: var(--rail-left);
+  width: var(--rail-size);
+  height: var(--rail-size);
   border-radius: 50%;
   background: var(--color-charcoal);
   color: var(--color-cream);
@@ -3176,13 +3304,6 @@ section {
   opacity: 1;
   visibility: visible;
   transform: none;
-}
-
-@media (max-width: 960px) {
-  .back-to-top {
-    bottom: calc(var(--sticky-h, 84px) + 12px + env(safe-area-inset-bottom));
-    left: var(--space-3);
-  }
 }
 
 /* ---------- 24. Toasts ---------- */
@@ -3649,11 +3770,6 @@ section {
     font-size: 0.95rem;
   }
 
-  .back-to-top {
-    bottom: calc(84px + env(safe-area-inset-bottom));
-    inset-inline-end: var(--space-3);
-  }
-
   .toast-region {
     inset-inline: var(--space-3);
     width: auto;
@@ -3923,17 +4039,15 @@ section {
     display: none;
   }
 
-  /* Bigger, easier brand buttons */
-  .brand-rail {
-    top: calc(var(--header-h) + var(--space-3));
-    left: 8px;
-    gap: var(--space-3);
+  /* Bigger, easier brand buttons — one axis, retuned for touch */
+  :root {
+    --rail-left: 10px;
+    --rail-size: 58px;
   }
 
-  .rail-btn {
-    width: 58px;
-    height: 58px;
-    border-radius: var(--radius-md);
+  .brand-rail {
+    top: calc(var(--header-h) + var(--space-3));
+    gap: var(--space-3);
   }
 
   .container {
@@ -3952,18 +4066,14 @@ section {
   }
 
   /* With no bottom dock the corner buttons drop to the true bottom */
-  .a11y {
-    bottom: calc(var(--space-3) + 62px + env(safe-area-inset-bottom));
-    left: var(--space-3);
-  }
-
-  .back-to-top {
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
-    left: var(--space-3);
-  }
 }
 
 @media (max-width: 420px) {
+  :root {
+    --rail-left: 8px;
+    --rail-size: 52px;
+  }
+
   .container {
     padding-inline: 68px;
   }
@@ -3973,10 +4083,6 @@ section {
   .reviews-track {
     margin-inline: -68px;
     padding-inline: 68px;
-  }
-  .rail-btn {
-    width: 52px;
-    height: 52px;
   }
   /* Trim the bar so brand + actions still share one row at 320px */
   .header-actions {
