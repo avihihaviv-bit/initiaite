@@ -2515,8 +2515,8 @@ section {
 }
 
 .why-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 }
 
 .why-card h3 {
@@ -3739,6 +3739,14 @@ section {
   .why-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
+  }
+
+  /* Under ~500px the rail lane leaves each of two columns barely 110px,
+     which broke the body copy to one word per line. One column reads. */
+  @media (max-width: 500px) {
+    .why-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .why-card {

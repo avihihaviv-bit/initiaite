@@ -35,12 +35,6 @@ export function dishMedia(item, sizes = "(max-width: 700px) 50vw, 300px") {
     ${artPlaceholder(item.category)}`;
 }
 
-function tagIcon(tag) {
-  if (tag === "veg") return `<span class="dish-tag tooltip" data-tooltip="צמחוני"><svg class="icon icon-fill"><use href="#i-leaf"></use></svg></span>`;
-  if (tag === "spicy") return `<span class="dish-tag tooltip" data-tooltip="חריף"><svg class="icon icon-fill"><use href="#i-chili"></use></svg></span>`;
-  return "";
-}
-
 export function dishCardHTML(item) {
   const badges = [];
   if (item.bestseller) badges.push(`<span class="badge badge-bestseller">רב מכר</span>`);
@@ -61,7 +55,6 @@ export function dishCardHTML(item) {
             <span class="dish-price">${escapeHtml(item.price)}</span>
           </div>
           <p class="dish-desc">${escapeHtml(item.desc)}</p>
-          <div class="dish-tags">${item.tags.map(tagIcon).join("")}</div>
         </div>
       </button>
     </article>

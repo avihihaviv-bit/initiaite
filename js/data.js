@@ -20,7 +20,7 @@ export const RESTAURANT = {
   // Landline reused for WhatsApp per the owner's instruction.
   whatsappHref:
     "https://wa.me/97236225040?text=" +
-    encodeURIComponent("היי! רציתי לשאול לגבי הזמנה מפיצה איטליאנה 🍕"),
+    encodeURIComponent("היי! רציתי לשאול לגבי הזמנה 🍕"),
   address: "אריה שנקר 61, חולון",
   addressFull: "אריה שנקר 61, חולון, 5833323",
   plusCode: "2QCG+4F חולון",
