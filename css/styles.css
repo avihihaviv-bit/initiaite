@@ -1141,6 +1141,75 @@ html.a11y-no-motion *::after {
   scroll-behavior: auto !important;
 }
 
+/* ---------- 6a4. Open / closed status pill ---------- */
+/* Open and closed have to be readable at a glance and tellable apart without
+   reading the words. The mid-tone brand green sat almost invisible on this
+   dark ground, so both states use the light-on-dark variants. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.22em 0.7em 0.22em 0.6em;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  vertical-align: middle;
+}
+
+.status-pill::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-pill.is-open {
+  color: var(--color-basil-dark);
+  background: rgba(127, 191, 135, 0.14);
+  border-color: rgba(127, 191, 135, 0.42);
+}
+
+/* A live green dot earns a pulse; a red one should just sit there. */
+.status-pill.is-open::before {
+  animation: status-pulse 2.2s ease-in-out infinite;
+}
+
+.status-pill.is-closed {
+  color: var(--color-tomato-dark);
+  background: rgba(255, 106, 70, 0.14);
+  border-color: rgba(255, 106, 70, 0.42);
+}
+
+@keyframes status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 191, 135, 0.6); }
+  70% { box-shadow: 0 0 0 5px rgba(127, 191, 135, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-pill.is-open::before { animation: none; }
+}
+
+/* High contrast: keep the two states distinguishable by more than hue. */
+html.a11y-contrast .status-pill {
+  background: #000;
+  border-width: 2px;
+}
+
+html.a11y-contrast .status-pill.is-open {
+  color: #4ade80;
+  border-color: #4ade80;
+}
+
+html.a11y-contrast .status-pill.is-closed {
+  color: #ff8a6a;
+  border-color: #ff8a6a;
+}
+
 /* ---------- 6b. Scroll progress (grows right-to-left) ---------- */
 .scroll-progress {
   position: fixed;

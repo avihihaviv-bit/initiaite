@@ -61,25 +61,30 @@ function findNextOpen(day, minutes) {
 
 export function renderHoursStatus() {
   const status = getOpenStatus();
-  const texts = qsa("#hero-hours-status, #mobile-nav-status");
-  const locationStatus = qs("#location-status");
 
-  let label;
+  // The state always leads, so the first two words answer the question even
+  // when the rest is truncated.
+  let detailed;
   if (status.open) {
-    label = `פתוח עכשיו · סוגר ב-${status.closesAt}`;
+    detailed = `פתוח עכשיו · סוגר ב-${status.closesAt}`;
   } else if (status.nextOpen) {
-    label = `סגור כרגע · נפתח ${status.nextOpen.label} ב-${status.nextOpen.open}`;
+    detailed = `סגור עכשיו · נפתח ${status.nextOpen.label} ב-${status.nextOpen.open}`;
   } else {
-    label = "סגור כרגע";
+    detailed = "סגור עכשיו";
   }
+  const short = status.open ? "פתוח עכשיו" : "סגור עכשיו";
 
-  texts.forEach((el) => (el.textContent = label));
-  if (locationStatus) {
-    locationStatus.textContent = status.open ? "· פתוח עכשיו" : "· סגור עכשיו";
-    locationStatus.style.color = status.open
-      ? "var(--color-basil)"
-      : "var(--color-tomato)";
-  }
+  const paint = (el, text) => {
+    if (!el) return;
+    el.textContent = text;
+    el.classList.toggle("is-open", status.open);
+    el.classList.toggle("is-closed", !status.open);
+    // Screen readers get the state announced when it flips, not just the text.
+    el.setAttribute("aria-label", detailed);
+  };
+
+  qsa("#hero-hours-status, #mobile-nav-status").forEach((el) => paint(el, detailed));
+  paint(qs("#location-status"), short);
 }
 
 export function renderHoursTable() {
