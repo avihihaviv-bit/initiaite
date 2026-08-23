@@ -111,7 +111,7 @@ export function initActiveNavHighlight() {
 export function initPageLoader() {
   const intro = qs("#intro");
   if (!intro) {
-    document.body.classList.add("is-ready");
+    document.body.classList.add("is-ready", "intro-done");
     return;
   }
 
@@ -125,6 +125,12 @@ export function initPageLoader() {
     // Hero entrance begins while the curtain is still opening.
     setTimeout(() => document.body.classList.add("is-ready"), 320);
     setTimeout(() => intro.classList.add("is-done"), 1200);
+    // Once the entrance has played, pin the hero to its finished state. The
+    // animation is the only thing holding those elements at opacity 1, so
+    // without this, anything that re-applies it — toggling "stop animations"
+    // back off, or resetting the panel — replays it and blanks the hero for
+    // most of a second.
+    setTimeout(() => document.body.classList.add("intro-done"), 2200);
   };
 
   const minHold = new Promise((r) => setTimeout(r, 1700));

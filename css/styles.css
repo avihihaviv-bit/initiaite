@@ -1141,6 +1141,37 @@ html.a11y-no-motion *::after {
   scroll-behavior: auto !important;
 }
 
+/* Killing every animation above also kills the ones that bring content IN.
+   The hero entrance, the hero image and the scroll reveals all start at
+   opacity 0 and are raised to 1 by an animation or a transition — with those
+   switched off they stayed invisible, so turning on "stop animations" blanked
+   the whole homepage. Put them in their finished state instead, which is what
+   the equivalent prefers-reduced-motion rules already do. */
+html.a11y-no-motion .intro-item,
+html.a11y-no-motion .hero-title .line-inner,
+html.a11y-no-motion .intro-pizza,
+html.a11y-no-motion .reveal,
+html.a11y-no-motion .reveal-scale {
+  opacity: 1;
+  transform: none;
+}
+
+/* The loader is dismissed by script, but without its fade it should not sit
+   over the page for even a frame. */
+html.a11y-no-motion .intro {
+  display: none;
+}
+
+/* After the entrance has played once, the hero holds its finished state on its
+   own rather than depending on the animation still being applied. */
+.intro-done .intro-item,
+.intro-done .hero-title .line-inner,
+.intro-done .intro-pizza {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
 /* ---------- 6a4. Open / closed status pill ---------- */
 /* Open and closed have to be readable at a glance and tellable apart without
    reading the words. The mid-tone brand green sat almost invisible on this
