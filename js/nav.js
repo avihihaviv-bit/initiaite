@@ -32,7 +32,13 @@ export function initHeaderScroll() {
       progress.style.width = `${max > 0 ? Math.min(100, (y / max) * 100) : 0}%`;
     }
 
-    if (backToTop) backToTop.classList.toggle("is-visible", y > 640);
+    // The root class drives the accessibility button's lift, so the two
+    // corner buttons move as one stack.
+    const showTop = y > 640;
+    if (backToTop) {
+      backToTop.classList.toggle("is-visible", showTop);
+      document.documentElement.classList.toggle("has-backtotop", showTop);
+    }
 
     if (stickyCta) {
       const scrollingDown = y > lastY && y > 200;

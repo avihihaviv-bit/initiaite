@@ -832,10 +832,18 @@ p {
 /* ---------- 6a3. Accessibility widget ---------- */
 .a11y {
   position: fixed;
-  /* Stacked directly on top of back-to-top, sharing its centre line */
-  bottom: calc(var(--rail-bottom) + var(--rail-size) + var(--rail-left));
+  /* Rests on the floor. When back-to-top rises into the corner it lifts this
+     out of the way by exactly its own height, so the two read as a stack
+     being pushed up rather than two buttons independently repositioning. */
+  bottom: var(--rail-bottom);
   left: var(--rail-left);
   z-index: var(--z-toast);
+  transform: translateY(0);
+  transition: transform 0.52s cubic-bezier(0.22, 1.15, 0.36, 1);
+}
+
+html.has-backtotop .a11y {
+  transform: translateY(calc(-1 * (var(--rail-size) + var(--rail-left))));
 }
 
 .a11y-toggle {
@@ -3300,16 +3308,96 @@ section {
   box-shadow: var(--shadow-md);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
-  transition: opacity var(--dur-fast), transform var(--dur-fast),
-    visibility var(--dur-fast);
+  /* Starts one slot below the floor — where the accessibility button is
+     sitting — so it looks like it slides out from under it and shoulders it
+     upward, rather than fading in on top of it. */
+  transform: translateY(calc(var(--rail-size) + var(--rail-left))) scale(0.55);
+  transition: opacity 0.3s var(--ease-out),
+    transform 0.52s cubic-bezier(0.22, 1.15, 0.36, 1),
+    visibility 0.3s;
   z-index: var(--z-sticky-cta);
+}
+
+/* Warm halo, the cream counterpart to the accessibility button's blue one. */
+.back-to-top::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  z-index: -1;
+  background: rgba(216, 172, 92, 0.75);
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
 }
 
 .back-to-top.is-visible {
   opacity: 1;
   visibility: visible;
-  transform: none;
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top.is-visible::before {
+  opacity: 1;
+  animation: btt-halo 3.4s ease-in-out infinite;
+  /* Let the entrance land before the idle pulse takes over. */
+  animation-delay: 0.5s;
+}
+
+/* A single ring that expands away once, on arrival. */
+.back-to-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-gold-dark);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.back-to-top.is-visible::after {
+  animation: btt-ring 0.85s var(--ease-out) 0.18s;
+}
+
+/* The glyph keeps nudging upward — a standing hint at what the button does. */
+.back-to-top .icon {
+  animation: btt-nudge 2.6s ease-in-out infinite;
+  animation-delay: 0.6s;
+}
+
+.back-to-top:hover,
+.back-to-top:focus-visible {
+  transform: translateY(-3px) scale(1.07);
+}
+
+.back-to-top:hover .icon,
+.back-to-top:focus-visible .icon {
+  animation-play-state: paused;
+}
+
+@keyframes btt-halo {
+  0%, 100% { opacity: 0.3; transform: scale(0.95); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes btt-ring {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.85); }
+}
+
+@keyframes btt-nudge {
+  0%, 70%, 100% { transform: translateY(0); }
+  80% { transform: translateY(-4px); }
+  90% { transform: translateY(-1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a11y,
+  .back-to-top { transition: none; }
+  .back-to-top::before,
+  .back-to-top::after,
+  .back-to-top .icon { animation: none; }
+  .back-to-top { transform: translateY(0) scale(1); }
 }
 
 /* ---------- 24. Toasts ---------- */
