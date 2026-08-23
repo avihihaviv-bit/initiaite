@@ -85,6 +85,15 @@ export function renderHoursStatus() {
 
   qsa("#hero-hours-status, #mobile-nav-status").forEach((el) => paint(el, detailed));
   paint(qs("#location-status"), short);
+
+  // Today's row in the hours table is the same signal, so it tracks the same
+  // state. The class lives on the table, not the row, so it survives
+  // renderHoursTable() rewriting the rows.
+  const table = qs("#hours-table");
+  if (table) {
+    table.classList.toggle("is-open-now", status.open);
+    table.classList.toggle("is-closed-now", !status.open);
+  }
 }
 
 export function renderHoursTable() {

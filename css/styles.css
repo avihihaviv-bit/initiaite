@@ -3107,9 +3107,29 @@ section {
   font-weight: 700;
 }
 
+/* Today's row is the same signal as the status pill, so it carries the same
+   colour: green while they are actually open, red once they have closed. It
+   used to be red unconditionally, which read as "closed" even mid-service.
+   The light-on-dark variants, again — the mid-tone green vanishes here. */
 .hours-table tr.is-today td {
-  color: var(--color-tomato);
   font-weight: 700;
+  color: var(--color-tomato-dark);
+}
+
+.hours-table.is-open-now tr.is-today td {
+  color: var(--color-basil-dark);
+}
+
+.hours-table.is-closed-now tr.is-today td {
+  color: var(--color-tomato-dark);
+}
+
+html.a11y-contrast .hours-table.is-open-now tr.is-today td {
+  color: #4ade80;
+}
+
+html.a11y-contrast .hours-table.is-closed-now tr.is-today td {
+  color: #ff8a6a;
 }
 
 .map-embed {
