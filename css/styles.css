@@ -8,8 +8,14 @@
 :root {
   /* Floating-button column: one left edge and one size, so the rail, the
      accessibility button and back-to-top all share a centre line. */
-  --rail-left: 1rem;
+  --rail-left: 12px;
   --rail-size: 56px;
+  /* The bottom gutter tracks the left one, so the arrow sits in a true corner
+     with equal clearance on both sides. max(), never addition: on a phone the
+     safe inset already IS the clearance, and stacking a gutter on top of it
+     left a visible dead band. The -10px trims the inset down to just past the
+     home indicator instead of parking the button above the whole band. */
+  --rail-bottom: max(var(--rail-left), calc(env(safe-area-inset-bottom) - 10px));
 
   /* Color — deep charcoal Italian-night palette */
   --color-cream: #150f0a;
@@ -826,8 +832,8 @@ p {
 /* ---------- 6a3. Accessibility widget ---------- */
 .a11y {
   position: fixed;
-  /* Directly above back-to-top, sharing its centre line */
-  bottom: calc(var(--space-3) + var(--rail-size) + var(--space-3) + env(safe-area-inset-bottom));
+  /* Stacked directly on top of back-to-top, sharing its centre line */
+  bottom: calc(var(--rail-bottom) + var(--rail-size) + var(--rail-left));
   left: var(--rail-left);
   z-index: var(--z-toast);
 }
@@ -3279,7 +3285,7 @@ section {
 /* back to top */
 .back-to-top {
   position: fixed;
-  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  bottom: var(--rail-bottom);
   /* Physical left: the logical property resolves to the right under RTL,
      which would split this away from the accessibility button. */
   left: var(--rail-left);
