@@ -1,5 +1,5 @@
 import { REVIEWS } from "./data.js";
-import { qs, qsa, debounce } from "./utils.js";
+import { qs, qsa } from "./utils.js";
 import { reviewCardHTML } from "./render.js";
 import { revealStaggerChildren } from "./reveal.js";
 
@@ -23,20 +23,41 @@ export function renderReviews() {
     card?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
   });
 
-  const syncDots = debounce(() => {
+  const dotEls = qsa(".reviews-dot", dots);
+  const isRtl = getComputedStyle(track).direction === "rtl";
+
+  let lit = -1;
+  // Runs straight off the scroll event, with no debounce and no rAF hop: the
+  // old debounce(100) only fired once scrolling had *stopped*, so the dot sat
+  // still through the whole swipe and then jumped. Scroll events are already
+  // coalesced to one per frame, and with three cards the rect reads here are
+  // far too cheap to be worth deferring a frame for.
+  const syncDots = () => {
+    const trackBox = track.getBoundingClientRect();
+    // The current card is the one aligned to the scroller's start edge —
+    // which is the RIGHT edge under RTL. Measuring left edges picked the
+    // last card in view instead of the first.
+    const anchor = isRtl ? trackBox.right : trackBox.left;
     let closest = 0;
     let minDist = Infinity;
     cards.forEach((card, i) => {
-      const dist = Math.abs(card.getBoundingClientRect().left - track.getBoundingClientRect().left);
+      const box = card.getBoundingClientRect();
+      const dist = Math.abs((isRtl ? box.right : box.left) - anchor);
       if (dist < minDist) {
         minDist = dist;
         closest = i;
       }
     });
-    qsa(".reviews-dot", dots).forEach((dot, i) => dot.classList.toggle("is-active", i === closest));
-  }, 100);
+    if (closest === lit) return;
+    lit = closest;
+    dotEls.forEach((dot, i) => {
+      dot.classList.toggle("is-active", i === closest);
+      dot.setAttribute("aria-current", i === closest ? "true" : "false");
+    });
+  };
 
   track.addEventListener("scroll", syncDots, { passive: true });
+  syncDots();
 
   // Arrow navigation — one card per press, RTL aware.
   const step = (dir) => {
