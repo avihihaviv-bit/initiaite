@@ -6,6 +6,10 @@
       "headers": {
         "x-api-key": "${API_KEY_21ST}"
       }
+    },
+    "code-review-graph": {
+      "command": "uvx",
+      "args": ["code-review-graph", "serve"]
     }
   }
 }
