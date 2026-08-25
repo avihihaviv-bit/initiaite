@@ -1,6 +1,6 @@
 /* ==========================================================================
    Pizza Italiana — Design System & Styles
-   Brand: warm trattoria palette, Frank Ruhl Libre (display) + Assistant (body)
+   Brand: warm trattoria palette, Noto Serif Hebrew (display) + Rubik (body)
    Full RTL (Hebrew primary). Mobile-first.
    ========================================================================== */
 
@@ -48,8 +48,12 @@
   --color-error: #e2604a;
 
   /* Typography */
-  --font-display: "Frank Ruhl Libre", "Times New Roman", serif;
-  --font-body: "Assistant", "Segoe UI", -apple-system, sans-serif;
+  /* Noto Serif Hebrew carries far more weight and detail in the headline than
+     Frank Ruhl Libre did at the same size; Rubik reads warmer and rounder than
+     Assistant in body copy. Both cover the full weight range the design uses,
+     so nothing is synthesised. */
+  --font-display: "Noto Serif Hebrew", "Frank Ruhl Libre", "Times New Roman", serif;
+  --font-body: "Rubik", "Assistant", "Segoe UI", -apple-system, sans-serif;
 
   --fs-display-xl: clamp(2.6rem, 5vw + 1rem, 5rem);
   --fs-display-lg: clamp(2.1rem, 3.4vw + 1rem, 3.4rem);
@@ -425,7 +429,7 @@ p {
 
 /* Wolt wordmark inside ordering CTAs (text wordmark, not their asset) */
 .wolt-mark {
-  font-family: "Assistant", sans-serif;
+  font-family: var(--font-body);
   font-weight: 800;
   letter-spacing: -0.02em;
   text-transform: lowercase;
@@ -1362,6 +1366,12 @@ html.a11y-contrast .status-pill.is-closed {
 
 .brand {
   position: relative;
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.brand:active {
+  transform: scale(0.97);
 }
 
 .brand::before {
