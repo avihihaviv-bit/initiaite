@@ -3822,7 +3822,16 @@ html.a11y-contrast .hours-table.is-closed-now tr.is-today td {
 
 .hero-title .line {
   display: block;
+  /* Masks the wipe below. Released once it has played — see .intro-done. */
   overflow: hidden;
+}
+
+/* The display face has no true italic, so the browser slants it, and the
+   slant overhangs the layout box. Keeping the mask past the animation
+   sheared the edge off "נאפית". */
+.intro-done .hero-title .line,
+html.a11y-no-motion .hero-title .line {
+  overflow: visible;
 }
 
 .hero-title .line-inner {
@@ -4227,14 +4236,24 @@ html.a11y-contrast .hours-table.is-closed-now tr.is-today td {
   .main-nav {
     display: block;
     margin-inline: calc(-1 * var(--container-pad));
+    /* Without this the flex item's default min-width:auto let it grow to the
+       full 480px of its links, so the list below had nothing to scroll and
+       "מיקום" / "שאלות" simply sat off-screen behind the header's clip. */
+    min-width: 0;
   }
 
   .main-nav ul {
-    gap: var(--space-4);
+    /* Tighter than the desktop rhythm so fewer links start out hidden —
+       eight of them cannot all fit a phone bar at a readable size. */
+    gap: var(--space-3);
     overflow-x: auto;
     scrollbar-width: none;
     padding-inline: var(--container-pad);
     scroll-snap-type: x proximity;
+    /* Softens the trailing edge so it reads as "more this way" rather than a
+       link sliced in half. */
+    -webkit-mask-image: linear-gradient(to left, #000 88%, transparent 100%);
+    mask-image: linear-gradient(to left, #000 88%, transparent 100%);
   }
 
   .main-nav ul::-webkit-scrollbar {
