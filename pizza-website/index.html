@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fuoco — Wood-Fired Pizza, Straight From the Fire</title>
+<meta name="description" content="Fuoco is wood-fired pizza cooked at 900 degrees and handed to you the moment it leaves the oven. Order ahead, walk in, no delivery box, no soggy crust.">
+<meta name="theme-color" content="#14100e">
+<!-- DEPLOY STEP: replace with the live URL before going online -->
+<meta property="og:title" content="Fuoco — Real Fire. No Delay.">
+<meta property="og:description" content="Wood-fired pizza cooked at 900 degrees, handed to you straight from the oven. No box, no soggy crust.">
+<meta property="og:image" content="assets/img/hero-poster.jpg">
+<meta property="og:url" content="">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314100e'/%3E%3Cpath d='M16 4c1 4-3 5-3 9a3 3 0 006 0c1 1 1.5 2.5 1.5 4A6.5 6.5 0 019 17.5C9 12 16 10 16 4z' fill='%23ef6a2c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --canvas:#14100e;
+  --canvas-2:#1b1512;
+  --panel:#20180f0;
+  --panel:#221913;
+  --ember:#ef6a2c;
+  --ember-hover:#ff8a4c;
+  --ember-muted:rgba(239,106,44,.32);
+  --gold:#d9a441;
+  --text-primary:#f5ead9;
+  --text-secondary:#cab6a0;
+  --text-dim:#8a7867;
+  --line:rgba(217,164,65,.18);
+  --tshadow:0 1px 2px rgba(5,3,2,.95),0 3px 12px rgba(5,3,2,.78),0 10px 44px rgba(5,3,2,.75);
+  --ease-out:cubic-bezier(.16,.8,.24,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --display:'Fraunces',Georgia,serif;
+  --body:'Manrope',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{overflow-x:clip;overflow-x:hidden;background:var(--canvas);scroll-behavior:auto}
+body{
+  margin:0;background:var(--canvas);color:var(--text-primary);
+  font-family:var(--body);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  /* overflow-x intentionally left unset here: giving body its own overflow-x
+     forces its overflow-y to auto per the CSS overflow spec, which makes body
+     (not the viewport) the sticky containing block and silently breaks the
+     pinned hero. html alone is enough to stop sideways scroll. */
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;letter-spacing:-.01em}
+p{margin:0}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.skip-link{
+  position:absolute;left:12px;top:-60px;z-index:1000;background:var(--ember);color:#1a0d05;
+  padding:10px 16px;border-radius:8px;font-weight:600;transition:top .25s var(--ease-out);
+}
+.skip-link:focus{top:12px}
+:focus-visible{outline:2px solid var(--ember);outline-offset:3px;border-radius:2px}
+
+/* ---------- fixed background environment ---------- */
+.bg-field{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 50% 100%, rgba(239,106,44,.10) 0%, rgba(239,106,44,0) 70%),
+    var(--canvas);
+}
+.ember-particle{
+  position:absolute;bottom:-4%;width:3px;height:3px;border-radius:50%;
+  background:var(--ember);box-shadow:0 0 8px 2px var(--ember-muted);
+  opacity:0;animation:drift 14s linear infinite;
+}
+@keyframes drift{
+  0%{opacity:0;transform:translateY(0) translateX(0)}
+  8%{opacity:.7}
+  90%{opacity:.35}
+  100%{opacity:0;transform:translateY(-112vh) translateX(var(--dx,20px))}
+}
+body.paused .ember-particle{animation-play-state:paused!important}
+
+/* ---------- nav ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px clamp(20px,4vw,56px);
+  transition:background .4s var(--ease-out),backdrop-filter .4s var(--ease-out),padding .3s var(--ease-out),border-color .4s var(--ease-out);
+  border-bottom:1px solid transparent;
+}
+.nav.solid{
+  background:rgba(20,16,14,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding-top:14px;padding-bottom:14px;border-bottom-color:var(--line);
+}
+.nav .mark{font-family:var(--display);font-weight:700;font-size:1.3rem;letter-spacing:.02em;text-decoration:none}
+.nav .mark em{color:var(--ember);font-style:normal}
+.nav .links{display:flex;align-items:center;gap:clamp(18px,3vw,34px)}
+.nav .links a:not(.btn){
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-secondary);text-decoration:none;transition:color .25s var(--ease-out);
+}
+.nav .links a:not(.btn):hover{color:var(--text-primary)}
+.nav-toggle{display:none}
+@media (max-width:720px){
+  .nav .links a:not(.btn):not(.btn){display:none}
+  .nav .links{gap:14px}
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 26px;border-radius:999px;font-family:var(--body);font-weight:600;font-size:.92rem;
+  text-decoration:none;white-space:nowrap;transition:transform .3s var(--ease-out),box-shadow .3s var(--ease-out),background .3s var(--ease-out);
+  text-shadow:none;
+}
+.btn-ember{background:var(--ember);color:#1c0e04;box-shadow:0 8px 24px -8px rgba(239,106,44,.65)}
+.btn-ember:hover{background:var(--ember-hover);transform:translateY(-2px);box-shadow:0 12px 28px -8px rgba(239,106,44,.8)}
+.btn-ghost{border:1px solid var(--line);color:var(--text-primary);background:rgba(245,234,217,.03)}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(217,164,65,.08)}
+@media (pointer:coarse){.btn{min-height:44px}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;height:400vh}
+.stage{
+  position:sticky;top:0;height:100vh;width:100%;overflow:hidden;background:var(--canvas);
+}
+.stage .frame{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(46% 40% at 50% 78%, rgba(239,106,44,.42) 0%, rgba(239,106,44,0) 72%),
+    radial-gradient(70% 60% at 50% 100%, rgba(150,70,20,.28) 0%, rgba(20,16,14,0) 70%),
+    linear-gradient(180deg,#0c0908 0%,#181210 55%,#221710 100%);
+}
+.stage video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity 1.1s var(--ease-out);
+  will-change:transform;transform:translateZ(0);
+}
+.stage.video-ready video{opacity:1}
+.stage .poster{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;transition:opacity .8s var(--ease-out);
+}
+.stage.poster-ready .poster{opacity:1}
+.stage.video-ready .poster{opacity:0}
+.stage .scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 45%, rgba(10,7,5,0) 32%, rgba(10,7,5,.66) 100%);
+}
+.loader{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:48px;height:48px;color:var(--gold);opacity:.85;transition:opacity .5s var(--ease-out);
+}
+.stage.video-ready .loader,.stage.video-failed .loader{opacity:0;pointer-events:none}
+.loader circle{transition:stroke-dashoffset .2s linear}
+
+.scroll-cue{
+  position:absolute;left:50%;bottom:34px;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-secondary);
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+  opacity:1;transition:opacity .5s var(--ease-out);pointer-events:none;
+}
+.scroll-cue svg{animation:cuebob 2.2s var(--ease-in-out) infinite;width:16px;height:16px}
+@keyframes cuebob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.hero.past-start .scroll-cue{opacity:0}
+body.paused .scroll-cue svg{animation-play-state:paused!important}
+
+.band{
+  position:absolute;left:0;right:0;pointer-events:none;
+  display:flex;flex-direction:column;padding:0 clamp(24px,7vw,96px);
+  text-shadow:var(--tshadow);
+}
+.band::before{
+  content:"";position:absolute;inset:-6% -4%;pointer-events:none;z-index:-1;
+  opacity:calc(.25 + .75 * var(--k,0));
+  background:radial-gradient(ellipse 74% 60% at 50% 50%, rgba(6,4,3,.68) 0%, rgba(6,4,3,.44) 46%, rgba(6,4,3,0) 76%);
+}
+.band .kicker{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;
+}
+.band h1,.band h2{color:var(--text-primary)}
+.band .sub{color:var(--text-secondary);font-size:clamp(1rem,1.6vw,1.25rem);margin-top:16px;max-width:34ch}
+.band .cta-row{margin-top:30px;pointer-events:auto}
+
+#band-1{top:0;height:100%;align-items:flex-start;justify-content:center}
+#band-1 h1{font-size:clamp(2.6rem,8vw,6.4rem);line-height:.98}
+#band-2{top:0;height:100%;align-items:flex-end;justify-content:center;text-align:right}
+#band-2 h2{font-size:clamp(1.9rem,5.4vw,3.6rem);line-height:1.06;margin-left:auto}
+#band-3{top:0;height:100%;align-items:center;justify-content:flex-end;text-align:center;padding-bottom:12vh}
+#band-3 h2{font-size:clamp(1.8rem,4.6vw,3.2rem);line-height:1.12;max-width:16ch;margin:0 auto}
+
+/* split text */
+.w{display:inline-block;white-space:pre}
+.c{display:inline-block}
+
+/* band 1: approach-from-depth */
+#band-1 .c{
+  --kc:clamp(0,(var(--k,0) - var(--th,0))*2.6,1);
+  opacity:var(--kc);
+  transform:scale(calc(.82 + .18*var(--kc))) translateY(calc((1 - var(--kc))*10px));
+}
+/* band 2: scatter, echoes embers drifting */
+#band-2 .c{
+  --kc:clamp(0,(var(--k,0) - var(--th,0))*2.8,1);
+  opacity:var(--kc);
+  transform:translate(calc((1 - var(--kc))*var(--jx,0px)),calc((1 - var(--kc))*var(--jy,0px))) rotate(calc((1 - var(--kc))*var(--jr,0deg)));
+}
+/* band 3: word rise into staged settle */
+#band-3 .w{
+  --kc:clamp(0,(var(--k,0) - var(--th,0))*2.8,1);
+  opacity:var(--kc);
+  transform:translateY(calc((1 - var(--kc))*22px));
+}
+#band-3 .sub{opacity:var(--ks,0);transition:none}
+#band-3 .cta-row{opacity:var(--kb,0);transform:translateY(calc((1 - var(--kb,0))*10px))}
+
+@media (max-height:560px){.scroll-cue,.loader{display:none}}
+
+/* ---------- static hero (phones / reduced motion / short landscape) ---------- */
+@media (max-width:720px),
+       (orientation:portrait) and (max-width:1024px),
+       (orientation:portrait) and (pointer:coarse),
+       (orientation:landscape) and (pointer:coarse) and (max-height:560px),
+       (prefers-reduced-motion:reduce){
+  .hero{height:100vh}
+  .stage{position:relative;top:auto}
+  .stage video,.loader{display:none}
+  .band{position:absolute}
+  #band-1,#band-2{display:none}
+  #band-3{position:relative;height:100%}
+  #band-3 .c,#band-3 .w{opacity:1!important;transform:none!important}
+  #band-3 .sub,#band-3 .cta-row{opacity:1!important;transform:none!important}
+  .scroll-cue{opacity:1}
+}
+
+/* ---------- sections ---------- */
+main{position:relative;z-index:1;background:var(--canvas)}
+section{position:relative;padding:min(14vw,120px) clamp(20px,6vw,72px)}
+.wrap{max-width:1180px;margin:0 auto}
+.kicker-label{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;
+}
+.kicker-label::before{content:"";width:22px;height:1px;background:var(--gold);opacity:.7}
+
+/* reveal-on-scroll */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out)}
+.reveal.in{opacity:1;transform:none}
+.stagger .reveal:nth-child(1){transition-delay:0ms}
+.stagger .reveal:nth-child(2){transition-delay:90ms}
+.stagger .reveal:nth-child(3){transition-delay:180ms}
+.stagger .reveal:nth-child(4){transition-delay:270ms}
+.stagger .reveal:nth-child(5){transition-delay:360ms}
+.stagger .reveal:nth-child(6){transition-delay:450ms}
+.stagger.in-done .reveal{transition-delay:0ms!important}
+
+/* statement */
+.statement{text-align:center;padding-top:min(10vw,90px);padding-bottom:min(10vw,90px)}
+.statement h2{font-size:clamp(1.7rem,4.4vw,3.1rem);max-width:20ch;margin:0 auto;line-height:1.18}
+.statement h2 em{color:var(--ember);font-style:italic}
+.flame-divider{width:64px;height:80px;margin:0 auto 30px;color:var(--ember)}
+.flame-divider path{
+  fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:220;stroke-dashoffset:220;transition:stroke-dashoffset 1.4s var(--ease-out);
+}
+.flame-divider.in path{stroke-dashoffset:0}
+
+/* menu */
+.menu-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:52px;flex-wrap:wrap}
+.menu-head h2{font-size:clamp(2rem,4.6vw,3.4rem)}
+.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+@media (max-width:860px){.menu-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.menu-grid{grid-template-columns:1fr}}
+.pizza-card{
+  background:var(--panel);padding:34px 28px;position:relative;overflow:hidden;
+  transition:background .4s var(--ease-out);
+}
+.pizza-card::after{
+  content:"";position:absolute;right:-30%;top:-30%;width:70%;height:70%;border-radius:50%;
+  background:radial-gradient(circle,var(--ember-muted) 0%,rgba(239,106,44,0) 70%);
+  opacity:0;transition:opacity .5s var(--ease-out);pointer-events:none;
+}
+.pizza-card:hover{background:#271c14}
+.pizza-card:hover::after{opacity:1}
+.pizza-card .num{font-family:var(--mono);font-size:.7rem;color:var(--text-dim);letter-spacing:.1em}
+.pizza-card h3{font-size:1.5rem;margin:14px 0 10px;line-height:1.15}
+.pizza-card p{color:var(--text-secondary);font-size:.94rem;line-height:1.55}
+.pizza-card .price{
+  display:block;margin-top:20px;font-family:var(--mono);color:var(--gold);font-size:1rem;
+}
+.pizza-card.cta-card{
+  background:radial-gradient(140% 120% at 20% 0%, rgba(239,106,44,.22) 0%, rgba(239,106,44,0) 60%), var(--panel);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.pizza-card.cta-card h3{font-size:1.3rem;line-height:1.28;max-width:20ch}
+.pizza-card.cta-card a{
+  display:inline-flex;align-items:center;gap:8px;margin-top:18px;color:var(--ember);
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+}
+.pizza-card.cta-card a svg{width:14px;height:14px;transition:transform .3s var(--ease-out)}
+.pizza-card.cta-card a:hover svg{transform:translateX(4px)}
+
+/* how it works */
+.how{background:var(--canvas-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-bottom:64px}
+@media (max-width:860px){.how-grid{grid-template-columns:1fr;gap:32px}}
+.how-step .stepnum{
+  font-family:var(--display);font-size:2.6rem;color:var(--ember);opacity:.85;line-height:1;margin-bottom:16px;
+}
+.how-step h3{font-size:1.3rem;margin-bottom:10px}
+.how-step p{color:var(--text-secondary);font-size:.96rem;line-height:1.6}
+
+/* interactive: hold to time the pull */
+.hold-panel{
+  display:flex;align-items:center;gap:36px;flex-wrap:wrap;background:var(--panel);
+  border:1px solid var(--line);border-radius:20px;padding:36px 40px;
+}
+.hold-btn{
+  position:relative;width:118px;height:118px;border-radius:50%;flex:none;
+  background:rgba(239,106,44,.08);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:none;
+}
+.hold-btn svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.hold-btn circle.track{fill:none;stroke:rgba(245,234,217,.1);stroke-width:4}
+.hold-btn circle.fill{fill:none;stroke:var(--ember);stroke-width:4;stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327}
+.hold-btn .label{position:relative;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);text-align:center;max-width:70px}
+.hold-btn.active .label,.hold-btn.done .label{color:var(--text-primary)}
+.hold-copy{flex:1;min-width:220px}
+.hold-copy h3{font-size:1.25rem;margin-bottom:8px}
+.hold-copy p{color:var(--text-secondary);font-size:.94rem}
+.hold-result{
+  margin-top:10px;font-family:var(--mono);font-size:.82rem;color:var(--ember);
+  opacity:0;max-height:0;overflow:hidden;transition:opacity .5s var(--ease-out),max-height .5s var(--ease-out);
+}
+.hold-result.show{opacity:1;max-height:60px;margin-top:14px}
+
+/* story */
+.story-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+@media (max-width:900px){.story-grid{grid-template-columns:1fr}}
+.story-media{
+  position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/5;
+  background:
+    radial-gradient(60% 55% at 50% 75%, rgba(239,106,44,.4) 0%, rgba(239,106,44,0) 70%),
+    linear-gradient(180deg,#0c0908,#241708);
+  border:1px solid var(--line);
+}
+.story-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s var(--ease-out)}
+.story-media img.loaded{opacity:1}
+.story h2{font-size:clamp(1.9rem,3.6vw,2.7rem);margin-bottom:22px;line-height:1.16}
+.story p{color:var(--text-secondary);font-size:1.02rem;line-height:1.72;max-width:52ch}
+.story p+p{margin-top:16px}
+
+/* proof */
+.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media (max-width:860px){.proof-grid{grid-template-columns:1fr}}
+.quote{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px 26px}
+.quote svg{width:26px;height:20px;color:var(--ember);opacity:.7;margin-bottom:16px}
+.quote p{color:var(--text-primary);font-size:1rem;line-height:1.6;font-family:var(--display);font-weight:400;font-style:italic}
+.quote .who{margin-top:18px;font-family:var(--mono);font-size:.72rem;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase}
+
+/* faq */
+.faq-list{border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:24px 4px;text-align:left;font-family:var(--display);font-size:1.15rem;color:var(--text-primary);
+}
+.faq-q .plus{
+  flex:none;width:22px;height:22px;position:relative;color:var(--gold);
+}
+.faq-q .plus::before,.faq-q .plus::after{
+  content:"";position:absolute;left:50%;top:50%;background:currentColor;transform:translate(-50%,-50%);
+  transition:transform .35s var(--ease-out),opacity .35s var(--ease-out);
+}
+.faq-q .plus::before{width:14px;height:2px}
+.faq-q .plus::after{width:2px;height:14px}
+.faq-item.open .plus::after{transform:translate(-50%,-50%) rotate(90deg);opacity:0}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .45s var(--ease-in-out)}
+.faq-a p{padding:0 4px 24px;color:var(--text-secondary);font-size:.96rem;line-height:1.65;max-width:64ch}
+
+/* cta / signup */
+.cta-section{
+  background:
+    radial-gradient(60% 70% at 50% 100%, rgba(239,106,44,.16) 0%, rgba(239,106,44,0) 70%),
+    var(--canvas-2);
+  border-top:1px solid var(--line);text-align:center;
+}
+.cta-section h2{font-size:clamp(2rem,4.8vw,3.4rem);max-width:16ch;margin:0 auto 16px;line-height:1.14}
+.cta-section .lede{color:var(--text-secondary);font-size:1.05rem;max-width:46ch;margin:0 auto 40px}
+.signup-form{display:flex;gap:12px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.signup-form input{
+  flex:1;min-width:200px;background:rgba(245,234,217,.05);border:1px solid var(--line);color:var(--text-primary);
+  padding:13px 18px;border-radius:999px;font-family:var(--body);font-size:.95rem;
+  transition:border-color .3s var(--ease-out),background .3s var(--ease-out);
+}
+.signup-form input::placeholder{color:var(--text-dim)}
+.signup-form input:focus{border-color:var(--gold);background:rgba(245,234,217,.08)}
+.form-note{margin-top:16px;font-size:.8rem;color:var(--text-dim)}
+.form-success{
+  display:none;align-items:center;justify-content:center;gap:10px;
+  font-family:var(--mono);font-size:.9rem;color:var(--ember);padding:14px 0;
+}
+.cta-section.sent .signup-form,.cta-section.sent .form-note{display:none}
+.cta-section.sent .form-success{display:flex}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:56px clamp(20px,6vw,72px) 40px}
+.footer-top{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;margin-bottom:40px}
+.footer-mark{font-family:var(--display);font-weight:700;font-size:1.4rem}
+.footer-mark em{color:var(--ember);font-style:normal}
+.footer-links{display:flex;gap:40px;flex-wrap:wrap}
+.footer-col h4{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
+.footer-col a{display:block;color:var(--text-secondary);text-decoration:none;font-size:.9rem;margin-bottom:10px;transition:color .25s var(--ease-out)}
+.footer-col a:hover{color:var(--text-primary)}
+.footer-bottom{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:26px;
+  border-top:1px solid var(--line);font-size:.78rem;color:var(--text-dim);
+}
+.footer-bottom p{max-width:58ch;line-height:1.6}
+
+@media (max-width:600px){
+  .footer-top,.footer-bottom{flex-direction:column}
+}
+
+/* one living element per section: soft pulse on kicker rule, section-scoped */
+.pulse-line{position:relative}
+.pulse-line::after{
+  content:"";position:absolute;left:0;bottom:-1px;height:1px;width:100%;
+  background:linear-gradient(90deg,transparent,var(--ember),transparent);
+  opacity:0;animation:pulseline 5s ease-in-out infinite;animation-delay:-1.4s;
+}
+.pulse-line.in::after{opacity:.5}
+@keyframes pulseline{0%,100%{opacity:.15}50%{opacity:.55}}
+body.paused .pulse-line::after{animation-play-state:paused!important}
+
+/* reduced motion: kill everything, show final states */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;transition-delay:0ms!important;scroll-behavior:auto!important;
+  }
+  .reveal{opacity:1;transform:none}
+  .flame-divider path{stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="bg-field" aria-hidden="true" id="bgField"></div>
+
+<nav class="nav" id="nav">
+  <a class="mark" href="#top">Fu<em>o</em>co</a>
+  <div class="links">
+    <a href="#menu">Menu</a>
+    <a href="#how">How It Works</a>
+    <a href="#story">Story</a>
+    <a href="#faq">FAQ</a>
+    <a class="btn btn-ember" href="#order">Join the Fire List</a>
+  </div>
+</nav>
+
+<header class="hero" id="hero">
+  <div class="stage" id="stage">
+    <div class="frame" aria-hidden="true"></div>
+    <div class="poster" id="poster" aria-hidden="true"></div>
+    <video id="heroVideo" preload="none" muted playsinline aria-hidden="true" tabindex="-1"></video>
+    <div class="scrim" aria-hidden="true"></div>
+
+    <svg class="loader" id="loader" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(245,234,217,.15)" stroke-width="3"/>
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"
+              stroke-dasharray="126" style="stroke-dashoffset:var(--ld,126)"/>
+    </svg>
+
+    <div class="band" id="band-1">
+      <span class="kicker">Wood-Fired, Since Today</span>
+      <h1 id="h-band1" aria-hidden="true"></h1>
+      <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Real fire.</span>
+    </div>
+
+    <div class="band" id="band-2">
+      <h2 id="h-band2" aria-hidden="true"></h2>
+      <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Nine hundred degrees. Ninety seconds. Zero shortcuts.</span>
+    </div>
+
+    <div class="band" id="band-3">
+      <h2 id="h-band3" aria-hidden="true"></h2>
+      <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Order ahead. Walk in. It's already out of the fire.</span>
+      <p class="sub" id="band3-sub">No box. No delivery bag. No soggy crust. Just walk up and it's in your hands.</p>
+      <div class="cta-row" id="band3-cta"><a class="btn btn-ember" href="#order">Join the Fire List</a></div>
+    </div>
+
+    <div class="scroll-cue" aria-hidden="true">
+      <span>Scroll</span>
+      <svg viewBox="0 0 16 16" fill="none"><path d="M2 5l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+  <section class="statement">
+    <div class="wrap">
+      <svg class="flame-divider reveal" viewBox="0 0 64 80" fill="none" aria-hidden="true">
+        <path d="M32 4c4 14-10 18-10 32a10 10 0 0020 0c3 3 5 8 5 13A15 15 0 0117 49c0-18 15-24 15-45z"/>
+      </svg>
+      <h2 class="reveal">Everything on this menu starts the same way: <em>oak, almond wood, and about 900 degrees.</em> No fryers. No shortcuts. If it didn't touch the fire, it's not on the board.</h2>
+    </div>
+  </section>
+
+  <section class="menu" id="menu">
+    <div class="wrap">
+      <div class="menu-head reveal">
+        <div>
+          <span class="kicker-label">The Fire Line</span>
+          <h2>Five pizzas. That's the whole menu.</h2>
+        </div>
+        <p style="color:var(--text-secondary);max-width:36ch;font-size:.98rem">Fresh dough, mixed every morning and proofed slow. Nothing here has been frozen.</p>
+      </div>
+      <div class="menu-grid stagger">
+        <div class="pizza-card reveal">
+          <span class="num">01</span>
+          <h3>Margherita di Fuoco</h3>
+          <p>San Marzano tomato, fior di latte, torn basil, a slow drip of chili oil.</p>
+          <span class="price">$16</span>
+        </div>
+        <div class="pizza-card reveal">
+          <span class="num">02</span>
+          <h3>The Charwood</h3>
+          <p>Soppressata, smoked mozzarella, a run of Calabrian chili honey over a blistered crust.</p>
+          <span class="price">$19</span>
+        </div>
+        <div class="pizza-card reveal">
+          <span class="num">03</span>
+          <h3>Funghi e Fumo</h3>
+          <p>Wild mushroom, taleggio, thyme, a whisper of truffle oil off the heat.</p>
+          <span class="price">$18</span>
+        </div>
+        <div class="pizza-card reveal">
+          <span class="num">04</span>
+          <h3>Nonna's Garden</h3>
+          <p>Roasted squash, whipped ricotta, sage crisped in brown butter.</p>
+          <span class="price">$17</span>
+        </div>
+        <div class="pizza-card reveal">
+          <span class="num">05</span>
+          <h3>Diavola</h3>
+          <p>'Nduja, fresno chili, hot honey, a shower of aged pecorino.</p>
+          <span class="price">$19</span>
+        </div>
+        <div class="pizza-card cta-card reveal">
+          <h3>That's the whole board.</h3>
+          <p style="color:var(--text-secondary);font-size:.94rem">Order ahead and yours starts going in the second you tap confirm.</p>
+          <a href="#order">Join the Fire List <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <span class="kicker-label reveal">How It Works</span>
+      <h2 class="reveal" style="font-size:clamp(1.9rem,4vw,2.8rem);max-width:22ch;margin-bottom:52px">Every pizza we've ever ruined was ruined by a delivery box. So we stopped using them.</h2>
+      <div class="how-grid stagger">
+        <div class="how-step reveal">
+          <span class="stepnum">01</span>
+          <h3>Order ahead</h3>
+          <p>Tap in from your phone. We start the fire the second your order lands, not when you walk through the door.</p>
+        </div>
+        <div class="how-step reveal">
+          <span class="stepnum">02</span>
+          <h3>It goes in hot</h3>
+          <p>900 degrees, about ninety seconds a pie. No holding under a lamp, no sitting on a rack.</p>
+        </div>
+        <div class="how-step reveal">
+          <span class="stepnum">03</span>
+          <h3>Walk in, it's ready</h3>
+          <p>No box. No bag. No steam turning your crust soft. Straight off the peel and into your hands.</p>
+        </div>
+      </div>
+
+      <div class="hold-panel reveal">
+        <button class="hold-btn" id="holdBtn" aria-label="Press and hold to time the pull">
+          <svg viewBox="0 0 118 118"><circle class="track" cx="59" cy="59" r="52"/><circle class="fill" cx="59" cy="59" r="52"/></svg>
+          <span class="label" id="holdLabel">Press &amp; Hold</span>
+        </button>
+        <div class="hold-copy">
+          <h3>Time the pull.</h3>
+          <p>Ninety seconds is the window. Hold the button for the same stretch our pizzaiolo watches the crust for, and see what you get for it.</p>
+          <p class="hold-result" id="holdResult">Pulled it right on time. Here's 10% off your first order: <strong>FIRSTFIRE</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="story" id="story">
+    <div class="wrap story-grid">
+      <div class="story-media reveal">
+        <img id="storyImg" alt="A whole wood-fired pizza resting on a wooden peel inside the glowing mouth of a stone oven, crust charred and cheese bubbling.">
+      </div>
+      <div class="story reveal">
+        <span class="kicker-label">The Fire</span>
+        <h2>We didn't build a menu. We built an oven, and let it decide.</h2>
+        <p>Every pizzaiolo will tell you the same thing: the oven does most of the work. Ours burns oak and almond wood, nothing else, and it runs hot enough that a pie is done before you'd finish reading this sentence twice.</p>
+        <p>That heat is the whole reason the crust comes out the way it does: blistered, a little charred at the high points, chewy enough to hold real weight without going limp. We didn't design that. The fire did.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="proof">
+    <div class="wrap">
+      <span class="kicker-label reveal">What People Say</span>
+      <div class="proof-grid stagger">
+        <div class="quote reveal">
+          <svg viewBox="0 0 26 20" fill="currentColor"><path d="M0 20V11.6C0 6.4 3.2 1.8 8.4 0l1.4 2.8C6.6 4 4.8 6.4 4.6 9.4H10V20H0Zm16 0V11.6c0-5.2 3.2-9.8 8.4-11.6L25.8 2.8C22.6 4 20.8 6.4 20.6 9.4H26V20H16Z"/></svg>
+          <p>The crust alone is worth the trip. Blistered, chewy, still a little smoky by the time it hits the table.</p>
+          <div class="who">First-timer, now a regular</div>
+        </div>
+        <div class="quote reveal">
+          <svg viewBox="0 0 26 20" fill="currentColor"><path d="M0 20V11.6C0 6.4 3.2 1.8 8.4 0l1.4 2.8C6.6 4 4.8 6.4 4.6 9.4H10V20H0Zm16 0V11.6c0-5.2 3.2-9.8 8.4-11.6L25.8 2.8C22.6 4 20.8 6.4 20.6 9.4H26V20H16Z"/></svg>
+          <p>Ordered ahead on my walk over. It was in my hands before I'd even picked a table.</p>
+          <div class="who">Tuesday lunch regular</div>
+        </div>
+        <div class="quote reveal">
+          <svg viewBox="0 0 26 20" fill="currentColor"><path d="M0 20V11.6C0 6.4 3.2 1.8 8.4 0l1.4 2.8C6.6 4 4.8 6.4 4.6 9.4H10V20H0Zm16 0V11.6c0-5.2 3.2-9.8 8.4-11.6L25.8 2.8C22.6 4 20.8 6.4 20.6 9.4H26V20H16Z"/></svg>
+          <p>First pizza in years that didn't go soft in the box. Because it never sees one.</p>
+          <div class="who">Delivery skeptic, converted</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq pulse-line" id="faq">
+    <div class="wrap">
+      <span class="kicker-label reveal">Questions</span>
+      <div class="faq-list reveal">
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Do you deliver?<span class="plus" aria-hidden="true"></span></button>
+          <div class="faq-a"><p>We don't, on purpose. A pizza sealed in a delivery box steams itself soft before it reaches you. Order ahead, walk in, and yours comes straight off the peel, no box involved.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">How fresh is the dough, really?<span class="plus" aria-hidden="true"></span></button>
+          <div class="faq-a"><p>Mixed every morning, proofed slow, never frozen. What doesn't sell by close doesn't go back in the fridge for tomorrow.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What's actually burning in there?<span class="plus" aria-hidden="true"></span></button>
+          <div class="faq-a"><p>Oak and almond wood, nothing else, no gas assist. The oven floor runs close to 900°F, which is why a pie is done in under two minutes.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Anything for vegetarians?<span class="plus" aria-hidden="true"></span></button>
+          <div class="faq-a"><p>Yes, always. Margherita di Fuoco, Funghi e Fumo, and Nonna's Garden are vegetarian as listed, and it's marked clearly on the board.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">How long from order to pickup?<span class="plus" aria-hidden="true"></span></button>
+          <div class="faq-a"><p>Usually under ten minutes. We fire your dough the moment the order lands, not when you show up.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" id="order">
+    <div class="wrap">
+      <span class="kicker-label reveal" style="justify-content:center">Join the Fire List</span>
+      <h2 class="reveal">Get 10% off your first order and first word when we open near you.</h2>
+      <p class="lede reveal">No spam, no daily emails. Just the fire list, used when there's something worth telling you.</p>
+      <form class="signup-form reveal" id="signupForm">
+        <label class="sr-only" for="signupName" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Name</label>
+        <input type="text" id="signupName" name="name" placeholder="Your name" autocomplete="name" required>
+        <label class="sr-only" for="signupEmail" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Email</label>
+        <input type="email" id="signupEmail" name="email" placeholder="you@email.com" autocomplete="email" required>
+        <button class="btn btn-ember" type="submit">Join the List</button>
+      </form>
+      <div class="form-success" id="formSuccess">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9.5l4 4L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>You're on the list. Code FIRSTFIRE is yours when we open.</span>
+      </div>
+      <p class="form-note reveal">This is a concept build, so the list lives in your browser only for this demo, nothing is sent anywhere.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <a class="footer-mark" href="#top">Fu<em>o</em>co</a>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Site</h4>
+          <a href="#menu">Menu</a>
+          <a href="#how">How It Works</a>
+          <a href="#story">Our Story</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Visit</h4>
+          <a href="#order">Join the Fire List</a>
+          <a href="#top">Back to top</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Fuoco is a concept brand built to showcase this website design. The name, menu, and story are fictional, and the imagery on this page is AI-generated.</p>
+      <p>&copy; <span id="year"></span> Fuoco</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- ambient particles ---------- */
+(function particles(){
+  var field = document.getElementById('bgField');
+  var n = window.matchMedia('(max-width:720px)').matches ? 8 : 16;
+  for (var i=0;i<n;i++){
+    var p = document.createElement('span');
+    p.className = 'ember-particle';
+    var left = Math.random()*100;
+    var dur = 10 + Math.random()*10;
+    var delay = -Math.random()*dur;
+    var dx = (Math.random()*40-20).toFixed(0)+'px';
+    p.style.left = left+'%';
+    p.style.animationDuration = dur+'s';
+    p.style.animationDelay = delay+'s';
+    p.style.setProperty('--dx', dx);
+    field.appendChild(p);
+  }
+})();
+
+/* ---------- pause animations off-screen / hidden tab ---------- */
+document.addEventListener('visibilitychange', function(){
+  document.body.classList.toggle('paused', document.body.hidden);
+});
+
+/* ---------- nav solid state ---------- */
+var nav = document.getElementById('nav');
+var navTicking = false;
+function updateNav(){
+  navTicking = false;
+  nav.classList.toggle('solid', window.scrollY > 40);
+}
+addEventListener('scroll', function(){
+  if (!navTicking){ navTicking = true; requestAnimationFrame(updateNav); }
+}, {passive:true});
+updateNav();
+
+/* ---------- year ---------- */
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ---------- seeded rng for stable "random" jitter ---------- */
+function rng(seed){
+  var s = seed >>> 0;
+  return function(){ s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+}
+
+/* ---------- split headline text into word/char spans ---------- */
+function splitText(el, mode, seed){
+  var text = el.getAttribute('data-text') || el.textContent;
+  el.innerHTML = '';
+  var words = text.split(' ');
+  var rand = rng(seed);
+  var totalChars = text.replace(/ /g,'').length;
+  var ci = 0;
+  words.forEach(function(word, wi){
+    var w = document.createElement('span');
+    w.className = 'w';
+    if (mode === 'word'){
+      var th = (wi/words.length) * 0.7 + rand()*0.08;
+      w.style.setProperty('--th', th.toFixed(3));
+      w.textContent = word;
+    } else {
+      word.split('').forEach(function(ch){
+        var c = document.createElement('span');
+        c.className = 'c';
+        c.textContent = ch;
+        var th = mode === 'depth' ? (ci/totalChars)*0.5 : rand()*0.55;
+        c.style.setProperty('--th', th.toFixed(3));
+        if (mode === 'scatter'){
+          c.style.setProperty('--jx', (rand()*36-18).toFixed(1)+'px');
+          c.style.setProperty('--jy', (rand()*30-14).toFixed(1)+'px');
+          c.style.setProperty('--jr', (rand()*30-15).toFixed(1)+'deg');
+        }
+        w.appendChild(c);
+        ci++;
+      });
+    }
+    el.appendChild(w);
+    if (wi < words.length-1) el.appendChild(document.createTextNode(' '));
+  });
+}
+
+var b1 = document.getElementById('h-band1');
+b1.setAttribute('data-text','Real fire.');
+splitText(b1, 'depth', 1);
+
+var b2 = document.getElementById('h-band2');
+b2.setAttribute('data-text','900°. Ninety seconds. Zero shortcuts.');
+splitText(b2, 'scatter', 2);
+
+var b3 = document.getElementById('h-band3');
+b3.setAttribute('data-text',"It's already out of the fire.");
+splitText(b3, 'word', 3);
+
+/* ---------- hero scroll drive ---------- */
+var heroEl = document.getElementById('hero');
+var stage = document.getElementById('stage');
+var video = document.getElementById('heroVideo');
+var poster = document.getElementById('poster');
+var loader = document.getElementById('loader');
+var scrimCue = heroEl;
+
+var BANDS = [
+  {id:'band-1', a:0.00, b:0.30},
+  {id:'band-2', a:0.34, b:0.62},
+  {id:'band-3', a:0.66, b:1.00}
+];
+var bandEls = BANDS.map(function(bd){
+  return {def:bd, el:document.getElementById(bd.id), op:-1, k:-1};
+});
+
+function smoothstep(p,e0,e1){
+  var t = Math.min(1, Math.max(0, (p-e0)/(e1-e0)));
+  return t*t*(3-2*t);
+}
+function clamp(v,lo,hi){ return Math.min(hi, Math.max(lo, v)); }
+
+function heroProgress(){
+  var rect = heroEl.getBoundingClientRect();
+  var total = heroEl.offsetHeight - innerHeight;
+  if (total <= 0) return 0;
+  var p = (-rect.top) / total;
+  return clamp(p, 0, 1);
+}
+
+function updateCaptions(p){
+  heroEl.classList.toggle('past-start', p > 0.02);
+  bandEls.forEach(function(b, idx){
+    var a = b.def.a, bb = b.def.b;
+    var f = Math.min(0.02, (bb-a)/3);
+    var op;
+    if (idx === 0) op = 1 - smoothstep(p, bb-f, bb);
+    else if (idx === bandEls.length-1) op = smoothstep(p, a, a+f);
+    else op = smoothstep(p, a, a+f) * (1 - smoothstep(p, bb-f, bb));
+    op = clamp(op, 0, 1);
+
+    var ramp = Math.min(0.025, (bb-a)*0.35);
+    var loadK = idx === 0 ? loadRampValue() : 0;
+    var scrollK = clamp((p-a)/ramp, 0, 1);
+    var k = Math.max(scrollK, loadK);
+
+    if (Math.abs(op - b.op) > 0.004){
+      b.el.style.opacity = op;
+      b.op = op;
+    }
+    if (Math.abs(k - b.k) > 0.008){
+      b.el.style.setProperty('--k', k.toFixed(4));
+      b.k = k;
+      if (idx === bandEls.length-1){
+        var ks = clamp((k-0.66)*4,0,1);
+        var kb = clamp((k-0.78)*5,0,1);
+        b.el.style.setProperty('--ks', ks.toFixed(3));
+        b.el.style.setProperty('--kb', kb.toFixed(3));
+      }
+    }
+  });
+}
+
+var loadStart = performance.now();
+function loadRampValue(){
+  var t = (performance.now() - loadStart) / 900;
+  return clamp(t, 0, 1);
+}
+
+/* rAF lerp loop */
+var target = 0, shown = 0, rafId = null, lastTick = 0;
+var heroOnScreen = true;
+var io = new IntersectionObserver(function(entries){
+  heroOnScreen = entries[0].isIntersecting;
+  if (scrubOn && heroOnScreen && rafId === null) rafId = requestAnimationFrame(tick);
+}, {threshold:0});
+io.observe(heroEl);
+
+function tick(now){
+  if (!scrubOn){ rafId = null; return; }
+  var dt = Math.min(100, now - (lastTick || now));
+  lastTick = now;
+  var k = 0.16;
+  shown += (target - shown) * (1 - Math.pow(1-k, dt/16.667));
+  var loadK = loadRampValue();
+  if (Math.abs(target-shown) < 0.0005 && loadK >= 1){
+    shown = target; rafId = null; lastTick = 0;
+  } else {
+    rafId = requestAnimationFrame(tick);
+  }
+  if (video.duration) requestSeek(shown * video.duration);
+  updateCaptions(shown);
+}
+
+function onScroll(){
+  target = heroProgress();
+  if (rafId === null && heroOnScreen) rafId = requestAnimationFrame(tick);
+}
+
+/* seek gate */
+var seekBusy = false, pendingTime = null;
+function requestSeek(t){
+  if (!video.duration) return;
+  if (seekBusy){ pendingTime = t; return; }
+  seekBusy = true;
+  try { video.currentTime = t; } catch(e){ seekBusy = false; }
+}
+video.addEventListener('seeked', function(){
+  seekBusy = false;
+  if (pendingTime !== null){
+    var t = pendingTime; pendingTime = null; requestSeek(t);
+  }
+});
+video.addEventListener('error', function(){ seekBusy = false; pendingTime = null; });
+
+/* ---------- blob loader with streaming ring ---------- */
+var VIDEO_URL = 'assets/video/hero-scrub.mp4';
+var POSTER_URL = 'assets/img/hero-poster.jpg';
+var VIDEO_BYTES = 9000000;
+var started = false;
+
+function startBlobFetch(){
+  if (started) return;
+  started = true;
+  loadHeroBlob().catch(failVideo);
+}
+
+var posterImg = new Image();
+posterImg.onload = function(){
+  poster.style.backgroundImage = "url('"+POSTER_URL+"')";
+  stage.classList.add('poster-ready');
+  startBlobFetch();
+};
+posterImg.onerror = startBlobFetch;
+posterImg.src = POSTER_URL;
+setTimeout(startBlobFetch, 4000);
+
+function loadHeroBlob(){
+  var ctrl = new AbortController();
+  var watchdog = setTimeout(function(){ ctrl.abort(); }, 20000);
+  return fetch(VIDEO_URL, {signal: ctrl.signal}).then(function(res){
+    if (!res.ok) throw new Error('no video');
+    if (!res.body || !res.body.getReader){
+      return res.blob().then(function(blob){
+        clearTimeout(watchdog);
+        finishVideoLoad(blob);
+      });
+    }
+    var total = Number(res.headers.get('Content-Length')) || VIDEO_BYTES;
+    var reader = res.body.getReader();
+    var chunks = [];
+    var got = 0, lastRing = 0;
+    function pump(){
+      return reader.read().then(function(res2){
+        if (res2.done){
+          clearTimeout(watchdog);
+          loader.style.setProperty('--ld', 0);
+          finishVideoLoad(new Blob(chunks));
+          return;
+        }
+        clearTimeout(watchdog);
+        watchdog = setTimeout(function(){ ctrl.abort(); }, 20000);
+        chunks.push(res2.value);
+        got += res2.value.length;
+        var frac = Math.min(1, got/total);
+        var now = performance.now();
+        if (now - lastRing > 100 || frac === 1){
+          lastRing = now;
+          loader.style.setProperty('--ld', Math.round(126*(1-frac)));
+        }
+        return pump();
+      });
+    }
+    return pump();
+  });
+}
+
+function finishVideoLoad(blob){
+  video.src = URL.createObjectURL(blob);
+  video.load();
+  video.addEventListener('canplay', function(){
+    requestSeek(heroProgress() * video.duration);
+    stage.classList.add('video-ready');
+  }, {once:true});
+}
+
+function failVideo(){
+  stage.classList.add('video-failed');
+}
+
+/* ---------- reduced motion + static hero gates ---------- */
+var GATES = [
+  '(max-width: 720px)',
+  '(orientation: portrait) and (max-width: 1024px)',
+  '(orientation: portrait) and (pointer: coarse)',
+  '(orientation: landscape) and (pointer: coarse) and (max-height: 560px)',
+  '(prefers-reduced-motion: reduce)'
+];
+var scrubOn = false;
+
+function pinToFinalStates(){
+  bandEls.forEach(function(b, idx){
+    b.el.style.opacity = idx === bandEls.length-1 ? 1 : 0;
+    b.el.style.setProperty('--k', 1);
+    if (idx === bandEls.length-1){
+      b.el.style.setProperty('--ks', 1);
+      b.el.style.setProperty('--kb', 1);
+    }
+  });
+  document.querySelectorAll('.flame-divider').forEach(function(el){ el.classList.add('in'); });
+}
+function unpinFinalStates(){
+  bandEls.forEach(function(b){ b.op = -1; b.k = -1; });
+}
+
+function enableScrub(){
+  if (scrubOn) return; scrubOn = true;
+  addEventListener('scroll', onScroll, {passive:true});
+  unpinFinalStates();
+  updateCaptions(heroProgress());
+  onScroll();
+}
+function disableScrub(){
+  if (!scrubOn) return; scrubOn = false;
+  removeEventListener('scroll', onScroll);
+  if (rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
+}
+function applyHeroMode(){
+  var isStatic = GATES.some(function(q){ return matchMedia(q).matches; });
+  if (isStatic){ disableScrub(); pinToFinalStates(); }
+  else enableScrub();
+}
+var MQLS = GATES.map(function(q){ return matchMedia(q); });
+MQLS.forEach(function(m){ m.addEventListener('change', applyHeroMode); });
+applyHeroMode();
+
+/* ---------- ending frame reused as story image ---------- */
+var storyImg = document.getElementById('storyImg');
+var endImg = new Image();
+endImg.onload = function(){ storyImg.src = 'assets/img/hero-ending.jpg'; storyImg.classList.add('loaded'); };
+endImg.onerror = function(){};
+endImg.src = 'assets/img/hero-ending.jpg';
+
+/* ---------- reveal on scroll ---------- */
+var revealIO = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if (e.isIntersecting){
+      e.target.classList.add('in');
+      var group = e.target.closest('.stagger');
+      if (group){
+        clearTimeout(group._doneTimer);
+        group._doneTimer = setTimeout(function(){ group.classList.add('in-done'); }, 700);
+      }
+      revealIO.unobserve(e.target);
+    }
+  });
+}, {threshold:0.18, rootMargin:'0px 0px -6% 0px'});
+document.querySelectorAll('.reveal, .flame-divider, .pulse-line').forEach(function(el){ revealIO.observe(el); });
+
+/* ---------- faq accordion ---------- */
+document.querySelectorAll('.faq-item').forEach(function(item){
+  var btn = item.querySelector('.faq-q');
+  var panel = item.querySelector('.faq-a');
+  btn.addEventListener('click', function(){
+    var open = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(function(o){
+      if (o !== item){
+        o.classList.remove('open');
+        o.querySelector('.faq-q').setAttribute('aria-expanded','false');
+        o.querySelector('.faq-a').style.maxHeight = 0;
+      }
+    });
+    item.classList.toggle('open', !open);
+    btn.setAttribute('aria-expanded', String(!open));
+    panel.style.maxHeight = !open ? panel.scrollHeight+'px' : 0;
+  });
+});
+
+/* ---------- hold-to-time interaction ---------- */
+(function(){
+  var btn = document.getElementById('holdBtn');
+  var fillCircle = btn.querySelector('.fill');
+  var label = document.getElementById('holdLabel');
+  var result = document.getElementById('holdResult');
+  var CIRC = 2*Math.PI*52;
+  fillCircle.style.strokeDasharray = CIRC.toFixed(1);
+  fillCircle.style.strokeDashoffset = CIRC.toFixed(1);
+  var DURATION = 1400;
+  var startT = null, raf = null, progress = 0, done = false;
+
+  function paint(){
+    fillCircle.style.strokeDashoffset = (CIRC * (1-progress)).toFixed(1);
+  }
+
+  function step(now){
+    if (startT === null) startT = now;
+    progress = Math.min(1, (now-startT)/DURATION);
+    paint();
+    if (progress >= 1){
+      complete();
+      return;
+    }
+    raf = requestAnimationFrame(step);
+  }
+
+  function begin(){
+    if (done) return;
+    btn.classList.add('active');
+    label.textContent = 'Hold…';
+    startT = null;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(step);
+  }
+
+  function release(){
+    if (done) return;
+    cancelAnimationFrame(raf);
+    btn.classList.remove('active');
+    label.textContent = 'Press & Hold';
+    easeBack();
+  }
+
+  function easeBack(){
+    var from = progress;
+    var t0 = performance.now();
+    var dur = 450;
+    function ease(now){
+      var t = Math.min(1, (now-t0)/dur);
+      progress = from * (1-t);
+      paint();
+      if (t < 1) requestAnimationFrame(ease);
+    }
+    requestAnimationFrame(ease);
+  }
+
+  function complete(){
+    done = true;
+    btn.classList.remove('active');
+    btn.classList.add('done');
+    label.textContent = 'Pulled!';
+    result.classList.add('show');
+  }
+
+  btn.addEventListener('pointerdown', function(e){ e.preventDefault(); begin(); });
+  addEventListener('pointerup', release);
+  addEventListener('pointercancel', release);
+  btn.addEventListener('keydown', function(e){
+    if ((e.key === ' ' || e.key === 'Enter') && !e.repeat){ e.preventDefault(); begin(); }
+  });
+  btn.addEventListener('keyup', function(e){
+    if (e.key === ' ' || e.key === 'Enter') release();
+  });
+
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(e){
+    if (e.matches && !done) complete();
+  });
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    // reduced motion: show the finished state without requiring a hold
+    progress = 1; done = false;
+  }
+})();
+
+/* ---------- signup form (JS-only demo success state, no backend) ---------- */
+document.getElementById('signupForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  document.querySelector('.cta-section').classList.add('sent');
+});
+
+})();
+</script>
+</body>
+</html>
