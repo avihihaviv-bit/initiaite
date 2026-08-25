@@ -21,7 +21,6 @@
 :root{
   --canvas:#14100e;
   --canvas-2:#1b1512;
-  --panel:#20180f0;
   --panel:#221913;
   --ember:#ef6a2c;
   --ember-hover:#ff8a4c;
@@ -121,7 +120,7 @@ body.paused .ember-particle{animation-play-state:paused!important}
 @media (pointer:coarse){.btn{min-height:44px}}
 
 /* ---------- hero ---------- */
-.hero{position:relative;height:400vh}
+.hero{position:relative;height:550vh}
 .stage{
   position:sticky;top:0;height:100vh;width:100%;overflow:hidden;background:var(--canvas);
 }
@@ -923,10 +922,15 @@ video.addEventListener('seeked', function(){
 video.addEventListener('error', function(){ seekBusy = false; pendingTime = null; });
 
 /* ---------- blob loader with streaming ring ---------- */
+/* This whole pipeline (poster paint + video blob fetch) must live behind
+   the static-hero gate: phone and reduced-motion visitors get the static
+   hero and must never download either file. initHeroOnce() is the single
+   entry point, called only from enableScrub(). */
 var VIDEO_URL = 'assets/video/hero-scrub.mp4';
 var POSTER_URL = 'assets/img/hero-poster.jpg';
-var VIDEO_BYTES = 9000000;
+var VIDEO_BYTES = 5884552;
 var started = false;
+var heroInited = false;
 
 function startBlobFetch(){
   if (started) return;
@@ -934,15 +938,19 @@ function startBlobFetch(){
   loadHeroBlob().catch(failVideo);
 }
 
-var posterImg = new Image();
-posterImg.onload = function(){
-  poster.style.backgroundImage = "url('"+POSTER_URL+"')";
-  stage.classList.add('poster-ready');
-  startBlobFetch();
-};
-posterImg.onerror = startBlobFetch;
-posterImg.src = POSTER_URL;
-setTimeout(startBlobFetch, 4000);
+function initHeroOnce(){
+  if (heroInited) return;
+  heroInited = true;
+  var posterImg = new Image();
+  posterImg.onload = function(){
+    poster.style.backgroundImage = "url('"+POSTER_URL+"')";
+    stage.classList.add('poster-ready');
+    startBlobFetch();
+  };
+  posterImg.onerror = startBlobFetch;
+  posterImg.src = POSTER_URL;
+  setTimeout(startBlobFetch, 4000);
+}
 
 function loadHeroBlob(){
   var ctrl = new AbortController();
@@ -964,7 +972,7 @@ function loadHeroBlob(){
         if (res2.done){
           clearTimeout(watchdog);
           loader.style.setProperty('--ld', 0);
-          finishVideoLoad(new Blob(chunks));
+          finishVideoLoad(new Blob(chunks, {type: 'video/mp4'}));
           return;
         }
         clearTimeout(watchdog);
@@ -1024,6 +1032,7 @@ function unpinFinalStates(){
 
 function enableScrub(){
   if (scrubOn) return; scrubOn = true;
+  initHeroOnce();
   addEventListener('scroll', onScroll, {passive:true});
   unpinFinalStates();
   updateCaptions(heroProgress());
