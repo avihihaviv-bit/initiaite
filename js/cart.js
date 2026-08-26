@@ -9,9 +9,9 @@ const STORAGE_KEY = "pi_cart";
  * placed: the basket exists so you can gather what you want and hand it over
  * in one go — to Wolt, where you pay, or to the restaurant over WhatsApp.
  */
-let lines = load();
+let lines = loadCart();
 
-function load() {
+function loadCart() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     // Drop anything whose dish has since left the menu.
@@ -23,7 +23,7 @@ function load() {
   }
 }
 
-function save() {
+function saveCart() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
   } catch {
@@ -72,7 +72,7 @@ export function addToCart(id, qty = 1) {
   const line = lines.find((l) => l.id === id);
   if (line) line.qty = clampQty(line.qty + qty);
   else lines.push({ id, qty: clampQty(qty) });
-  save();
+  saveCart();
   render();
   if (!qs("#cart-backdrop")?.classList.contains("is-open")) {
     showToast(`${item.name} נוסף לסל`, "success");
@@ -85,20 +85,20 @@ export function setQty(id, qty) {
   if (qty <= 0) removeFromCart(id);
   else {
     line.qty = clampQty(qty);
-    save();
+    saveCart();
     render();
   }
 }
 
 export function removeFromCart(id) {
   lines = lines.filter((l) => l.id !== id);
-  save();
+  saveCart();
   render();
 }
 
 export function clearCart() {
   lines = [];
-  save();
+  saveCart();
   render();
 }
 
