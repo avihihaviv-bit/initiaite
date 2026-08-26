@@ -217,12 +217,14 @@ body.paused .scroll-cue svg{animation-play-state:paused!important}
 
 @media (max-height:560px){.scroll-cue,.loader{display:none}}
 
-/* ---------- static hero (phones / reduced motion / short landscape) ---------- */
-@media (max-width:720px),
-       (orientation:portrait) and (max-width:1024px),
-       (orientation:portrait) and (pointer:coarse),
-       (orientation:landscape) and (pointer:coarse) and (max-height:560px),
-       (prefers-reduced-motion:reduce){
+/* ---------- static hero (reduced motion only) ---------- */
+/* Mobile gets the same scrubbing video hero as desktop (by request): the
+   clip is small (5.7MB), cover-crops to portrait cleanly (verified against
+   the real footage's poster and ending frames), and object-fit:cover on
+   .stage video already handles the crop. Reduced motion is the one gate
+   that must never be removed: it is an accessibility floor, not a device
+   guess, and desktop honors it identically. */
+@media (prefers-reduced-motion:reduce){
   .hero{height:100vh}
   .stage{position:relative;top:auto}
   .stage video,.loader{display:none}
@@ -1005,12 +1007,8 @@ function failVideo(){
   stage.classList.add('video-failed');
 }
 
-/* ---------- reduced motion + static hero gates ---------- */
+/* ---------- reduced motion gate (the one that must always stay) ---------- */
 var GATES = [
-  '(max-width: 720px)',
-  '(orientation: portrait) and (max-width: 1024px)',
-  '(orientation: portrait) and (pointer: coarse)',
-  '(orientation: landscape) and (pointer: coarse) and (max-height: 560px)',
   '(prefers-reduced-motion: reduce)'
 ];
 var scrubOn = false;
