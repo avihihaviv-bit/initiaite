@@ -8,13 +8,8 @@ import { prefersReducedMotion } from "./utils.js";
  * That gives fabric-like folds with light catching the crests, without the
  * cost (or the load-time) of a WebGL/Three.js scene.
  *
- * Cost control. The output is soft-focus by design, so it is drawn small and
- * scaled up rather than rendered at device resolution: at full DPR this was
- * repainting several megapixels every frame for an image nobody ever sees
- * sharp. The upscale supplies most of the softening the CSS blur used to, and
- * blur is charged on displayed area, so the remaining radius is small.
- *  - fixed low backing resolution, independent of screen size
- *  - capped at ~30fps; the wave is slow enough that nothing is lost
+ * Cost control:
+ *  - renders at a capped device-pixel ratio, lower on small screens
  *  - pauses when the tab is hidden
  *  - falls back to a static painted frame under prefers-reduced-motion
  */
@@ -40,16 +35,12 @@ export function initFlagBackdrop() {
   let raf = null;
   let running = false;
 
-  // Backing width in device pixels. Vertical colour bands with a slow fold —
-  // there is no fine detail to lose, and CSS stretches it back to full size.
-  const BACKING_W = 480;
-
   function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, isSmall ? 1.5 : 2);
     w = window.innerWidth;
     h = window.innerHeight;
-    dpr = Math.min(1, BACKING_W / Math.max(w, 1));
-    canvas.width = Math.max(1, Math.round(w * dpr));
-    canvas.height = Math.max(1, Math.round(h * dpr));
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
     canvas.style.width = w + "px";
     canvas.style.height = h + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -106,28 +97,13 @@ export function initFlagBackdrop() {
       ctx.fillRect(x, yOff - (stripH - h) / 2, STRIP + 1, stripH);
     }
 
-    if (running) raf = requestAnimationFrame(frame);
-  }
-
-  // ~30fps. The fold takes seconds to travel; drawing it twice per displayed
-  // frame buys nothing and costs every visitor half a core.
-  const MIN_FRAME_MS = 1000 / 30;
-  let lastDraw = 0;
-
-  function frame(time) {
-    if (!running) return;
-    if (time - lastDraw >= MIN_FRAME_MS) {
-      lastDraw = time;
-      draw(time);
-      return;
-    }
-    raf = requestAnimationFrame(frame);
+    if (running) raf = requestAnimationFrame(draw);
   }
 
   function start() {
     if (running || reduced) return;
     running = true;
-    raf = requestAnimationFrame(frame);
+    raf = requestAnimationFrame(draw);
   }
 
   function stop() {
