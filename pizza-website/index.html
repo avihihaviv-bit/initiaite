@@ -148,11 +148,18 @@ body.paused .ember-particle{animation-play-state:paused!important}
   background:radial-gradient(ellipse 120% 90% at 50% 45%, rgba(10,7,5,0) 32%, rgba(10,7,5,.66) 100%);
 }
 .loader{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:48px;height:48px;color:var(--gold);opacity:.85;transition:opacity .5s var(--ease-out);
+  position:absolute;left:50%;top:20%;transform:translate(-50%,-50%);
+  width:38px;height:38px;color:var(--gold);opacity:0;pointer-events:none;
+  transition:opacity .5s var(--ease-out);
+  filter:drop-shadow(0 0 7px rgba(217,164,65,.5));
+  animation:loaderspin 1.6s linear infinite;
 }
-.stage.video-ready .loader,.stage.video-failed .loader{opacity:0;pointer-events:none}
-.loader circle{transition:stroke-dashoffset .2s linear}
+.loader.show{opacity:.9}
+.stage.video-ready .loader,.stage.video-failed .loader{opacity:0!important}
+.loader circle.track{opacity:.22}
+.loader circle.fill{stroke-linecap:round;transition:stroke-dashoffset .2s linear}
+@keyframes loaderspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+body.paused .loader{animation-play-state:paused!important}
 
 .scroll-cue{
   position:absolute;left:50%;bottom:34px;transform:translateX(-50%);
@@ -471,8 +478,8 @@ body.paused .pulse-line::after{animation-play-state:paused!important}
     <div class="scrim" aria-hidden="true"></div>
 
     <svg class="loader" id="loader" viewBox="0 0 48 48" aria-hidden="true">
-      <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(245,234,217,.15)" stroke-width="3"/>
-      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"
+      <circle class="track" cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <circle class="fill" cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2.5"
               stroke-dasharray="126" style="stroke-dashoffset:var(--ld,126)"/>
     </svg>
 
@@ -934,9 +941,12 @@ var VIDEO_BYTES = 5884552;
 var started = false;
 var heroInited = false;
 
+var loaderShowTimer = null;
+
 function startBlobFetch(){
   if (started) return;
   started = true;
+  loaderShowTimer = setTimeout(function(){ loader.classList.add('show'); }, 220);
   loadHeroBlob().catch(failVideo);
 }
 
@@ -999,11 +1009,15 @@ function finishVideoLoad(blob){
   video.load();
   video.addEventListener('canplay', function(){
     requestSeek(heroProgress() * video.duration);
+    clearTimeout(loaderShowTimer);
+    loader.classList.remove('show');
     stage.classList.add('video-ready');
   }, {once:true});
 }
 
 function failVideo(){
+  clearTimeout(loaderShowTimer);
+  loader.classList.remove('show');
   stage.classList.add('video-failed');
 }
 
