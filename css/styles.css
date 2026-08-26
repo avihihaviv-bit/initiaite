@@ -3282,6 +3282,56 @@ html.a11y-contrast .hours-table.is-closed-now tr.is-today td {
 }
 
 /* ---------- 22. Footer ---------- */
+/* Kosher mark closing the page — the same seal and glow as the hero badge, so
+   the claim reads as one thing stated twice rather than two loose mentions. */
+.footer-kosher-row {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--space-5) var(--space-2);
+}
+
+.footer-kosher {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(127, 191, 135, 0.12);
+  border: 1px solid rgba(127, 191, 135, 0.4);
+  color: var(--color-basil-dark);
+  box-shadow: 0 0 22px rgba(127, 191, 135, 0.18);
+  animation: kosher-glow 4s ease-in-out infinite;
+}
+
+.footer-kosher strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.footer-kosher .kosher-seal svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+@keyframes kosher-glow {
+  0%, 100% { box-shadow: 0 0 18px rgba(127, 191, 135, 0.14); }
+  50% { box-shadow: 0 0 30px rgba(127, 191, 135, 0.34); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-kosher { animation: none; }
+}
+
+html.a11y-contrast .footer-kosher {
+  background: #000;
+  border-color: #4ade80;
+  color: #4ade80;
+  box-shadow: none;
+  animation: none;
+}
+
 .site-footer {
   background: #0c0805;
   color: rgba(244, 233, 216, 0.82);
