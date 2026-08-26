@@ -1900,19 +1900,6 @@ html.a11y-contrast .status-pill.is-closed {
   filter: blur(4px);
 }
 
-.pizza-hint {
-  position: absolute;
-  bottom: -2.4rem;
-  inset-inline-start: 50%;
-  transform: translateX(50%);
-  font-size: var(--fs-tiny);
-  color: var(--color-charcoal-mute);
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  white-space: nowrap;
-}
-
 @media (max-width: 600px) {
   .pizza-3d {
     animation-duration: 9s;
