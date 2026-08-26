@@ -6,14 +6,14 @@ import { revealStaggerChildren } from "./reveal.js";
  * Ordered so the largest tile (first) carries the strongest hero shot.
  */
 const GALLERY = [
-  { src: "assets/images/menu/pizza-mishpahtit.png", alt: "פיצה משפחתית טרייה מהתנור, פיצה איטליאנה חולון" },
-  { src: "assets/images/menu/pizza-levana.png", alt: "פיצה לבנה על בסיס אלפרדו עם פטריות" },
-  { src: "assets/images/menu/malawach-patuach.png", alt: "מלווח פתוח מוגש עם ביצה, רסק וטחינה" },
-  { src: "assets/images/menu/pasta-penne.png", alt: "פסטה פנה ברוטב שמנת ופטריות" },
-  { src: "assets/images/menu/ziva-zeitim.png", alt: "זיווה זיתים מוגשת עם רסק, ביצה וטחינה" },
-  { src: "assets/images/menu/ravioli-batata.png", alt: "רביולי בטטה ברוטב עגבניות" },
-  { src: "assets/images/menu/pizza-yevanit.png", alt: "פיצה יוונית עם זיתי קלמטה, בולגרית ועגבניות שרי" },
-  { src: "assets/images/menu/toast.png", alt: "טוסט חם מוגש עם תוספות ורטבים בצד" },
+  { src: "assets/images/menu/pizza-mishpahtit.webp", alt: "פיצה משפחתית טרייה מהתנור, פיצה איטליאנה חולון" },
+  { src: "assets/images/menu/pizza-levana.webp", alt: "פיצה לבנה על בסיס אלפרדו עם פטריות" },
+  { src: "assets/images/menu/malawach-patuach.webp", alt: "מלווח פתוח מוגש עם ביצה, רסק וטחינה" },
+  { src: "assets/images/menu/pasta-penne.webp", alt: "פסטה פנה ברוטב שמנת ופטריות" },
+  { src: "assets/images/menu/ziva-zeitim.webp", alt: "זיווה זיתים מוגשת עם רסק, ביצה וטחינה" },
+  { src: "assets/images/menu/ravioli-batata.webp", alt: "רביולי בטטה ברוטב עגבניות" },
+  { src: "assets/images/menu/pizza-yevanit.webp", alt: "פיצה יוונית עם זיתי קלמטה, בולגרית ועגבניות שרי" },
+  { src: "assets/images/menu/toast.webp", alt: "טוסט חם מוגש עם תוספות ורטבים בצד" },
 ];
 
 let currentIndex = 0;

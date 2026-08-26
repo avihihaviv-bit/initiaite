@@ -581,8 +581,11 @@ p {
   display: block;
   width: 100%;
   height: 100%;
-  /* Push it back: soft focus keeps the foreground crisp by contrast. */
-  filter: blur(7px) saturate(1.1);
+  /* Push it back: soft focus keeps the foreground crisp by contrast. The
+     canvas is drawn small and stretched here, which supplies most of that
+     softening for free — blur is charged on displayed area, so a full-screen
+     7px radius was being recomputed every single frame. */
+  filter: blur(3px) saturate(1.1);
   transform: scale(1.06);
 }
 
@@ -602,10 +605,12 @@ p {
 }
 
 /* Sections sit on their own tinted glass so the flag reads as atmosphere. */
+/* No backdrop-filter here: a later rule paints this background fully opaque,
+   so there was never anything showing through for it to blur — it was buying
+   nothing and costing a backdrop snapshot and blur over the full width of
+   three of the tallest sections on the page, on every scroll. */
 .section-alt {
   background: rgba(24, 17, 11, 0.86);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
 }
 
 /* Menu, reviews and location carry dense text — give them a touch more
@@ -617,7 +622,7 @@ p {
 
 @media (prefers-reduced-motion: reduce) {
   .flag-backdrop canvas {
-    filter: blur(10px) saturate(0.95);
+    filter: blur(3px) saturate(0.95);
   }
 }
 
@@ -628,10 +633,12 @@ p {
   overflow: hidden;
 }
 
+/* The softness is in the gradient's own falloff rather than a filter: these
+   drift continuously, and a 70px blur over a few hundred thousand pixels was
+   being recomputed as they moved. */
 .light {
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
   opacity: 0.5;
   will-change: transform;
 }
@@ -641,7 +648,7 @@ p {
   height: 42vmax;
   top: -12%;
   right: -8%;
-  background: radial-gradient(circle, rgba(226, 73, 44, 0.5), transparent 68%);
+  background: radial-gradient(circle, rgba(226, 73, 44, 0.34) 0%, rgba(226, 73, 44, 0.14) 38%, transparent 72%);
   animation: drift-1 26s ease-in-out infinite;
 }
 
@@ -650,7 +657,7 @@ p {
   height: 36vmax;
   bottom: -14%;
   left: -6%;
-  background: radial-gradient(circle, rgba(76, 122, 84, 0.45), transparent 68%);
+  background: radial-gradient(circle, rgba(76, 122, 84, 0.3) 0%, rgba(76, 122, 84, 0.12) 38%, transparent 72%);
   animation: drift-2 32s ease-in-out infinite;
 }
 
@@ -659,7 +666,7 @@ p {
   height: 28vmax;
   top: 34%;
   left: 42%;
-  background: radial-gradient(circle, rgba(216, 172, 92, 0.35), transparent 70%);
+  background: radial-gradient(circle, rgba(216, 172, 92, 0.24) 0%, rgba(216, 172, 92, 0.1) 38%, transparent 74%);
   animation: drift-3 38s ease-in-out infinite;
 }
 
@@ -4662,6 +4669,12 @@ html.a11y-no-motion .hero-title .line {
 }
 
 /* A slow light drifts across each section band */
+/* The glow travels on transform, not on the gradient's own centre. Animating
+   a registered custom property inside the gradient repainted the full width of
+   the tallest sections on the page every frame, forever; transform and opacity
+   are handled by the compositor and cost nothing per frame. The gradient fades
+   out well before the edges, so sliding the layer looks the same as moving the
+   light. */
 .section-alt::before,
 #menu::before,
 #location::before {
@@ -4670,22 +4683,17 @@ html.a11y-no-motion .hero-title .line {
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    50% 60% at var(--sweep-x, 50%) 0%,
+    50% 60% at 50% 0%,
     rgba(216, 172, 92, 0.09),
     transparent 70%
   );
   animation: band-sweep 16s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes band-sweep {
-  0%, 100% { --sweep-x: 18%; opacity: 0.5; }
-  50% { --sweep-x: 82%; opacity: 1; }
-}
-
-@property --sweep-x {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 50%;
+  0%, 100% { transform: translateX(-32%); opacity: 0.5; }
+  50% { transform: translateX(32%); opacity: 1; }
 }
 
 /* Cards lift into a pool of light on hover, matching the tilt system */
@@ -4787,7 +4795,8 @@ html.a11y-no-motion .hero-title .line {
     /* True full-bleed. A plain negative margin left it capped at the
        container's content box (355px of a 390px screen) — and width alone was
        ignored, because flex-basis wins over width for a flex item's main size.
-       That cap is most of the reason the row would not seat all eight links. */
+       That cap is most of the reason the row would not seat all eight links.
+       Both are set: the basis carries the size, width keeps it honest. */
     flex-basis: 100vw;
     width: 100vw;
     margin-inline: calc(50% - 50vw);
