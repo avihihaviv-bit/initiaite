@@ -118,26 +118,45 @@ export function whatsappOrderHref() {
 
 // ---------- UI ----------
 
+function priceLabel(item, qty) {
+  const p = priceOf(item);
+  // Showing the line total, not the unit price, is what people check against
+  // the running total — the unit price stays as the smaller second line.
+  return p === null ? escapeHtml(item.price) : `₪${p * qty}`;
+}
+
 function lineHTML({ item, qty }) {
+  const unit = priceOf(item);
   return `
     <li class="cart-line" data-id="${item.id}">
-      <div class="cart-line-media">${
+      ${
         item.img
-          ? `<img src="${item.img}" alt="" loading="lazy" decoding="async" width="64" height="64">`
-          : ""
-      }</div>
-      <div class="cart-line-body">
+          ? `<img class="cart-line-img" src="${item.img}" alt="" loading="lazy" decoding="async" width="60" height="60">`
+          : `<span class="cart-line-img cart-line-img-empty"><svg class="icon"><use href="#i-bag"></use></svg></span>`
+      }
+      <div class="cart-line-main">
         <span class="cart-line-name">${escapeHtml(item.name)}</span>
-        <span class="cart-line-price">${escapeHtml(item.price)}</span>
+        ${
+          unit !== null && qty > 1
+            ? `<span class="cart-line-unit">${qty} × ₪${unit}</span>`
+            : ""
+        }
+        <div class="cart-qty" role="group" aria-label="כמות של ${escapeHtml(item.name)}">
+          <button type="button" data-cart-dec aria-label="פחות">
+            <svg class="icon"><use href="#i-minus"></use></svg>
+          </button>
+          <span class="cart-qty-value" aria-live="polite">${qty}</span>
+          <button type="button" data-cart-inc aria-label="עוד">
+            <svg class="icon"><use href="#i-plus"></use></svg>
+          </button>
+        </div>
       </div>
-      <div class="cart-qty">
-        <button type="button" data-cart-dec aria-label="הפחתת כמות של ${escapeHtml(item.name)}">−</button>
-        <span class="cart-qty-value" aria-live="polite">${qty}</span>
-        <button type="button" data-cart-inc aria-label="הוספת כמות של ${escapeHtml(item.name)}">+</button>
+      <div class="cart-line-end">
+        <span class="cart-line-total">${priceLabel(item, qty)}</span>
+        <button type="button" class="cart-line-remove" data-cart-remove aria-label="הסרת ${escapeHtml(item.name)} מהסל">
+          <svg class="icon"><use href="#i-close"></use></svg>
+        </button>
       </div>
-      <button type="button" class="cart-line-remove" data-cart-remove aria-label="הסרת ${escapeHtml(item.name)} מהסל">
-        <svg class="icon"><use href="#i-close"></use></svg>
-      </button>
     </li>`;
 }
 
@@ -152,6 +171,12 @@ export function render() {
     el.classList.toggle("has-items", count > 0);
     el.setAttribute("aria-label", count ? `הסל שלי — ${count} פריטים` : "הסל שלי");
   });
+
+  const headCount = qs("#cart-head-count");
+  if (headCount) {
+    headCount.textContent = count === 1 ? "פריט אחד" : `${count} פריטים`;
+    headCount.hidden = count === 0;
+  }
 
   const list = qs("#cart-lines");
   const empty = qs("#cart-empty");
