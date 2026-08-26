@@ -4232,42 +4232,33 @@ html.a11y-no-motion .hero-title .line {
     display: none;
   }
 
-  /* Full nav on the bar, scrolled horizontally when it runs long */
+  /* Every link on the bar, wrapped onto as many rows as it takes. Eight of
+     them cannot fit one phone row at a readable size, and a scrolling bar
+     meant the last two had to be found before they could be tapped — so the
+     rows win: nothing hidden, nothing to discover, every link a target. */
   .main-nav {
     display: block;
     margin-inline: calc(-1 * var(--container-pad));
-    /* Without this the flex item's default min-width:auto let it grow to the
-       full 480px of its links, so the list below had nothing to scroll and
-       "מיקום" / "שאלות" simply sat off-screen behind the header's clip. */
     min-width: 0;
   }
 
   .main-nav ul {
-    /* Tighter than the desktop rhythm so fewer links start out hidden —
-       eight of them cannot all fit a phone bar at a readable size. */
-    gap: var(--space-3);
-    overflow-x: auto;
-    scrollbar-width: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1) var(--space-3);
     padding-inline: var(--container-pad);
-    scroll-snap-type: x proximity;
-    /* Softens the trailing edge so it reads as "more this way" rather than a
-       link sliced in half. */
-    -webkit-mask-image: linear-gradient(to left, #000 88%, transparent 100%);
-    mask-image: linear-gradient(to left, #000 88%, transparent 100%);
-  }
-
-  .main-nav ul::-webkit-scrollbar {
-    display: none;
   }
 
   .main-nav li {
     flex: 0 0 auto;
-    scroll-snap-align: start;
   }
 
   .main-nav a {
     font-size: 0.9rem;
-    padding-block: var(--space-1);
+    /* Roomier than the desktop hit area — these are thumbs, and the wrap
+       gives us the vertical space to spend. */
+    padding-block: var(--space-2);
+    padding-inline: var(--space-2);
   }
 
   .header-actions {
@@ -4351,5 +4342,10 @@ html.a11y-no-motion .hero-title .line {
   }
   .main-nav a {
     font-size: 0.84rem;
+    padding-inline: var(--space-1);
+  }
+
+  .main-nav ul {
+    gap: var(--space-1) var(--space-2);
   }
 }
