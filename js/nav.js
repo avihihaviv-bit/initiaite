@@ -82,6 +82,19 @@ export function initActiveNavHighlight() {
   const links = qsa(".main-nav a");
   if (!links.length || !("IntersectionObserver" in window)) return;
 
+  const list = qs(".main-nav ul");
+
+  // The row is sized to seat all eight links from ~360px up, so this normally
+  // never fires. It covers the narrow phones that miss out, and enlarged text
+  // from the accessibility panel, which can overflow the row at any width.
+  const trackOverflow = () => {
+    if (!list) return;
+    list.classList.toggle("is-overflowing", list.scrollWidth > list.clientWidth + 2);
+  };
+  trackOverflow();
+  if (list && "ResizeObserver" in window) new ResizeObserver(trackOverflow).observe(list);
+  window.addEventListener("resize", trackOverflow, { passive: true });
+
   const sections = links
     .map((a) => document.querySelector(a.getAttribute("href")))
     .filter(Boolean);
@@ -91,9 +104,17 @@ export function initActiveNavHighlight() {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const id = `#${entry.target.id}`;
-          links.forEach((a) =>
-            a.classList.toggle("is-active", a.getAttribute("href") === id)
-          );
+          let active = null;
+          links.forEach((a) => {
+            const on = a.getAttribute("href") === id;
+            a.classList.toggle("is-active", on);
+            if (on) active = a;
+          });
+          // When the row does scroll, keep the section you are reading in view
+          // so its link never has to be hunted for.
+          if (active && list?.classList.contains("is-overflowing")) {
+            active.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+          }
         }
       });
     },

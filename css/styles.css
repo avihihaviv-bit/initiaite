@@ -4238,15 +4238,39 @@ html.a11y-no-motion .hero-title .line {
      rows win: nothing hidden, nothing to discover, every link a target. */
   .main-nav {
     display: block;
-    margin-inline: calc(-1 * var(--container-pad));
     min-width: 0;
+    /* True full-bleed. A plain negative margin left it capped at the
+       container's content box (355px of a 390px screen) — and width alone was
+       ignored, because flex-basis wins over width for a flex item's main size.
+       That cap is most of the reason the row would not seat all eight links. */
+    flex-basis: 100vw;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
   }
 
   .main-nav ul {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
-    gap: var(--space-1) var(--space-3);
-    padding-inline: var(--container-pad);
+    gap: 0 var(--space-1);
+    /* Only a hair of inset: the row needs every pixel of the viewport to seat
+       all eight links, and the header's own padding already holds it off the
+       edge visually. */
+    padding-inline: 2px;
+    /* Never actually reached down to 320px — a safety net for anything
+       narrower (folded phones, huge text) so it scrolls instead of clipping. */
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .main-nav ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Only once it genuinely overflows — otherwise the fade would dim a link
+     that is sitting perfectly in view. */
+  .main-nav ul.is-overflowing {
+    -webkit-mask-image: linear-gradient(to left, #000 90%, transparent 100%);
+    mask-image: linear-gradient(to left, #000 90%, transparent 100%);
   }
 
   .main-nav li {
@@ -4254,11 +4278,14 @@ html.a11y-no-motion .hero-title .line {
   }
 
   .main-nav a {
-    font-size: 0.9rem;
-    /* Roomier than the desktop hit area — these are thumbs, and the wrap
-       gives us the vertical space to spend. */
+    /* Sized off the viewport so all eight stay on one line. Fitted to
+       measurements of the real row: it seats exactly at 10px on a 320 screen,
+       13px at 390 and 15px at 430, which is 4.2vw less about 4px. Floored at
+       a readable ~11px and capped at the desktop 0.9rem, which it reaches
+       around 438px. */
+    font-size: clamp(0.69rem, 4.2vw - 4px, 0.9rem);
     padding-block: var(--space-2);
-    padding-inline: var(--space-2);
+    padding-inline: 2px;
   }
 
   .header-actions {
@@ -4340,12 +4367,5 @@ html.a11y-no-motion .hero-title .line {
   .brand-logo {
     height: 36px;
   }
-  .main-nav a {
-    font-size: 0.84rem;
-    padding-inline: var(--space-1);
-  }
-
-  .main-nav ul {
-    gap: var(--space-1) var(--space-2);
-  }
+  /* Type and gaps here are handled by the fluid sizing in the block above. */
 }
