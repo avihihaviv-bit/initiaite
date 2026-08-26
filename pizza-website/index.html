@@ -166,8 +166,9 @@ body.paused .ember-particle{animation-play-state:paused!important}
   transition:opacity .5s var(--ease-out);
   filter:drop-shadow(0 0 7px rgba(217,164,65,.5));
   animation:loaderspin 1.6s linear infinite;
+  animation-play-state:paused;
 }
-.loader.show{opacity:.9}
+.loader.show{opacity:.9;animation-play-state:running}
 .stage.video-ready .loader,.stage.video-failed .loader{opacity:0!important}
 .loader circle.track{opacity:.22}
 .loader circle.fill{stroke-linecap:round;transition:stroke-dashoffset .2s linear}
@@ -213,6 +214,7 @@ body.paused .scroll-cue svg{animation-play-state:paused!important}
 /* split text */
 .w{display:inline-block;white-space:pre}
 .c{display:inline-block}
+.band .w,.band .c{will-change:opacity,transform}
 
 /* band 1: approach-from-depth */
 #band-1 .c{
