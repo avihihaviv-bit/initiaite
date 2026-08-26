@@ -10,6 +10,7 @@ import {
   initMagneticButtons,
   initParallax,
   revealStaggerChildren,
+  initOffscreenAnimationPause,
 } from "./reveal.js";
 import {
   renderBestsellers,
@@ -53,6 +54,7 @@ function init() {
 
   initA11y();
   initCart();
+  initOffscreenAnimationPause();
   initFlagBackdrop();
   markTiltTargets();
   initTilt();

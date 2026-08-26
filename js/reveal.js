@@ -108,3 +108,22 @@ export function initMagneticButtons() {
     });
   });
 }
+
+/**
+ * Idle the decorative loops on sections that are off screen. A paused
+ * animation costs nothing; a page-worth of them running behind content the
+ * visitor scrolled past costs every frame.
+ */
+export function initOffscreenAnimationPause() {
+  if (!("IntersectionObserver" in window)) return;
+  const sections = qsa("section, .flag-backdrop, .brand-rail");
+  if (!sections.length) return;
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => e.target.classList.toggle("is-offscreen", !e.isIntersecting));
+    },
+    { rootMargin: "120px" }
+  );
+  sections.forEach((s) => io.observe(s));
+}

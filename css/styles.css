@@ -4082,6 +4082,18 @@ html.a11y-contrast .cart-close {
   border-color: #fff;
 }
 
+/* Decorative loops stop when their section scrolls out of view. Paused
+   animations cost nothing, and there is no reason to keep a glow sweeping a
+   section the visitor left two screens ago. */
+.is-offscreen .section-alt::before,
+.is-offscreen::before,
+.is-offscreen .light,
+.is-offscreen .rail-btn,
+.is-offscreen .a11y-toggle,
+.is-offscreen .a11y-toggle::before {
+  animation-play-state: paused;
+}
+
 /* ---------- 24. Toasts ---------- */
 .toast-region {
   position: fixed;
@@ -4198,9 +4210,11 @@ html.a11y-contrast .cart-close {
   overflow: hidden;
 }
 
+/* display, not visibility: hidden visibility stops it being painted but leaves
+   it in the layout at z-index 500 with its ember and ring animations still
+   ticking — seven of them, forever, for an overlay nobody can see. */
 .intro.is-done {
-  visibility: hidden;
-  pointer-events: none;
+  display: none;
 }
 
 .intro-stack {
