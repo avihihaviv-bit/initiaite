@@ -28,7 +28,7 @@
   --gold:#d9a441;
   --text-primary:#f5ead9;
   --text-secondary:#cab6a0;
-  --text-dim:#8a7867;
+  --text-dim:#9c8873;
   --line:rgba(217,164,65,.18);
   --tshadow:0 1px 2px rgba(5,3,2,.95),0 3px 12px rgba(5,3,2,.78),0 10px 44px rgba(5,3,2,.75);
   --ease-out:cubic-bezier(.16,.8,.24,1);
@@ -38,7 +38,9 @@
   --mono:'IBM Plex Mono',ui-monospace,monospace;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{overflow-x:clip;overflow-x:hidden;background:var(--canvas);scroll-behavior:auto}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+html{overflow-x:clip;overflow-x:hidden;background:var(--canvas);scroll-behavior:smooth}
+#menu,#how,#story,#faq,#order{scroll-margin-top:100px}
 body{
   margin:0;background:var(--canvas);color:var(--text-primary);
   font-family:var(--body);font-size:16px;line-height:1.5;
@@ -50,14 +52,15 @@ body{
 }
 img{max-width:100%;display:block}
 a{color:inherit}
-h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;letter-spacing:-.01em}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;letter-spacing:-.01em;text-wrap:balance}
 p{margin:0}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .skip-link{
-  position:absolute;left:12px;top:-60px;z-index:1000;background:var(--ember);color:#1a0d05;
-  padding:10px 16px;border-radius:8px;font-weight:600;transition:top .25s var(--ease-out);
+  position:absolute;left:12px;top:12px;z-index:1000;background:var(--ember);color:#1a0d05;
+  padding:10px 16px;border-radius:8px;font-weight:600;
+  transform:translateY(-80px);transition:transform .25s var(--ease-out);
 }
-.skip-link:focus{top:12px}
+.skip-link:focus{transform:translateY(0)}
 :focus-visible{outline:2px solid var(--ember);outline-offset:3px;border-radius:2px}
 
 /* ---------- fixed background environment ---------- */
@@ -66,6 +69,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   background:
     radial-gradient(60% 50% at 50% 100%, rgba(239,106,44,.10) 0%, rgba(239,106,44,0) 70%),
     var(--canvas);
+}
+/* A uniform film-grain layer over the whole frame, hero video included, like
+   real grain sitting over the image rather than hidden behind opaque
+   section backgrounds. Sits above nav so it reads as one continuous frame. */
+.grain{
+  position:fixed;inset:-40px;z-index:200;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.035;mix-blend-mode:overlay;
 }
 .ember-particle{
   position:absolute;bottom:-4%;width:3px;height:3px;border-radius:50%;
@@ -115,14 +126,16 @@ body.paused .ember-particle{animation-play-state:paused!important}
 }
 .btn-ember{background:var(--ember);color:#1c0e04;box-shadow:0 8px 24px -8px rgba(239,106,44,.65)}
 .btn-ember:hover{background:var(--ember-hover);transform:translateY(-2px);box-shadow:0 12px 28px -8px rgba(239,106,44,.8)}
+.btn-ember:active{transform:translateY(0) scale(.97);box-shadow:0 6px 16px -8px rgba(239,106,44,.7)}
 .btn-ghost{border:1px solid var(--line);color:var(--text-primary);background:rgba(245,234,217,.03)}
 .btn-ghost:hover{border-color:var(--gold);background:rgba(217,164,65,.08)}
+.btn-ghost:active{transform:scale(.97)}
 @media (pointer:coarse){.btn{min-height:44px}}
 
 /* ---------- hero ---------- */
 .hero{position:relative;height:550vh}
 .stage{
-  position:sticky;top:0;height:100vh;width:100%;overflow:hidden;background:var(--canvas);
+  position:sticky;top:0;height:100vh;height:100dvh;width:100%;overflow:hidden;background:var(--canvas);
 }
 .stage .frame{
   position:absolute;inset:0;
@@ -232,7 +245,7 @@ body.paused .scroll-cue svg{animation-play-state:paused!important}
    that must never be removed: it is an accessibility floor, not a device
    guess, and desktop honors it identically. */
 @media (prefers-reduced-motion:reduce){
-  .hero{height:100vh}
+  .hero{height:100vh;height:100dvh}
   .stage{position:relative;top:auto}
   .stage video,.loader{display:none}
   .band{position:absolute}
@@ -284,6 +297,7 @@ section{position:relative;padding:min(14vw,120px) clamp(20px,6vw,72px)}
 .pizza-card{
   background:var(--panel);padding:34px 28px;position:relative;overflow:hidden;
   transition:background .4s var(--ease-out);
+  display:flex;flex-direction:column;
 }
 .pizza-card::after{
   content:"";position:absolute;right:-30%;top:-30%;width:70%;height:70%;border-radius:50%;
@@ -296,7 +310,7 @@ section{position:relative;padding:min(14vw,120px) clamp(20px,6vw,72px)}
 .pizza-card h3{font-size:1.5rem;margin:14px 0 10px;line-height:1.15}
 .pizza-card p{color:var(--text-secondary);font-size:.94rem;line-height:1.55}
 .pizza-card .price{
-  display:block;margin-top:20px;font-family:var(--mono);color:var(--gold);font-size:1rem;
+  display:block;margin-top:auto;padding-top:20px;font-family:var(--mono);color:var(--gold);font-size:1rem;
 }
 .pizza-card.cta-card{
   background:radial-gradient(140% 120% at 20% 0%, rgba(239,106,44,.22) 0%, rgba(239,106,44,0) 60%), var(--panel);
@@ -458,6 +472,7 @@ body.paused .pulse-line::after{animation-play-state:paused!important}
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="bg-field" aria-hidden="true" id="bgField"></div>
+<div class="grain" aria-hidden="true"></div>
 
 <nav class="nav" id="nav">
   <a class="mark" href="#top">Fu<em>o</em>co</a>
@@ -486,17 +501,17 @@ body.paused .pulse-line::after{animation-play-state:paused!important}
     <div class="band" id="band-1">
       <span class="kicker">Wood-Fired, Since Today</span>
       <h1 id="h-band1" aria-hidden="true"></h1>
-      <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Real fire.</span>
+      <span class="sr-only">Real fire.</span>
     </div>
 
     <div class="band" id="band-2">
       <h2 id="h-band2" aria-hidden="true"></h2>
-      <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Nine hundred degrees. Ninety seconds. Zero shortcuts.</span>
+      <span class="sr-only">Nine hundred degrees. Ninety seconds. Zero shortcuts.</span>
     </div>
 
     <div class="band" id="band-3">
       <h2 id="h-band3" aria-hidden="true"></h2>
-      <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Order ahead. Walk in. It's already out of the fire.</span>
+      <span class="sr-only">Order ahead. Walk in. It's already out of the fire.</span>
       <p class="sub" id="band3-sub">No box. No delivery bag. No soggy crust. Just walk up and it's in your hands.</p>
       <div class="cta-row" id="band3-cta"><a class="btn btn-ember" href="#order">Join the Fire List</a></div>
     </div>
@@ -675,9 +690,9 @@ body.paused .pulse-line::after{animation-play-state:paused!important}
       <h2 class="reveal">Get 10% off your first order and first word when we open near you.</h2>
       <p class="lede reveal">No spam, no daily emails. Just the fire list, used when there's something worth telling you.</p>
       <form class="signup-form reveal" id="signupForm">
-        <label class="sr-only" for="signupName" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Name</label>
+        <label class="sr-only" for="signupName">Name</label>
         <input type="text" id="signupName" name="name" placeholder="Your name" autocomplete="name" required>
-        <label class="sr-only" for="signupEmail" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Email</label>
+        <label class="sr-only" for="signupEmail">Email</label>
         <input type="email" id="signupEmail" name="email" placeholder="you@email.com" autocomplete="email" required>
         <button class="btn btn-ember" type="submit">Join the List</button>
       </form>
