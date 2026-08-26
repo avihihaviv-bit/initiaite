@@ -1,3 +1,4 @@
 node_modules/
 .env
 pizza-website-review/
+__pycache__/
