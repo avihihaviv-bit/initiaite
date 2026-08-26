@@ -143,6 +143,9 @@ export function openProductModal(id) {
       ${item.isPlaceholder ? `<span class="badge badge-placeholder">מנה לדוגמה — המחיר והפרטים המדויקים בוולט</span>` : ""}
     </div>
     <div class="modal-ctas">
+      <button class="btn btn-primary btn-lg" type="button" data-add-to-cart="${item.id}">
+        <svg class="icon"><use href="#i-plus"></use></svg> הוספה לסל
+      </button>
       <a class="btn btn-wolt btn-lg" href="${RESTAURANT.woltUrl}" target="_blank" rel="noopener" data-wolt-cta="product-modal">
         <svg class="icon"><use href="#i-bag"></use></svg> להזמנה בוולט
       </a>

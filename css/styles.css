@@ -3517,6 +3517,335 @@ html.a11y-contrast .hours-table.is-closed-now tr.is-today td {
   .back-to-top { transform: translateY(0) scale(1); }
 }
 
+/* ---------- 23b. Basket ---------- */
+/* A list builder, not a checkout: it collects dishes so they can be handed
+   over in one go. No payment details are ever entered or stored here. */
+.cart-button {
+  position: relative;
+  overflow: visible;
+}
+
+.cart-button.has-items {
+  color: var(--color-gold-dark);
+  border-color: var(--color-gold);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  inset-inline-end: -5px;
+  min-width: 19px;
+  height: 19px;
+  padding-inline: 4px;
+  border-radius: 999px;
+  background: var(--color-tomato);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 19px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Add-to-basket on a dish card, sitting over the card's own open-details button */
+.dish-card {
+  position: relative;
+}
+
+.dish-add {
+  position: absolute;
+  top: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.34rem 0.7rem;
+  border-radius: 999px;
+  background: var(--color-tomato);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.dish-add .icon {
+  width: 0.95em;
+  height: 0.95em;
+  stroke-width: 2.6;
+}
+
+.dish-add:hover,
+.dish-add:focus-visible {
+  transform: scale(1.06);
+  box-shadow: var(--shadow-md), 0 0 0 3px rgba(226, 73, 44, 0.35);
+}
+
+.dish-add:active {
+  transform: scale(0.96);
+}
+
+/* Drawer */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+  border-inline-end: 1px solid var(--color-cream-line);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-100%);
+  transition: transform var(--dur-med) var(--ease-premium);
+  z-index: var(--z-modal);
+}
+
+[dir="rtl"] .cart-drawer {
+  transform: translateX(-100%);
+}
+
+.cart-backdrop.is-open .cart-drawer {
+  transform: none;
+}
+
+.cart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+  border-bottom: 1px solid var(--color-cream-line);
+}
+
+.cart-head h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.cart-note {
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--color-charcoal-mute);
+  background: var(--color-cream-dim);
+  border-bottom: 1px solid var(--color-cream-line);
+}
+
+.cart-lines {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cart-line {
+  display: grid;
+  grid-template-columns: 56px 1fr auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-cream-dim);
+}
+
+.cart-line-media img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+.cart-line-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cart-line-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.cart-line-price {
+  font-size: 0.82rem;
+  color: var(--color-tomato-dark);
+  font-weight: 700;
+}
+
+.cart-qty {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-cream-line);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.cart-qty button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-charcoal);
+  display: grid;
+  place-items: center;
+}
+
+.cart-qty button:hover,
+.cart-qty button:focus-visible {
+  background: var(--color-cream-line);
+}
+
+.cart-qty-value {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.cart-line-remove {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--color-charcoal-mute);
+  display: grid;
+  place-items: center;
+}
+
+.cart-line-remove:hover,
+.cart-line-remove:focus-visible {
+  color: var(--color-tomato-dark);
+  background: var(--color-tomato-tint);
+}
+
+.cart-empty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  color: var(--color-charcoal-soft);
+}
+
+.cart-empty[hidden] {
+  display: none;
+}
+
+.cart-footer {
+  padding: var(--space-4) var(--space-5) calc(var(--space-5) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-cream-line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-cream-dim);
+}
+
+.cart-footer[hidden] {
+  display: none;
+}
+
+.cart-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 1rem;
+  margin-bottom: var(--space-1);
+}
+
+.cart-total-row strong {
+  font-size: 1.5rem;
+  font-family: var(--font-display);
+  color: var(--color-gold-dark);
+}
+
+.cart-total-note {
+  margin: 0 0 var(--space-1);
+  font-size: 0.74rem;
+  color: var(--color-charcoal-mute);
+}
+
+.cart-total-note[hidden] {
+  display: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-charcoal-mute);
+  font-size: 0.85rem;
+}
+
+.btn-ghost:hover,
+.btn-ghost:focus-visible {
+  color: var(--color-tomato-dark);
+}
+
+@media (max-width: 520px) {
+  /* Bottom sheet reads better than a side panel on a phone. */
+  .cart-drawer {
+    inset-inline: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-height: 88vh;
+    border-inline-end: none;
+    border-top: 1px solid var(--color-cream-line);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transform: translateY(100%);
+  }
+
+  [dir="rtl"] .cart-drawer {
+    transform: translateY(100%);
+  }
+
+  .cart-backdrop.is-open .cart-drawer {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer {
+    transition: none;
+  }
+}
+
+/* Corner controls and toasts both out-rank the drawer, so they are stood down
+   while it is open rather than allowed to cover its actions. */
+body.cart-open .a11y,
+body.cart-open .back-to-top,
+body.cart-open .brand-rail,
+body.cart-open .toast-region {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+html.a11y-contrast .cart-drawer,
+html.a11y-contrast .cart-note,
+html.a11y-contrast .cart-footer,
+html.a11y-contrast .cart-line,
+html.a11y-contrast .cart-qty {
+  background: #000;
+  border-color: #fff;
+}
+
 /* ---------- 24. Toasts ---------- */
 .toast-region {
   position: fixed;

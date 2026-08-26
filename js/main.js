@@ -3,6 +3,7 @@ import { initHeaderScroll, initMobileNav, initActiveNavHighlight, initPageLoader
 import { initHero3D } from "./hero3d.js";
 import { initFlagBackdrop } from "./flag.js";
 import { initA11y } from "./a11y.js";
+import { initCart } from "./cart.js";
 import { initTilt, markTiltTargets } from "./tilt.js";
 import {
   initScrollReveal,
@@ -51,6 +52,7 @@ function init() {
   qsa(".why-grid, .footer-grid").forEach(revealStaggerChildren);
 
   initA11y();
+  initCart();
   initFlagBackdrop();
   markTiltTargets();
   initTilt();

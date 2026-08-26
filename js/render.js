@@ -57,6 +57,11 @@ export function dishCardHTML(item) {
           <p class="dish-desc">${escapeHtml(item.desc)}</p>
         </div>
       </button>
+      <button class="dish-add" type="button" data-add-to-cart="${item.id}"
+              aria-label="הוספת ${escapeHtml(item.name)} לסל">
+        <svg class="icon"><use href="#i-plus"></use></svg>
+        <span>לסל</span>
+      </button>
     </article>
   `;
 }
