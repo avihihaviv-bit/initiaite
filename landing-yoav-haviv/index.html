@@ -209,12 +209,6 @@ html[data-theme="light"] .section-deep{background:var(--bg-alt)}
   0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,.55)}
   50%{box-shadow:0 0 0 6px rgba(46,204,113,0)}
 }
-.eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.12em;
-  color:var(--cyan);text-transform:uppercase;margin-bottom:18px;
-}
-.eyebrow::before{content:"";width:22px;height:1px;background:var(--cyan)}
 h2.section-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:16px;position:relative;display:inline-block}
 .section-sub{color:var(--text-muted);font-size:18px;max-width:640px;margin-bottom:56px}
 .btn{
@@ -275,7 +269,7 @@ header{
   background:none;border:none;color:var(--text);cursor:pointer;padding:0;font-family:'Rubik',sans-serif;
 }
 .logo .dot{width:9px;height:9px;border-radius:2px;background:var(--gold);transform:rotate(45deg)}
-.nav-links{display:flex;gap:28px;list-style:none;font-size:17px;font-weight:700}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none;font-size:17px;font-weight:700}
 .nav-links li{position:relative}
 .nav-links button{
   background:none;border:none;padding:2px 0;font:inherit;cursor:pointer;
@@ -301,6 +295,7 @@ header{
   display:none;width:40px;height:40px;border-radius:9px;border:1px solid var(--line-strong);
   background:transparent;color:var(--text);align-items:center;justify-content:center;cursor:pointer;flex:none;
 }
+.nav-cta-icon{width:1.7em;height:1.7em;flex:none}
 @media(max-width:880px){
   .nav-toggle{display:flex}
   .nav-cta{padding:9px 14px;font-size:13px}
@@ -774,7 +769,7 @@ footer{border-top:1px solid var(--line);padding:50px 0 130px;background:var(--bg
 
 /* floating whatsapp */
 .wa-float{
-  position:fixed;top:96px;left:20px;z-index:800;width:60px;height:60px;border-radius:50%;
+  position:fixed;top:calc(var(--header-h, 90px) + 14px);left:20px;z-index:800;width:60px;height:60px;border-radius:50%;
   background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -8px rgba(37,211,102,.6);
   text-decoration:none;
   animation:waBounce 3.2s ease-in-out infinite;
@@ -915,7 +910,7 @@ html.stop-motion #intro{display:none !important}
       </button>
       <a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A8%D7%A6%D7%94%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%91%D7%A0%D7%99%D7%99%D7%AA%20%D7%90%D7%AA%D7%A8" target="_blank" rel="noopener" class="btn btn-whatsapp nav-cta">
         בואו נדבר בוואטסאפ
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18a8 8 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-.6-.3-1.3-.7-1.9-1.3-.5-.5-1-1.1-1.4-1.7-.1-.2 0-.4.1-.5l.4-.5c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.6.6-.9 1.3-.9 2.1.1.9.5 1.8 1.1 2.6 1.2 1.7 2.6 3 4.5 3.7.6.2 1.1.4 1.7.5.6.1 1.2.1 1.7 0 .6-.1 1.4-.6 1.6-1.1.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.4-.3z"/></svg>
+        <svg class="nav-cta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18a8 8 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-.6-.3-1.3-.7-1.9-1.3-.5-.5-1-1.1-1.4-1.7-.1-.2 0-.4.1-.5l.4-.5c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.6.6-.9 1.3-.9 2.1.1.9.5 1.8 1.1 2.6 1.2 1.7 2.6 3 4.5 3.7.6.2 1.1.4 1.7.5.6.1 1.2.1 1.7 0 .6-.1 1.4-.6 1.6-1.1.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.4-.3z"/></svg>
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="פתח תפריט ניווט" aria-expanded="false" aria-controls="navLinks">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -931,7 +926,6 @@ html.stop-motion #intro{display:none !important}
   <div class="container hero-grid">
     <div>
       <div class="avail-badge"><span class="avail-dot"></span> זמין לפרויקטים חדשים</div>
-      <div class="eyebrow">בניית אתרים ודפי נחיתה</div>
       <h1><span class="accent">אתר מקצועי</span>,<br>מוכן תוך <span class="accent">3 ימים</span>.</h1>
       <p class="lead">אני יואב, בונה אתרים ודפי נחיתה לעסקים קטנים - מסעדות, מספרות, חניות וכל עסק שרוצה להיראות רציני ברשת ולקבל יותר פניות. עיצוב נקי, טעינה מהירה, וכפתור וואטסאפ שעובד בשבילכם 24/7.</p>
       <p class="motto">אתר טוב לא נראה כמו אתר - הוא נראה כמו לקוח שכבר בדרך אליכם.</p>
@@ -996,7 +990,6 @@ html.stop-motion #intro{display:none !important}
 <!-- SERVICES -->
 <section id="services">
   <div class="container">
-    <div class="eyebrow reveal">בשבילכם</div>
     <h2 class="section-title reveal">אתר לכל סוג עסק</h2>
     <p class="section-sub reveal">בונה בעיקר לעסקים שכונתיים ומקומיים - כל עסק צריך להיראות רציני באינטרנט, בלי קשר לגודל.</p>
     <div class="grid-3">
@@ -1025,7 +1018,6 @@ html.stop-motion #intro{display:none !important}
 <!-- PROCESS -->
 <section id="process" class="section-deep">
   <div class="container">
-    <div class="eyebrow reveal">איך זה עובד</div>
     <h2 class="section-title reveal">מהשיחה הראשונה עד לאתר באוויר - 3 ימים</h2>
     <p class="section-sub reveal">זמן הבנייה הממוצע לאתר. עבודות פשוטות יותר יכולות להיות מהירות יותר, ומורכבות - קצת יותר.</p>
     <div class="timeline">
@@ -1051,7 +1043,6 @@ html.stop-motion #intro{display:none !important}
 <!-- BEFORE/AFTER -->
 <section id="before-after">
   <div class="container">
-    <div class="eyebrow reveal">ההבדל</div>
     <h2 class="section-title reveal">עסק בלי אתר, מול עסק עם אתר</h2>
     <div class="ba">
       <div class="ba-card before reveal">
@@ -1079,7 +1070,6 @@ html.stop-motion #intro{display:none !important}
 <!-- PORTFOLIO -->
 <section id="portfolio" class="section-deep">
   <div class="container">
-    <div class="eyebrow reveal">עבודות לדוגמה</div>
     <h2 class="section-title reveal">כמה עבודות שיצאו לאוויר</h2>
     <p class="section-sub reveal">חלק מהאתרים שבניתי לאחרונה. לוחצים על "לצפייה באתר" כדי לראות אותם חיים.</p>
     <div class="grid-2">
@@ -1112,7 +1102,6 @@ html.stop-motion #intro{display:none !important}
 <!-- TESTIMONIALS -->
 <section id="testimonials">
   <div class="container">
-    <div class="eyebrow reveal">לקוחות</div>
     <h2 class="section-title reveal">מה אומרים על העבודה</h2>
     <div class="testi-grid">
       <div class="testi-card reveal led-hover tilt-3d">
@@ -1138,19 +1127,16 @@ html.stop-motion #intro{display:none !important}
 <!-- PRICING -->
 <section id="pricing">
   <div class="container">
-    <div class="eyebrow reveal">מחיר הוגן</div>
     <h2 class="section-title reveal">מחיר ברור. בלי הפתעות.</h2>
     <p class="section-sub reveal">עבודה גדולה ומורכבת יותר? מדברים על זה ישירות ומתאימים הצעת מחיר.</p>
     <div class="price-card reveal led-hover tilt-3d">
-      <span class="eyebrow" style="margin-bottom:6px">דף נחיתה בסיסי</span>
       <div class="price-num">החל מ-<span>1500 ₪</span></div>
       <ul class="price-list">
         <li>עיצוב מותאם אישית לעסק שלך</li>
         <li>מותאם לנייד ומהיר</li>
         <li>כפתור וואטסאפ / טופס יצירת קשר</li>
-        <li>העלאה לדומיין שלך</li>
+        <li>אתר מקצועי עם חיבור לדומיין שלך</li>
         <li>SEO בסיסי לגוגל</li>
-        <li>תמיכה שבועיים לאחר ההשקה</li>
       </ul>
       <button type="button" class="btn btn-gold nav-jump" data-target="#contact" style="margin-top:8px">בוא נתחיל</button>
     </div>
@@ -1160,7 +1146,6 @@ html.stop-motion #intro{display:none !important}
 <!-- GUIDE -->
 <section id="guide" class="section-deep">
   <div class="container">
-    <div class="eyebrow reveal">מדריך קצר</div>
     <h2 class="section-title reveal">5 דברים שחייבים בדף נחיתה לעסק שכונתי</h2>
     <div class="guide reveal">
       <ol>
@@ -1177,7 +1162,6 @@ html.stop-motion #intro{display:none !important}
 <!-- FAQ -->
 <section id="faq">
   <div class="container">
-    <div class="eyebrow reveal">שאלות נפוצות</div>
     <h2 class="section-title reveal">שאלות שחוזרות על עצמן</h2>
     <div class="reveal">
       <details open>
@@ -1209,7 +1193,6 @@ html.stop-motion #intro{display:none !important}
   <div class="container contact-wrap">
 
     <div class="contact-info reveal">
-      <div class="eyebrow">צור קשר</div>
       <h2 class="section-title">יש לך עסק. בוא נראה אותו <span class="accent">אונליין</span>.</h2>
       <p class="section-sub" style="margin-bottom:30px">בחר מה אתה צריך, מלא שתי שורות - וההודעה מוכנה לשליחה. אחזור אליך תוך יום עסקים.</p>
 
@@ -1222,7 +1205,7 @@ html.stop-motion #intro{display:none !important}
           <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.6a2 2 0 01-.4 2.1L8 9.6a16 16 0 006.4 6.4l1.2-1.2a2 2 0 012.1-.4c.8.3 1.7.5 2.6.6a2 2 0 011.7 2.1z"/></svg></div>
           <div><b>טלפון</b><span>054-529-8888</span></div>
         </div>
-        <p class="contact-note">המספר רשום על שם יואב חביב</p>
+        <p class="contact-note">המספר רשום על שמי, יואב חביב</p>
       </div>
     </div>
 
@@ -1267,7 +1250,6 @@ html.stop-motion #intro{display:none !important}
 <!-- ABOUT US -->
 <section id="about" class="section-deep about-section">
   <div class="container">
-    <div class="eyebrow reveal">קצת עליי</div>
     <h2 class="section-title reveal">מי בונה לכם את האתר</h2>
     <p class="section-sub reveal">נעים להכיר. רחפו מעל הכרטיס כדי להכיר יותר.</p>
 
@@ -1345,6 +1327,14 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   document.documentElement.style.setProperty('--dur','1');
 }
 
+// keep --header-h in sync with the real (sticky) header height, so
+// fixed elements anchored below it never overlap it on any viewport
+function setHeaderHeightVar(){
+  document.documentElement.style.setProperty('--header-h', document.querySelector('header').offsetHeight + 'px');
+}
+setHeaderHeightVar();
+window.addEventListener('resize', setHeaderHeightVar);
+
 // scroll progress bar
 const progressBar = document.getElementById('scrollProgress');
 window.addEventListener('scroll', ()=>{
@@ -1372,18 +1362,21 @@ document.querySelectorAll('.nav-jump').forEach(btn=>{
   });
 });
 
-// active nav button on scroll
+// active nav button on scroll - a section stays "active" from its own
+// heading until the next linked section's heading, even across any
+// unlinked content in between (e.g. before-after/testimonials/guide).
 const navLinks = document.querySelectorAll('.nav-links .nav-jump');
 const navSections = Array.from(navLinks).map(b=>document.querySelector(b.dataset.target)).filter(Boolean);
-const navObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      const id = '#' + entry.target.id;
-      navLinks.forEach(b=>b.classList.toggle('active', b.dataset.target === id));
-    }
-  });
-},{rootMargin:'-40% 0px -55% 0px'});
-navSections.forEach(s=>navObserver.observe(s));
+function updateActiveNav(){
+  const headerH = document.querySelector('header').offsetHeight;
+  const y = window.scrollY + headerH + 10;
+  let current = null;
+  navSections.forEach(sec => { if (sec.offsetTop <= y) current = sec; });
+  const id = current ? '#' + current.id : null;
+  navLinks.forEach(b => b.classList.toggle('active', b.dataset.target === id));
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+updateActiveNav();
 
 // about-us flip cards - tap support for touch devices
 document.querySelectorAll('.about-card-outer').forEach(card=>{
