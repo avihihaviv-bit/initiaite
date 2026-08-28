@@ -6,16 +6,28 @@
 <title>יואב חביב | בניית אתרים ודפי נחיתה</title>
 <meta name="description" content="בניית אתרים ודפי נחיתה למסעדות, מספרות, חניות ועסקים קטנים. אתר מוכן תוך 3 ימים, מחיר החל מ-1500 ₪, מונגש לפי צורך.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23000000%22/%3E%3Crect%20x%3D%2210%22%20y%3D%2210%22%20width%3D%2244%22%20height%3D%2244%22%20rx%3D%226%22%20fill%3D%22none%22%20stroke%3D%22%235EEAD4%22%20stroke-width%3D%222%22/%3E%3Crect%20x%3D%2218%22%20y%3D%2230%22%20width%3D%2228%22%20height%3D%2216%22%20rx%3D%223%22%20fill%3D%22none%22%20stroke%3D%22%23F2A93B%22%20stroke-width%3D%222.5%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2220%22%20r%3D%224%22%20fill%3D%22%23F2A93B%22/%3E%3C/svg%3E">
-<link rel="canonical" href="https://example.com/">
+<!-- ============================================================
+     כשיהיה דומיין אמיתי: החליפו את https://example.com בכתובת
+     האמיתית בארבעת השורות המסומנות למטה, וגם בקובץ sitemap.xml
+     ובעמודי work/. זה כל מה שצריך.
+     ============================================================ -->
+<link rel="canonical" href="https://example.com/">                                  <!-- ← דומיין -->
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="יואב חביב">
+<meta property="og:url" content="https://example.com/">                             <!-- ← דומיין -->
 <meta property="og:title" content="יואב חביב | בניית אתרים ודפי נחיתה">
 <meta property="og:description" content="אתרים נקיים, מהירים ויפים לעסקים קטנים - מסעדות, מספרות וחנויות. מחיר החל מ-1500 ₪.">
 <meta property="og:locale" content="he_IL">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://example.com/og-image.png">               <!-- ← דומיין -->
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="יואב חביב - אתר מקצועי, מוכן תוך 3 ימים">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="יואב חביב | בניית אתרים ודפי נחיתה">
 <meta name="twitter:description" content="אתרים נקיים, מהירים ויפים לעסקים קטנים - מסעדות, מספרות וחנויות.">
+<meta name="twitter:image" content="https://example.com/og-image.png">              <!-- ← דומיין -->
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +129,27 @@ html[data-theme="light"]{
   --text:#0A1628;
   --text-muted:#4B5A70;
   --shadow:0 20px 50px -25px rgba(10,22,40,.25);
+  /* The dark-theme gold/cyan were chosen against pure black. On the cream
+     background they measured ~1.2-1.8:1 (WCAG AA needs 4.5:1 for body text,
+     3:1 for large), i.e. the whole light theme was barely readable. These
+     are the same hues darkened until they pass. */
+  --gold:#8A5A0B;
+  --gold-dark:#6E4708;
+  --cyan:#0E6B5E;
 }
+/* ...but keep the BRIGHT brand gold anywhere it is a background sitting
+   behind dark text, where darkening it would break contrast the other way. */
+html[data-theme="light"] .btn-gold{background:linear-gradient(180deg,#F2A93B,#C9861E)}
+html[data-theme="light"] .a11y-btn,
+html[data-theme="light"] .skip-link{background:#F2A93B}
+html[data-theme="light"] .logo .dot,
+html[data-theme="light"] .marquee-track .sep{background:#C9861E}
+/* .btn-outline keeps its dark navy gradient in both themes, so its label
+   must stay light - inheriting the light theme's near-black --text made
+   the phone number measure 1.02:1 against it, i.e. invisible. */
+html[data-theme="light"] .btn-outline{color:#FAFAF8}
+/* the "before" red also needs darkening for the cream background */
+html[data-theme="light"] .ba-card.before h3{color:#9B2C2C}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:#000000;color-scheme:dark}
 html[data-theme="light"]{background:#F6F2E9;color-scheme:light}
@@ -263,7 +295,10 @@ h2.section-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:16
   transform:skewX(-20deg);animation:shineSweep 3.6s ease-in-out infinite;
 }
 .btn-whatsapp{
-  background:linear-gradient(180deg, #34F09B 0%, #22C55E 45%, #189249 100%);
+  /* darkest stop lifted from #189249 to #1CA85B: at the old value the
+     near-black label measured 4.26:1 against the bottom of the gradient,
+     just under the 4.5:1 WCAG AA threshold for normal-size text */
+  background:linear-gradient(180deg, #34F09B 0%, #22C55E 45%, #1CA85B 100%);
   color:#06210F;position:relative;overflow:hidden;
 }
 .btn-whatsapp:hover{transform:translateY(-2px);box-shadow:0 14px 30px -14px rgba(37,211,102,.6)}
@@ -501,11 +536,18 @@ html.intro-done #intro{display:none !important}
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   overflow:hidden;padding:26px 0;background:var(--bg-alt);
 }
+/* Two identical sets sit side by side and the track slides by exactly
+   one set width, so the loop restart is invisible. The gap lives INSIDE
+   each set (plus a matching trailing pad) rather than on the track: a
+   gap on the track would be counted between all children, so -50% would
+   land half a gap short of the second set and show a jump on every
+   restart. */
 .marquee-track{
-  display:flex;align-items:center;width:max-content;gap:20px;white-space:nowrap;
+  display:flex;align-items:center;width:max-content;gap:0;white-space:nowrap;
   font-family:'Rubik',sans-serif;font-weight:700;font-size:20px;color:var(--text);letter-spacing:.01em;
   animation:marqueeMove 26s linear infinite;
 }
+.mq-set{display:flex;align-items:center;gap:20px;padding-inline-end:20px}
 .marquee-track .sep{
   display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;
   background:var(--gold);box-shadow:0 0 8px 2px rgba(242,169,59,.7);
@@ -695,9 +737,18 @@ details p{padding-bottom:18px;color:var(--text-muted);font-size:15px}
   background:var(--bg-alt);color:var(--text);font-family:'Heebo',sans-serif;font-size:15px;
 }
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan)}
-.form-msg{display:none;padding:14px 16px;border-radius:10px;font-size:14.5px}
-.form-msg.ok{display:block;background:rgba(46,125,107,.18);border:1px solid var(--after);color:var(--cyan)}
-.form-msg.err{display:block;background:rgba(138,59,59,.18);border:1px solid var(--before);color:#E08C8C}
+.form-msg{padding:14px 16px;border-radius:10px;font-size:14.5px;background:rgba(46,125,107,.18);border:1px solid var(--after);color:var(--cyan)}
+.form-msg[hidden]{display:none}
+.form-msg b{display:block;margin-bottom:4px;font-size:15.5px}
+.form-msg p{color:var(--text-muted);margin-bottom:12px}
+.fallback-actions{display:flex;flex-wrap:wrap;gap:9px}
+.fb-btn{
+  padding:9px 15px;border-radius:8px;cursor:pointer;text-decoration:none;
+  border:1px solid var(--line-strong);background:var(--bg-alt);color:var(--text);
+  font-family:'Heebo',sans-serif;font-size:13.5px;font-weight:600;
+  transition:border-color .2s ease,color .2s ease;
+}
+.fb-btn:hover{border-color:var(--gold);color:var(--gold)}
 .contact-side .item{display:flex;gap:14px;margin-bottom:22px}
 .contact-side .item .ic{width:42px;height:42px;flex:none;border-radius:9px;background:var(--bg-alt);border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;color:var(--gold)}
 .contact-side .item b{display:block;font-size:15px}
@@ -787,9 +838,9 @@ details p{padding-bottom:18px;color:var(--text-muted);font-size:15px}
 /* footer */
 footer{border-top:1px solid var(--line);padding:50px 0 130px;background:var(--bg)}
 .foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:26px;margin-bottom:26px}
-.foot-links{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--text-muted)}
-.foot-links button{text-decoration:none;background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer}
-.foot-links button:hover{color:var(--gold)}
+.foot-links{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--text-muted);align-items:center}
+.foot-links button,.foot-links a{text-decoration:none;background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer}
+.foot-links button:hover,.foot-links a:hover{color:var(--gold)}
 .foot-bottom{font-size:13px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace}
 
 /* scroll progress + back to top */
@@ -1036,18 +1087,22 @@ try{
 <!-- MARQUEE -->
 <div class="marquee" aria-hidden="true">
   <div class="marquee-track">
-    <span>מסעדות</span><span class="sep"></span>
-    <span>מספרות</span><span class="sep"></span>
-    <span>חנויות שכונתיות</span><span class="sep"></span>
-    <span>קפה ומאפים</span><span class="sep"></span>
-    <span>סטודיו לציפורניים</span><span class="sep"></span>
-    <span>בעלי מקצוע</span><span class="sep"></span>
-    <span>מסעדות</span><span class="sep"></span>
-    <span>מספרות</span><span class="sep"></span>
-    <span>חנויות שכונתיות</span><span class="sep"></span>
-    <span>קפה ומאפים</span><span class="sep"></span>
-    <span>סטודיו לציפורניים</span><span class="sep"></span>
-    <span>בעלי מקצוע</span><span class="sep"></span>
+    <div class="mq-set">
+      <span>מסעדות</span><span class="sep"></span>
+      <span>מספרות</span><span class="sep"></span>
+      <span>חנויות שכונתיות</span><span class="sep"></span>
+      <span>קפה ומאפים</span><span class="sep"></span>
+      <span>סטודיו לציפורניים</span><span class="sep"></span>
+      <span>בעלי מקצוע</span><span class="sep"></span>
+    </div>
+    <div class="mq-set">
+      <span>מסעדות</span><span class="sep"></span>
+      <span>מספרות</span><span class="sep"></span>
+      <span>חנויות שכונתיות</span><span class="sep"></span>
+      <span>קפה ומאפים</span><span class="sep"></span>
+      <span>סטודיו לציפורניים</span><span class="sep"></span>
+      <span>בעלי מקצוע</span><span class="sep"></span>
+    </div>
   </div>
 </div>
 
@@ -1310,7 +1365,15 @@ try{
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18a8 8 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-.6-.3-1.3-.7-1.9-1.3-.5-.5-1-1.1-1.4-1.7-.1-.2 0-.4.1-.5l.4-.5c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.6.6-.9 1.3-.9 2.1.1.9.5 1.8 1.1 2.6 1.2 1.7 2.6 3 4.5 3.7.6.2 1.1.4 1.7.5.6.1 1.2.1 1.7 0 .6-.1 1.4-.6 1.6-1.1.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.4-.3z"/></svg>
           שלח בוואטסאפ
         </button>
-        <div class="form-msg ok" id="msgOk" role="status">פותח וואטסאפ עם ההודעה שמוכנה - רק לשלוח 🙌</div>
+        <div class="form-msg" id="msgOk" role="status" aria-live="polite" hidden>
+          <b>ההודעה מוכנה 🙌</b>
+          <p>פתחתי לך את וואטסאפ עם ההודעה - רק ללחוץ שליחה. לא נפתח? אפשר גם:</p>
+          <div class="fallback-actions">
+            <a class="fb-btn" id="waManual" target="_blank" rel="noopener" href="#">פתיחת וואטסאפ</a>
+            <button type="button" class="fb-btn" id="copyMsg">העתקת ההודעה</button>
+            <a class="fb-btn" href="tel:0545298888">חיוג 054-529-8888</a>
+          </div>
+        </div>
       </form>
     </div>
 
@@ -1363,6 +1426,8 @@ try{
         <button type="button" class="nav-jump" data-target="#faq">שאלות נפוצות</button>
         <button type="button" class="nav-jump" data-target="#about">קצת עליי</button>
         <button type="button" class="nav-jump" data-target="#contact">צור קשר</button>
+        <a href="work/">כל העבודות</a>
+        <a href="privacy.html">מדיניות פרטיות</a>
         <button type="button" class="nav-jump" data-target="#a11y-statement">הצהרת נגישות</button>
       </nav>
     </div>
@@ -1396,6 +1461,47 @@ try{
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   document.documentElement.style.setProperty('--dur','1');
 }
+
+/* ── site config ─────────────────────────────────────────────────
+   One place to change the contact details. If the phone number ever
+   changes, update PHONE_INTL/PHONE_LOCAL here and in the tel:/wa.me
+   hrefs in the markup.                                              */
+const PHONE_INTL  = '972545298888';
+const PHONE_LOCAL = '0545298888';
+const WA_BASE     = 'https://wa.me/' + PHONE_INTL + '?text=';
+
+/* ── analytics ───────────────────────────────────────────────────
+   Provider-agnostic. Today it only fills window.dataLayer, which is
+   harmless on its own. To start actually collecting: drop in a GA4 /
+   Plausible / Umami snippet and these same calls begin reporting -
+   no changes needed here.                                           */
+window.dataLayer = window.dataLayer || [];
+function track(event, params){
+  const payload = Object.assign({event:event}, params||{});
+  try{
+    window.dataLayer.push(payload);
+    if(typeof window.gtag === 'function') window.gtag('event', event, params||{});
+    if(typeof window.plausible === 'function') window.plausible(event, {props:params||{}});
+  }catch(e){}
+}
+// which section a click came from, so it is clear what actually converts
+function sectionOf(el){
+  const s = el.closest('section[id]');
+  if(s) return s.id;
+  if(el.closest('header')) return 'header';
+  if(el.closest('footer')) return 'footer';
+  if(el.classList.contains('wa-float')) return 'floating';
+  return 'other';
+}
+document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>{
+  a.addEventListener('click', ()=> track('whatsapp_click', {section:sectionOf(a)}));
+});
+document.querySelectorAll('a[href^="tel:"]').forEach(a=>{
+  a.addEventListener('click', ()=> track('call_click', {section:sectionOf(a)}));
+});
+document.querySelectorAll('.proj-case, .proj-link').forEach(a=>{
+  a.addEventListener('click', ()=> track('portfolio_click', {href:a.getAttribute('href')}));
+});
 
 // intro: skip button, Esc, and remember that it has been seen
 (function(){
@@ -1560,6 +1666,24 @@ a11yBtn.addEventListener('click', ()=>{
   const open = a11yPanel.classList.toggle('open');
   a11yBtn.setAttribute('aria-expanded', open ? 'true':'false');
 });
+
+// Escape closes whichever popup is open and hands focus back to the
+// control that opened it, so keyboard users are never stranded inside.
+document.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Escape') return;
+  if(a11yPanel.classList.contains('open')){
+    a11yPanel.classList.remove('open');
+    a11yBtn.setAttribute('aria-expanded','false');
+    a11yBtn.focus();
+  }
+  const nl = document.getElementById('navLinks');
+  const nt = document.getElementById('navToggle');
+  if(nl && nl.classList.contains('open')){
+    nl.classList.remove('open');
+    nt.setAttribute('aria-expanded','false');
+    nt.focus();
+  }
+});
 document.querySelectorAll('[data-a11y]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const cls = btn.dataset.a11y;
@@ -1611,14 +1735,24 @@ function updatePreview(){ preview.textContent = buildMessage(); }
 });
 updatePreview();
 
-// contact form -> opens WhatsApp with the filled details, pre-written
+// contact form -> opens WhatsApp with the filled details, pre-written.
+// The form is deliberately NOT reset afterwards: if WhatsApp is blocked
+// or not installed, wiping what the visitor typed would lose the lead
+// with nothing to fall back on. The fallback panel below always gives
+// them another route (manual link / copy / phone).
 const form = document.getElementById('contactForm');
 const msgOk = document.getElementById('msgOk');
+const waManual = document.getElementById('waManual');
+const copyMsgBtn = document.getElementById('copyMsg');
+let lastMessage = '';
+
 form.addEventListener('submit', (e)=>{
   e.preventDefault();
-  const text = buildMessage();
-  const url = 'https://wa.me/972545298888?text=' + encodeURIComponent(text);
-  msgOk.style.display='block';
+  lastMessage = buildMessage();
+  const url = WA_BASE + encodeURIComponent(lastMessage);
+  waManual.href = url;
+  msgOk.hidden = false;
+  track('lead_submit', {product:selectedProduct});
   // real <a> click (not window.open) - works reliably even inside restrictive viewers
   const link = document.createElement('a');
   link.href = url;
@@ -1627,10 +1761,32 @@ form.addEventListener('submit', (e)=>{
   document.body.appendChild(link);
   link.click();
   link.remove();
-  form.reset();
-  selectedProduct = 'אתר';
-  pills.forEach(x=>x.classList.toggle('selected', x.dataset.value === 'אתר'));
-  updatePreview();
+  msgOk.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+
+copyMsgBtn.addEventListener('click', async ()=>{
+  const text = lastMessage || buildMessage();
+  const done = ()=>{
+    const original = 'העתקת ההודעה';
+    copyMsgBtn.textContent = 'הועתק ✓';
+    setTimeout(()=>{ copyMsgBtn.textContent = original; }, 2000);
+    track('lead_copy_fallback');
+  };
+  try{
+    await navigator.clipboard.writeText(text);
+    done();
+  }catch(err){
+    // older browsers / non-secure contexts have no async clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly','');
+    ta.style.cssText = 'position:fixed;top:-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); done(); }
+    catch(e2){ copyMsgBtn.textContent = 'סמנו והעתיקו ידנית'; }
+    ta.remove();
+  }
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
