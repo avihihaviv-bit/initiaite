@@ -158,6 +158,32 @@ html[data-theme="light"] .bg-glow .led{opacity:.7}
   .bg-glow .led{width:3px;height:3px}
 }
 @media (prefers-reduced-motion: reduce){.bg-glow .led{animation:none}}
+
+/* cursor-following spotlight */
+.cursor-glow{
+  position:fixed;top:0;left:0;width:520px;height:520px;z-index:2;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle, rgba(242,169,59,.20) 0%, rgba(94,234,212,.10) 40%, transparent 72%);
+  transform:translate(-50%,-50%);
+  mix-blend-mode:screen;opacity:0;transition:opacity .4s ease;
+  will-change:transform;
+}
+.cursor-glow.active{opacity:1}
+@media (hover:none), (max-width:880px){.cursor-glow{display:none}}
+@media (prefers-reduced-motion: reduce){.cursor-glow{display:none}}
+html.stop-motion .cursor-glow{display:none}
+
+/* ambient drifting background orbs */
+.bg-orbs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg-orbs .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.35}
+.bg-orbs .orb-1{width:420px;height:420px;background:radial-gradient(circle, rgba(242,169,59,.5), transparent 70%);top:-10%;right:-8%;animation:orbDrift1 22s ease-in-out infinite}
+.bg-orbs .orb-2{width:380px;height:380px;background:radial-gradient(circle, rgba(94,234,212,.45), transparent 70%);bottom:5%;left:-10%;animation:orbDrift2 26s ease-in-out infinite}
+.bg-orbs .orb-3{width:300px;height:300px;background:radial-gradient(circle, rgba(242,169,59,.35), transparent 70%);top:40%;left:35%;animation:orbDrift3 30s ease-in-out infinite}
+@keyframes orbDrift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,40px) scale(1.15)}}
+@keyframes orbDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(50px,-50px) scale(1.1)}}
+@keyframes orbDrift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,60px) scale(.9)}}
+@media(max-width:640px){.bg-orbs .orb{opacity:.22}}
+@media (prefers-reduced-motion: reduce){.bg-orbs .orb{animation:none}}
 body{
   background:var(--bg);
   color:var(--text);
@@ -549,9 +575,11 @@ header{
 /* before/after */
 .ba{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 @media(max-width:760px){.ba{grid-template-columns:1fr}}
-.ba-card{border-radius:var(--radius);padding:32px 28px;border:1px solid var(--line)}
+.ba-card{border-radius:var(--radius);padding:32px 28px;border:1px solid var(--line);cursor:pointer;transition:border-color .3s ease, box-shadow .3s ease}
 .ba-card.before{background:linear-gradient(160deg, rgba(138,59,59,.14), transparent)}
 .ba-card.after{background:linear-gradient(160deg, rgba(46,125,107,.16), transparent)}
+.ba-card.before:hover,.ba-card.before.glow{border-color:var(--before);box-shadow:0 0 0 1px var(--before),0 0 50px -8px rgba(224,140,140,.65)}
+.ba-card.after:hover,.ba-card.after.glow{border-color:var(--after);box-shadow:0 0 0 1px var(--after),0 0 50px -8px rgba(94,234,212,.65)}
 .ba-card h3{font-size:26px;font-family:'Rubik',sans-serif;font-weight:900;letter-spacing:-.01em;margin-bottom:18px}
 .ba-card.before h3{color:#E08C8C;text-shadow:0 0 30px rgba(224,140,140,.35)}
 .ba-card.after h3{color:var(--cyan);text-shadow:0 0 30px rgba(94,234,212,.4)}
@@ -839,6 +867,11 @@ html.stop-motion #intro{display:none !important}
 </head>
 <body>
 <div class="bg-scan" aria-hidden="true"></div>
+<div class="bg-orbs" aria-hidden="true">
+  <span class="orb orb-1"></span>
+  <span class="orb orb-2"></span>
+  <span class="orb orb-3"></span>
+</div>
 <div class="bg-glow" aria-hidden="true">
   <span class="led" style="top:8%;left:12%;animation-delay:0s"></span>
   <span class="led cyan" style="top:15%;left:78%;animation-delay:.6s"></span>
@@ -1340,6 +1373,16 @@ function setHeaderHeightVar(){
 setHeaderHeightVar();
 window.addEventListener('resize', setHeaderHeightVar);
 
+// cursor-following spotlight (desktop / mouse only - CSS hides it on touch)
+const cursorGlow = document.createElement('div');
+cursorGlow.className = 'cursor-glow';
+document.body.appendChild(cursorGlow);
+window.addEventListener('mousemove', (e)=>{
+  cursorGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%,-50%)`;
+  cursorGlow.classList.add('active');
+}, {passive:true});
+document.addEventListener('mouseleave', ()=>{ cursorGlow.classList.remove('active'); });
+
 // scroll progress bar
 const progressBar = document.getElementById('scrollProgress');
 window.addEventListener('scroll', ()=>{
@@ -1386,6 +1429,11 @@ updateActiveNav();
 // about-us flip cards - tap support for touch devices
 document.querySelectorAll('.about-card-outer').forEach(card=>{
   card.addEventListener('click', ()=>{ card.classList.toggle('flipped'); });
+});
+
+// before/after cards - colored glow on click (red for "without", green for "with")
+document.querySelectorAll('.ba-card').forEach(card=>{
+  card.addEventListener('click', ()=>{ card.classList.toggle('glow'); });
 });
 
 // 3D tilt effect on cards
