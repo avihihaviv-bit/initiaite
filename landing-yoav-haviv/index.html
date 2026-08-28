@@ -535,25 +535,39 @@ html.intro-done #intro{display:none !important}
 .marquee{
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   overflow:hidden;padding:26px 0;background:var(--bg-alt);
+  /* The overflow container - not just the track - must be LTR. Under the
+     page's RTL the over-wide track is anchored to the RIGHT edge and spills
+     leftwards, so animating it further left drags its right edge inward and
+     empties the strip. Anchoring the container left makes the track spill
+     rightwards, so content keeps feeding in from the right as it scrolls. */
+  direction:ltr;
 }
-/* Two identical sets sit side by side and the track slides by exactly
-   one set width, so the loop restart is invisible. The gap lives INSIDE
-   each set (plus a matching trailing pad) rather than on the track: a
-   gap on the track would be counted between all children, so -50% would
-   land half a gap short of the second set and show a jump on every
-   restart. */
+/* Seamless marquee.
+   Two things are needed for the loop to be invisible:
+   1. direction:ltr on the track. Under the page's RTL the track was
+      anchored to the RIGHT edge and overflowed leftwards, so sliding it
+      further left just pulled content off screen with nothing behind it
+      - the strip emptied out and then snapped back full every cycle.
+      Anchoring left means content always follows in from the right.
+   2. Enough copies to cover the viewport plus one full copy, and a shift
+      distance of exactly one copy width (set from JS as --mq-shift).
+      Copies are appended by JS to match the actual viewport.
+   The gap lives inside each set (plus a matching trailing pad) rather
+   than on the track, so one copy width is an exact multiple of the
+   spacing and consecutive copies join invisibly. */
 .marquee-track{
   display:flex;align-items:center;width:max-content;gap:0;white-space:nowrap;
+  direction:ltr;
   font-family:'Rubik',sans-serif;font-weight:700;font-size:20px;color:var(--text);letter-spacing:.01em;
   animation:marqueeMove 26s linear infinite;
 }
-.mq-set{display:flex;align-items:center;gap:20px;padding-inline-end:20px}
+.mq-set{display:flex;align-items:center;gap:20px;padding-inline-end:20px;direction:rtl;flex:none}
 .marquee-track .sep{
   display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;
   background:var(--gold);box-shadow:0 0 8px 2px rgba(242,169,59,.7);
   animation:ledPulse 1.6s ease-in-out infinite;
 }
-@keyframes marqueeMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes marqueeMove{from{transform:translateX(0)}to{transform:translateX(calc(-1 * var(--mq-shift,50%)))}}
 @media (prefers-reduced-motion: reduce){.marquee-track{animation:none}.marquee-track .sep{animation:none}}
 
 /* reveal */
@@ -1502,6 +1516,47 @@ document.querySelectorAll('a[href^="tel:"]').forEach(a=>{
 document.querySelectorAll('.proj-case, .proj-link').forEach(a=>{
   a.addEventListener('click', ()=> track('portfolio_click', {href:a.getAttribute('href')}));
 });
+
+// Marquee: clone the strip until it covers the viewport plus one full
+// copy, and shift by exactly one copy width. Without enough copies the
+// strip runs out of content mid-scroll and snaps back; the shift being
+// exactly one copy is what makes the restart invisible.
+(function(){
+  const track = document.querySelector('.marquee-track');
+  if(!track) return;
+  const proto = track.querySelector('.mq-set');
+  if(!proto) return;
+  function build(){
+    track.querySelectorAll('.mq-set').forEach((s,i)=>{ if(i>0) s.remove(); });
+    proto.style.paddingInlineEnd = '';
+    let setW = proto.getBoundingClientRect().width;
+    if(!setW) return;
+    // Snap one copy to a whole number of pixels. The natural width is
+    // fractional, which would make the loop translate by a sub-pixel
+    // amount - every glyph then re-rasterises with different
+    // antialiasing at the restart, which reads as a flicker even though
+    // the layout lines up. Absorbing the fraction into the trailing pad
+    // makes the shift an exact integer.
+    const basePad = parseFloat(getComputedStyle(proto).paddingInlineEnd) || 0;
+    const target = Math.round(setW);
+    proto.style.paddingInlineEnd = (basePad + (target - setW)) + 'px';
+    setW = target;
+
+    const copies = Math.ceil(window.innerWidth / setW) + 2;
+    const frag = document.createDocumentFragment();
+    for(let i=1;i<copies;i++){
+      const c = proto.cloneNode(true);
+      c.setAttribute('aria-hidden','true');
+      frag.appendChild(c);
+    }
+    track.appendChild(frag);
+    track.style.setProperty('--mq-shift', setW + 'px');
+  }
+  build();
+  let t;
+  window.addEventListener('resize', ()=>{ clearTimeout(t); t = setTimeout(build, 200); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+})();
 
 // intro: skip button, Esc, and remember that it has been seen
 (function(){
