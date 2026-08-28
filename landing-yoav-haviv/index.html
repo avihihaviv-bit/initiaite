@@ -164,7 +164,11 @@ html[data-theme="light"]{background:#F6F2E9;color-scheme:light}
   100%{transform:translateX(160vw)}
 }
 @media (prefers-reduced-motion: reduce){.bg-scan::before{animation:none;display:none}}
-.bg-glow{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+/* The LED point-lights were authored while the whole ambient layer was
+   accidentally hidden behind an opaque body background. Now that it
+   actually shows, they are dialled back so they stay atmospheric and
+   never punch through the text sitting over them. */
+.bg-glow{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;opacity:.26}
 .bg-glow .led{
   position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold);
   box-shadow:0 0 12px 3px rgba(242,169,59,.85), 0 0 28px 8px rgba(242,169,59,.4);
@@ -188,6 +192,9 @@ html[data-theme="light"]{background:#F6F2E9;color-scheme:light}
 html[data-theme="light"] .bg-glow .led{opacity:.7}
 @media(max-width:640px){
   .bg-glow .led{width:3px;height:3px}
+  /* the oversized ones would otherwise land as bright blobs on top of
+     the single text column a phone shows */
+  .bg-glow .led.big{width:5px;height:5px}
 }
 @media (prefers-reduced-motion: reduce){.bg-glow .led{animation:none}}
 
@@ -211,13 +218,44 @@ html.stop-motion .cursor-glow{display:none}
 .bg-orbs .orb-1{width:420px;height:420px;background:radial-gradient(circle, rgba(242,169,59,.5), transparent 70%);top:-10%;right:-8%;animation:orbDrift1 22s ease-in-out infinite}
 .bg-orbs .orb-2{width:380px;height:380px;background:radial-gradient(circle, rgba(94,234,212,.45), transparent 70%);bottom:5%;left:-10%;animation:orbDrift2 26s ease-in-out infinite}
 .bg-orbs .orb-3{width:300px;height:300px;background:radial-gradient(circle, rgba(242,169,59,.35), transparent 70%);top:40%;left:35%;animation:orbDrift3 30s ease-in-out infinite}
+/* A wide, very soft aurora band that drifts slowly across the whole
+   page. It is what gives the background a sense of depth rather than a
+   flat colour, and it is most noticeable on a phone. */
+.bg-orbs .aurora{
+  position:absolute;left:-25%;right:-25%;height:46vh;top:22%;
+  background:linear-gradient(100deg,
+    transparent 0%,
+    rgba(94,234,212,.16) 28%,
+    rgba(242,169,59,.14) 52%,
+    transparent 80%);
+  filter:blur(64px);opacity:.7;
+  animation:auroraDrift 34s ease-in-out infinite;
+}
+@keyframes auroraDrift{
+  0%,100%{transform:translate3d(-6%,0,0) rotate(-3deg)}
+  50%    {transform:translate3d(6%,-6%,0) rotate(3deg)}
+}
+@media(max-width:640px){.bg-orbs .aurora{height:38vh;opacity:.85}}
+@media (prefers-reduced-motion: reduce){.bg-orbs .aurora{animation:none}}
 @keyframes orbDrift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,40px) scale(1.15)}}
 @keyframes orbDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(50px,-50px) scale(1.1)}}
 @keyframes orbDrift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,60px) scale(.9)}}
-@media(max-width:640px){.bg-orbs .orb{opacity:.22}}
+/* Phones get a stronger ambient than desktop, not a weaker one: the
+   screen is small and mostly filled by one column of text, so without
+   this the page reads as a flat black slab. */
+@media(max-width:640px){
+  .bg-orbs .orb{opacity:.55;filter:blur(50px)}
+  .bg-orbs .orb-1{width:min(78vw,380px);height:min(78vw,380px);top:-6%;right:-16%}
+  .bg-orbs .orb-2{width:min(72vw,350px);height:min(72vw,350px);bottom:8%;left:-20%}
+  .bg-orbs .orb-3{width:min(60vw,290px);height:min(60vw,290px);top:42%;left:18%;opacity:.4}
+}
 @media (prefers-reduced-motion: reduce){.bg-orbs .orb{animation:none}}
 body{
-  background:var(--bg);
+  /* Transparent on purpose - <html> carries the base colour for both
+     themes. body paints its own background AFTER negative z-index
+     children, so an opaque body background covered the whole ambient
+     layer (orbs, aurora, LED field) and the page rendered flat black. */
+  background:transparent;
   color:var(--text);
   font-family:'Heebo',sans-serif;
   line-height:1.65;
@@ -241,7 +279,7 @@ body::before{
 }
 html[data-theme="light"] body::before{opacity:.16}
 @media(max-width:640px){
-  body::before{background-size: 60px 60px, 60px 60px, 60px 60px, 60px 60px; opacity:.22}
+  body::before{background-size: 62px 62px, 62px 62px, 62px 62px, 62px 62px; opacity:.24}
 }
 @keyframes ledFieldTwinkle{0%,100%{opacity:.32}50%{opacity:.42}}
 @keyframes ledFieldDrift{
@@ -259,9 +297,15 @@ img,svg{display:block;max-width:100%}
      buttons, so no text can ever scroll behind them */
   .container{padding-left:90px}
 }
-section{position:relative;padding:110px 0;background:var(--bg)}
-.section-deep{background:#000000}
-html[data-theme="light"] .section-deep{background:var(--bg-alt)}
+/* Sections are transparent so the fixed ambient layers (orbs, LED field,
+   scan sweep) actually show through. They used to carry an opaque
+   background, which painted straight over all of it - the page rendered
+   as flat #000 everywhere and none of the atmosphere was ever visible.
+   The alternating "deep" sections now dim the ambient instead of hiding
+   it, which keeps the rhythm while letting the light come through. */
+section{position:relative;padding:110px 0;background:transparent}
+.section-deep{background:rgba(0,0,0,.55)}
+html[data-theme="light"] .section-deep{background:rgba(239,233,218,.6)}
 .avail-badge{
   display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;
   border:1px solid var(--line-strong);background:var(--surface);font-size:13px;color:var(--text-muted);
@@ -850,7 +894,8 @@ details p{padding-bottom:18px;color:var(--text-muted);font-size:15px}
 }
 
 /* footer */
-footer{border-top:1px solid var(--line);padding:50px 0 130px;background:var(--bg)}
+footer{border-top:1px solid var(--line);padding:50px 0 130px;background:rgba(0,0,0,.55)}
+html[data-theme="light"] footer{background:rgba(239,233,218,.6)}
 .foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:26px;margin-bottom:26px}
 .foot-links{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--text-muted);align-items:center}
 .foot-links button,.foot-links a{text-decoration:none;background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer}
@@ -961,6 +1006,7 @@ try{
   <span class="orb orb-1"></span>
   <span class="orb orb-2"></span>
   <span class="orb orb-3"></span>
+  <span class="aurora"></span>
 </div>
 <div class="bg-glow" aria-hidden="true">
   <span class="led" style="top:8%;left:12%;animation-delay:0s"></span>
