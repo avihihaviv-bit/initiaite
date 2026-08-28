@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>יואב חביב | בניית אתרים ודפי נחיתה</title>
-<meta name="description" content="בניית אתרים ודפי נחיתה למסעדות, מספרות, חניות ועסקים קטנים. אתר מוכן תוך 3 ימים, מחיר החל מ-500 ₪, מונגש לפי צורך.">
+<meta name="description" content="בניית אתרים ודפי נחיתה למסעדות, מספרות, חניות ועסקים קטנים. אתר מוכן תוך 3 ימים, מחיר החל מ-1500 ₪, מונגש לפי צורך.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23000000%22/%3E%3Crect%20x%3D%2210%22%20y%3D%2210%22%20width%3D%2244%22%20height%3D%2244%22%20rx%3D%226%22%20fill%3D%22none%22%20stroke%3D%22%235EEAD4%22%20stroke-width%3D%222%22/%3E%3Crect%20x%3D%2218%22%20y%3D%2230%22%20width%3D%2228%22%20height%3D%2216%22%20rx%3D%223%22%20fill%3D%22none%22%20stroke%3D%22%23F2A93B%22%20stroke-width%3D%222.5%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2220%22%20r%3D%224%22%20fill%3D%22%23F2A93B%22/%3E%3C/svg%3E">
 <link rel="canonical" href="https://example.com/">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="יואב חביב | בניית אתרים ודפי נחיתה">
-<meta property="og:description" content="אתרים נקיים, מהירים ויפים לעסקים קטנים - מסעדות, מספרות וחנויות. מחיר החל מ-500 ₪.">
+<meta property="og:description" content="אתרים נקיים, מהירים ויפים לעסקים קטנים - מסעדות, מספרות וחנויות. מחיר החל מ-1500 ₪.">
 <meta property="og:locale" content="he_IL">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="יואב חביב | בניית אתרים ודפי נחיתה">
@@ -40,14 +40,14 @@
   "makesOffer": {
     "@type": "Offer",
     "priceCurrency": "ILS",
-    "price": "500",
+    "price": "1500",
     "priceSpecification": {
       "@type": "PriceSpecification",
-      "price": "500",
+      "price": "1500",
       "priceCurrency": "ILS",
-      "minPrice": "500"
+      "minPrice": "1500"
     },
-    "description": "בניית דף נחיתה / אתר, מחיר החל מ-500 ₪"
+    "description": "בניית דף נחיתה / אתר, מחיר החל מ-1500 ₪"
   }
 }
 </script>
@@ -66,7 +66,7 @@
     {
       "@type": "Question",
       "name": "כמה עולה בניית אתר?",
-      "acceptedAnswer": {"@type": "Answer", "text": "מחיר החל מ-500 ₪ לדף נחיתה בסיסי. המחיר הסופי נקבע לפי היקף העבודה - כולל עיצוב מותאם אישית, התאמה מלאה לנייד, כפתורי יצירת קשר והעלאה לאוויר."}
+      "acceptedAnswer": {"@type": "Answer", "text": "מחיר החל מ-1500 ₪ לדף נחיתה בסיסי. המחיר הסופי נקבע לפי היקף העבודה - כולל עיצוב מותאם אישית, התאמה מלאה לנייד, כפתורי יצירת קשר והעלאה לאוויר."}
     },
     {
       "@type": "Question",
@@ -216,13 +216,6 @@ html[data-theme="light"] .section-deep{background:var(--bg-alt)}
 }
 .eyebrow::before{content:"";width:22px;height:1px;background:var(--cyan)}
 h2.section-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:16px;position:relative;display:inline-block}
-h2.section-title::after{
-  content:"";position:absolute;bottom:-10px;right:0;height:3px;width:0;border-radius:3px;
-  background:linear-gradient(90deg,var(--gold),var(--cyan));
-  transition:width 1.1s cubic-bezier(.16,.8,.2,1) .15s;
-}
-h2.section-title.in::after{width:72px}
-h2.section-title.no-underline::after{display:none}
 .section-sub{color:var(--text-muted);font-size:18px;max-width:640px;margin-bottom:56px}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:10px;
@@ -320,8 +313,8 @@ header{
   .nav-links.open{display:flex}
   .nav-links li{width:100%}
   .nav-links button{
-    display:block;width:100%;text-align:right;padding:14px 2px;
-    border-bottom:1px solid var(--line);
+    display:block;width:100%;text-align:center;padding:16px 2px;
+    border-bottom:1px solid var(--line);font-size:19px;
   }
   .nav-links li:last-child button{border-bottom:none}
 }
@@ -781,19 +774,28 @@ footer{border-top:1px solid var(--line);padding:50px 0 130px;background:var(--bg
 
 /* floating whatsapp */
 .wa-float{
-  position:fixed;bottom:26px;left:26px;z-index:800;width:60px;height:60px;border-radius:50%;
+  position:fixed;top:84px;right:20px;z-index:800;width:60px;height:60px;border-radius:50%;
   background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -8px rgba(37,211,102,.6);
   text-decoration:none;
+  animation:waBounce 3.2s ease-in-out infinite;
 }
 .wa-float::after{
   content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #25D366;
   animation:pulseRing 2.4s ease-out infinite;
 }
 @keyframes pulseRing{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.7);opacity:0}}
+@keyframes waBounce{
+  0%,75%,100%{transform:translateY(0)}
+  80%{transform:translateY(-10px)}
+  86%{transform:translateY(0)}
+  90%{transform:translateY(-5px)}
+  94%{transform:translateY(0)}
+}
+@media (prefers-reduced-motion: reduce){.wa-float{animation:none}}
 
 /* accessibility widget */
 .a11y-btn{
-  position:fixed;bottom:26px;left:96px;z-index:800;width:52px;height:52px;border-radius:50%;
+  position:fixed;bottom:26px;left:26px;z-index:800;width:52px;height:52px;border-radius:50%;
   background:var(--gold);color:#1a1206;border:none;display:flex;align-items:center;justify-content:center;
   cursor:pointer;box-shadow:0 12px 26px -10px rgba(242,169,59,.6);
 }
@@ -898,7 +900,7 @@ html.stop-motion #intro{display:none !important}
       <button class="icon-btn" id="themeToggle" aria-label="החלף מצב תצוגה בהיר/כהה" title="בהיר/כהה">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
       </button>
-      <button type="button" class="btn btn-whatsapp nav-cta" data-wa="היי, ארצה לשמוע על בניית אתר">בואו נדבר בוואטסאפ</button>
+      <a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A8%D7%A6%D7%94%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%91%D7%A0%D7%99%D7%99%D7%AA%20%D7%90%D7%AA%D7%A8" target="_blank" rel="noopener" class="btn btn-whatsapp nav-cta">בואו נדבר בוואטסאפ</a>
       <button class="nav-toggle" id="navToggle" aria-label="פתח תפריט ניווט" aria-expanded="false" aria-controls="navLinks">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
@@ -918,15 +920,15 @@ html.stop-motion #intro{display:none !important}
       <p class="lead">אני יואב, בונה אתרים ודפי נחיתה לעסקים קטנים - מסעדות, מספרות, חניות וכל עסק שרוצה להיראות רציני ברשת ולקבל יותר פניות. עיצוב נקי, טעינה מהירה, וכפתור וואטסאפ שעובד בשבילכם 24/7.</p>
       <p class="motto">אתר טוב לא נראה כמו אתר - הוא נראה כמו לקוח שכבר בדרך אליכם.</p>
       <div class="hero-cta">
-        <button type="button" class="btn btn-whatsapp" data-wa="היי, אשמח לשמוע פרטים על האתר">
+        <a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%94%D7%90%D7%AA%D7%A8" target="_blank" rel="noopener" class="btn btn-whatsapp">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18a8 8 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-.6-.3-1.3-.7-1.9-1.3-.5-.5-1-1.1-1.4-1.7-.1-.2 0-.4.1-.5l.4-.5c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.6.6-.9 1.3-.9 2.1.1.9.5 1.8 1.1 2.6 1.2 1.7 2.6 3 4.5 3.7.6.2 1.1.4 1.7.5.6.1 1.2.1 1.7 0 .6-.1 1.4-.6 1.6-1.1.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.4-.3z"/></svg>
           וואטסאפ עכשיו
-        </button>
-        <button type="button" class="btn btn-outline" data-call>התקשרו: 054-529-8888</button>
+        </a>
+        <a href="tel:0545298888" class="btn btn-outline">התקשרו: 054-529-8888</a>
       </div>
       <div class="hero-facts">
         <div class="hero-fact"><b class="counter" data-target="3">0</b><span>ימי עבודה בממוצע</span></div>
-        <div class="hero-fact"><b class="mono">500 ₪</b><span>מחיר החל מ-</span></div>
+        <div class="hero-fact"><b class="mono">1500 ₪</b><span>מחיר החל מ-</span></div>
         <div class="hero-fact"><b class="mono">100%</b><span>מותאם לנייד</span></div>
       </div>
     </div>
@@ -986,19 +988,19 @@ html.stop-motion #intro{display:none !important}
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3v18M4 3l16 4-16 4"/></svg></div>
         <h3>מסעדות ובתי אוכל</h3>
         <p>תפריט מעוצב, שעות פתיחה, מיקום וכפתור הזמנה/וואטסאפ ישיר - כל מה שלקוח רעב צריך לראות תוך שנייה.</p>
-        <button type="button" class="card-cta" data-wa="היי, אשמח לשמוע על דף נחיתה למסעדה שלי">בוא נדבר על זה ←</button>
+        <a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%93%D7%A3%20%D7%A0%D7%97%D7%99%D7%AA%D7%94%20%D7%9C%D7%9E%D7%A1%D7%A2%D7%93%D7%94%20%D7%A9%D7%9C%D7%99" target="_blank" rel="noopener" class="card-cta">בוא נדבר על זה ←</a>
       </div>
       <div class="card reveal led-hover tilt-3d">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v10a2 2 0 002 2h4M6 3H4M6 3h2M20 6l-6 6M14 6l6 6"/></svg></div>
         <h3>מספרות וטיפוח</h3>
         <p>גלריית עבודות, קביעת תור בקליק אחד, וקישור ישיר לוואטסאפ - הופך "אולי אשלח הודעה" ל"תור נקבע".</p>
-        <button type="button" class="card-cta" data-wa="היי, אשמח לשמוע על דף נחיתה למספרה שלי">בוא נדבר על זה ←</button>
+        <a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%93%D7%A3%20%D7%A0%D7%97%D7%99%D7%AA%D7%94%20%D7%9C%D7%9E%D7%A1%D7%A4%D7%A8%D7%94%20%D7%A9%D7%9C%D7%99" target="_blank" rel="noopener" class="card-cta">בוא נדבר על זה ←</a>
       </div>
       <div class="card reveal led-hover tilt-3d">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l2-6h14l2 6M5 11h14v7H5zM5 16h14M7 11V8M17 11V8"/></svg></div>
         <h3>חניות ועסקים מקומיים</h3>
         <p>מיקום ברור על מפה, מחירון פשוט לקריאה ודרכי יצירת קשר מיידיות - בלי בלגן, בלי טקסטים ארוכים.</p>
-        <button type="button" class="card-cta" data-wa="היי, אשמח לשמוע על דף נחיתה לעסק שלי">בוא נדבר על זה ←</button>
+        <a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%93%D7%A3%20%D7%A0%D7%97%D7%99%D7%AA%D7%94%20%D7%9C%D7%A2%D7%A1%D7%A7%20%D7%A9%D7%9C%D7%99" target="_blank" rel="noopener" class="card-cta">בוא נדבר על זה ←</a>
       </div>
     </div>
   </div>
@@ -1069,7 +1071,7 @@ html.stop-motion #intro{display:none !important}
         <div class="proj-shot"><span class="live-badge"><span class="live-dot"></span> LIVE</span><span class="tag mono">kuti-bardugo-yoav.lovable.app</span></div>
         <div class="proj-body">
           <span class="kind mono">עסק מקומי</span>
-          <h3>קוטי ברדוגו</h3>
+          <h3>כותי ברדוגו</h3>
           <p>דף נחיתה נקי עם מיקוד בהמרה - כפתורי יצירת קשר בולטים ומבנה תוכן ברור.</p>
           <a class="proj-link" href="https://kuti-bardugo-yoav.lovable.app" target="_blank" rel="noopener">לצפייה באתר
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
@@ -1099,10 +1101,10 @@ html.stop-motion #intro{display:none !important}
     <div class="testi-grid">
       <div class="testi-card reveal led-hover tilt-3d">
         <div class="stars" aria-label="דירוג 5 מתוך 5 כוכבים">★★★★★</div>
-        <p class="q">"יואב הבין בדיוק מה אני צריכה. הדף עלה תוך שלושה ימים ומאז הטלפון לא מפסיק לצלצל."</p>
+        <p class="q">"יואב הבין בדיוק מה אני צריך. הדף עלה תוך שלושה ימים ומאז הטלפון לא מפסיק לצלצל."</p>
         <div class="who">
-          <div class="avatar mono">קב</div>
-          <div><div class="name">קוטי ברדוגו</div><div class="biz">מספרה ביתית · תל אביב</div></div>
+          <div class="avatar mono">כב</div>
+          <div><div class="name">כותי ברדוגו</div><div class="biz">מספרה ביתית · תל אביב</div></div>
         </div>
       </div>
       <div class="testi-card reveal led-hover tilt-3d">
@@ -1125,7 +1127,7 @@ html.stop-motion #intro{display:none !important}
     <p class="section-sub reveal">עבודה גדולה ומורכבת יותר? מדברים על זה ישירות ומתאימים הצעת מחיר.</p>
     <div class="price-card reveal led-hover tilt-3d">
       <span class="eyebrow" style="margin-bottom:6px">דף נחיתה בסיסי</span>
-      <div class="price-num">החל מ-<span>500 ₪</span></div>
+      <div class="price-num">החל מ-<span>1500 ₪</span></div>
       <ul class="price-list">
         <li>עיצוב מותאם אישית לעסק שלך</li>
         <li>מותאם לנייד ומהיר</li>
@@ -1168,7 +1170,7 @@ html.stop-motion #intro{display:none !important}
       </details>
       <details>
         <summary>כמה עולה בניית אתר?</summary>
-        <p>מחיר החל מ-500 ₪ לדף נחיתה בסיסי. המחיר הסופי נקבע לפי היקף העבודה - כולל עיצוב מותאם אישית, התאמה מלאה לנייד, כפתורי יצירת קשר (וואטסאפ/טלפון) והעלאה לאוויר.</p>
+        <p>מחיר החל מ-1500 ₪ לדף נחיתה בסיסי. המחיר הסופי נקבע לפי היקף העבודה - כולל עיצוב מותאם אישית, התאמה מלאה לנייד, כפתורי יצירת קשר (וואטסאפ/טלפון) והעלאה לאוויר.</p>
       </details>
       <details>
         <summary>אני צריך דומיין משלי?</summary>
@@ -1304,9 +1306,9 @@ html.stop-motion #intro{display:none !important}
 </footer>
 
 <!-- floating whatsapp -->
-<button type="button" class="wa-float" data-wa="היי, אשמח לשמוע על האתר" aria-label="שליחת הודעה בוואטסאפ ליואב">
+<a href="https://wa.me/972545298888?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%94%D7%90%D7%AA%D7%A8" target="_blank" rel="noopener" class="wa-float" aria-label="שליחת הודעה בוואטסאפ ליואב">
   <svg width="28" height="28" viewBox="0 0 24 24" fill="#06210F"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18a8 8 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-.6-.3-1.3-.7-1.9-1.3-.5-.5-1-1.1-1.4-1.7-.1-.2 0-.4.1-.5l.4-.5c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.6.6-.9 1.3-.9 2.1.1.9.5 1.8 1.1 2.6 1.2 1.7 2.6 3 4.5 3.7.6.2 1.1.4 1.7.5.6.1 1.2.1 1.7 0 .6-.1 1.4-.6 1.6-1.1.2-.6.2-1.1.1-1.2-.1-.1-.2-.2-.4-.3z"/></svg>
-</button>
+</a>
 
 <!-- accessibility widget -->
 <button class="a11y-btn" id="a11yBtn" aria-haspopup="true" aria-expanded="false" aria-controls="a11yPanel" aria-label="פתיחת תפריט נגישות">
@@ -1503,22 +1505,18 @@ form.addEventListener('submit', (e)=>{
   const text = buildMessage();
   const url = 'https://wa.me/972545298888?text=' + encodeURIComponent(text);
   msgOk.style.display='block';
-  window.open(url, '_blank', 'noopener');
+  // real <a> click (not window.open) - works reliably even inside restrictive viewers
+  const link = document.createElement('a');
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
   form.reset();
   selectedProduct = 'אתר';
   pills.forEach(x=>x.classList.toggle('selected', x.dataset.value === 'אתר'));
   updatePreview();
-});
-
-// all WhatsApp / call buttons - open directly, no <a href>
-document.querySelectorAll('[data-wa]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const url = 'https://wa.me/972545298888?text=' + encodeURIComponent(btn.dataset.wa);
-    window.open(url, '_blank', 'noopener');
-  });
-});
-document.querySelectorAll('[data-call]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{ window.location.href = 'tel:0545298888'; });
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
