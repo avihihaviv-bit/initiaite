@@ -124,6 +124,8 @@ The storyboard approval is the cheapest gate in the pipeline. One yes before any
 
 ## Phase 6: Generate the hero (gates included, money watched)
 
+If this session's network cannot reach Higgsfield's file host (generation succeeds but the result URL comes back blocked or unfetchable), switch to the Gemini relay in `references/troubleshooting.md` instead of pushing through the block. Same prompts, same laws, just handed to the user to run.
+
 Read `references/prompt-laws.md` before writing any generation prompt. Then:
 
 1. **Say what the frame costs, and set the money picture.** Preflight the exact starting frame you plan (`get_cost: true`, always free) and tell the user its price before generating it (about 2 credits at the proven defaults). Give the road ahead in one honest line: the video after this costs roughly 10 to 55 credits depending on the video model, and the model gets chosen together once the frame is approved. The cheap step comes first on purpose: the user sees the brand's world before the big decision.

@@ -87,5 +87,19 @@ Beyond rescue duty, this route makes the genuine self-test checks possible (real
 | The user says a setup step is done but the next step fails | "Done" was taken as verification | It never is; re-check the system yourself after every step before advancing |
 | Claude skips the setup checklist and jumps straight to brand or design questions | The skill zip was never extracted and fully read (common when the zip was dragged into the chat: the project folder stays empty and the skill's files never entered the conversation) | Extract the zip into the project workspace, read SKILL.md and every reference top to bottom, and restart at Phase 1. The checklist message is always the first thing the user sees |
 | Every hosting call hangs during a long session and a browser sign-in tab keeps opening | The hosting connector lost its signed-in state mid-session, so every call silently waits on a fresh sign-in | Complete the sign-in once in the tab that opens. If the popup misbehaves, one full app restart plus one sign-in fixes it cleanly. Files and the live site are never affected |
+| Higgsfield generation succeeds but the result URL comes back blocked, or any fetch/download of it errors (EGRESS_BLOCKED, a proxy 403, a curl that hangs then fails) | This session's sandbox has a network policy that doesn't allow Higgsfield's file host (its CDN domain), even though calls to Higgsfield's own API go through fine | Do not retry or route around it. Switch to the Gemini relay below for every remaining image and video in this build |
+
+### The Gemini relay (when Higgsfield's file host is network-blocked)
+
+The generation calls work; only fetching the result is blocked. Rather than fight the sandbox, hand each generation step to the user with Gemini in the loop, one asset at a time:
+
+1. Write the start-frame image prompt yourself, following the laws in `prompt-laws.md`, but in plain prose with no technical jargon or field labels. Give it to the user to paste into Gemini as-is.
+2. The user generates it in Gemini, downloads the result, and drags it into the chat. That file lands on local disk through the chat attachment, not through the network, so it is readable normally.
+3. Inspect the uploaded image yourself (anatomy, trademarks, composition, negative space) exactly as the normal pipeline requires.
+4. Write the video prompt (image-to-video, using that uploaded image as the starting frame), again in plain prose, and give it to the user to run in Gemini.
+5. The user generates it, downloads it, and drags the video into the chat the same way.
+6. Process the uploaded file locally with `ffmpeg-recipes.md` exactly as normal from here: the scrub encode, poster and ending frame, inspection, the video gate.
+
+Repeat the loop per shot or still needed (supporting menu images, a second chained segment, and so on). Tell the user once, up front, that this is the pattern for every remaining asset, so they know what is coming and do not have to re-explain it: you give a picture prompt, they bring back the picture, you give a video prompt built from that picture, they bring back the video.
 
 **The two-hang rule (the subsystem rule, for any tool):** a second consecutive hang on the same tool or subsystem means it is down. Stop retrying, name it out loud, and restart. Never make a third call into a hung subsystem. This is different from a slow render: a job that reports progress is working, however long it takes; a call that hangs with no response at all is the one this rule covers.
