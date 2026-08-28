@@ -351,6 +351,18 @@ header{
   display:flex;align-items:center;justify-content:center;overflow:hidden;
   animation:introOut .9s ease calc(5.3s / var(--dur)) forwards;
 }
+/* returning visitors (and anyone who skipped) never see the intro again */
+html.intro-done #intro{display:none !important}
+/* manual skip - bypass the timed animation immediately */
+#intro.skipped{animation:none;opacity:0;visibility:hidden;pointer-events:none}
+.intro-skip{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  padding:10px 22px;border-radius:99px;cursor:pointer;
+  border:1px solid var(--line-strong);background:var(--surface);color:var(--text-muted);
+  font-family:'Heebo',sans-serif;font-size:14px;font-weight:600;
+  transition:color .2s ease, border-color .2s ease;
+}
+.intro-skip:hover{color:var(--gold);border-color:var(--gold)}
 #intro .stage{position:relative;width:280px;height:280px}
 #intro .i-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 #intro .i-circle{
@@ -613,6 +625,9 @@ header{
 .proj-link{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--gold);text-decoration:none;font-size:15px}
 .proj-link svg{width:16px;height:16px;transition:transform .2s}
 .proj-link:hover svg{transform:translate(3px,-3px)}
+.proj-links{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px}
+.proj-case{font-weight:700;color:var(--cyan);text-decoration:none;font-size:15px}
+.proj-case:hover{text-decoration:underline}
 
 /* testimonials */
 .testi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
@@ -864,6 +879,16 @@ html.stop-motion #intro{display:none !important}
   .wa-float::after{animation:none}
 }
 </style>
+<script>
+// Runs before the intro paints: returning visitors skip the 6s animation
+// entirely. Storage can throw (private mode / blocked cookies), so any
+// failure just falls through to showing the intro normally.
+try{
+  if(localStorage.getItem('yh_intro_seen')){
+    document.documentElement.classList.add('intro-done');
+  }
+}catch(e){}
+</script>
 </head>
 <body>
 <div class="bg-scan" aria-hidden="true"></div>
@@ -904,8 +929,9 @@ html.stop-motion #intro{display:none !important}
 <button type="button" class="skip-link nav-jump" data-target="#main">דלג לתוכן הראשי</button>
 
 <!-- intro animation -->
-<div id="intro" aria-hidden="true">
-  <div class="stage">
+<div id="intro">
+  <button type="button" class="intro-skip" id="introSkip">דלג ←</button>
+  <div class="stage" aria-hidden="true">
     <svg class="i-svg" viewBox="0 0 280 280">
       <circle class="i-circle" cx="140" cy="140" r="80"/>
       <circle class="i-ring r1" cx="140" cy="140" r="80"/>
@@ -1117,9 +1143,12 @@ html.stop-motion #intro{display:none !important}
           <span class="kind mono">עסק מקומי</span>
           <h3>כותי ברדוגו</h3>
           <p>דף נחיתה נקי עם מיקוד בהמרה - כפתורי יצירת קשר בולטים ומבנה תוכן ברור.</p>
-          <a class="proj-link" href="https://kuti-bardugo-yoav.lovable.app" target="_blank" rel="noopener">לצפייה באתר
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-          </a>
+          <div class="proj-links">
+            <a class="proj-link" href="https://kuti-bardugo-yoav.lovable.app" target="_blank" rel="noopener">לצפייה באתר
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+            <a class="proj-case" href="work/kuti-bardugo.html">פרטים על העבודה ←</a>
+          </div>
         </div>
       </div>
       <div class="proj reveal led-hover tilt-3d">
@@ -1128,9 +1157,12 @@ html.stop-motion #intro{display:none !important}
           <span class="kind mono">חנות</span>
           <h3>סבא טמבור</h3>
           <p>אתר חנות עם הצגת מוצרים/שירותים בצורה נעימה וניווט פשוט למשתמש.</p>
-          <a class="proj-link" href="https://grandpa-tambur-store.lovable.app" target="_blank" rel="noopener">לצפייה באתר
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-          </a>
+          <div class="proj-links">
+            <a class="proj-link" href="https://grandpa-tambur-store.lovable.app" target="_blank" rel="noopener">לצפייה באתר
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+            <a class="proj-case" href="work/grandpa-tambur.html">פרטים על העבודה ←</a>
+          </div>
         </div>
       </div>
     </div>
@@ -1364,6 +1396,26 @@ html.stop-motion #intro{display:none !important}
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   document.documentElement.style.setProperty('--dur','1');
 }
+
+// intro: skip button, Esc, and remember that it has been seen
+(function(){
+  const intro = document.getElementById('intro');
+  if(!intro) return;
+  let done = false;
+  function dismissIntro(){
+    if(done) return;
+    done = true;
+    intro.classList.add('skipped');
+    try{ localStorage.setItem('yh_intro_seen','1'); }catch(e){}
+  }
+  const skipBtn = document.getElementById('introSkip');
+  if(skipBtn) skipBtn.addEventListener('click', dismissIntro);
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') dismissIntro();
+  });
+  // also mark as seen once it finishes on its own, so the next visit is instant
+  setTimeout(()=>{ try{ localStorage.setItem('yh_intro_seen','1'); }catch(e){} }, 6500);
+})();
 
 // keep --header-h in sync with the real (sticky) header height, so
 // fixed elements anchored below it never overlap it on any viewport
