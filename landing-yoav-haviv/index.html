@@ -196,6 +196,11 @@ h1,h2,h3,h4{font-family:'Rubik',sans-serif;line-height:1.2;letter-spacing:-.01em
 a{color:inherit}
 img,svg{display:block;max-width:100%}
 .container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+@media(max-width:640px){
+  /* reserve a clear lane on the left for the fixed WhatsApp/accessibility
+     buttons, so no text can ever scroll behind them */
+  .container{padding-left:90px}
+}
 section{position:relative;padding:110px 0;background:var(--bg)}
 .section-deep{background:#000000}
 html[data-theme="light"] .section-deep{background:var(--bg-alt)}
