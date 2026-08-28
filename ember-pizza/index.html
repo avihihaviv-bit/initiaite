@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember, Wood-Fired Pizza</title>
+<meta name="description" content="Wood-fired pizza, straight from a 900 degree oven to your hands. No heat lamp, no shortcuts.">
+<meta name="theme-color" content="#120d0b">
+
+<meta property="og:title" content="Ember, Wood-Fired Pizza">
+<meta property="og:description" content="Wood-fired pizza, straight from a 900 degree oven to your hands. No heat lamp, no shortcuts.">
+<!-- DEPLOY STEP: replace with absolute live URLs before shipping -->
+<meta property="og:image" content="assets/hero-poster.jpg">
+<meta property="og:url" content="https://example.com/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23d64526' d='M16 2c-1 5-7 8-7 15a7 7 0 0 0 14 0c0-3-2-4-2-7-2 2-2 4-2 4s-2-1-2-4c0-3 1-5-1-8z'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="bg-field" aria-hidden="true">
+  <span class="ember-spark"></span>
+  <span class="ember-spark"></span>
+  <span class="ember-spark"></span>
+  <span class="ember-spark"></span>
+  <span class="ember-spark"></span>
+  <span class="ember-spark"></span>
+</div>
+
+<nav class="nav">
+  <a href="#top" class="nav-mark">Ember</a>
+  <div class="nav-links">
+    <a href="#fire">The Fire</a>
+    <a href="#menu">Menu</a>
+    <a href="#door">Delivery</a>
+    <a href="#faq">Questions</a>
+  </div>
+  <a href="#order" class="btn btn-nav">Order Ember</a>
+</nav>
+
+<main id="main" tabindex="-1">
+
+<section id="top" class="hero" aria-label="Ember, wood-fired pizza">
+  <div class="hero-pin">
+    <div class="hero-stage" id="stage">
+      <div class="poster" id="poster" aria-hidden="true"></div>
+      <video id="heroVideo" muted playsinline aria-hidden="true" tabindex="-1" preload="none"></video>
+      <svg class="ring" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-dasharray="126" style="stroke-dashoffset:var(--ld,126)"/>
+      </svg>
+      <div class="scrim" aria-hidden="true"></div>
+
+      <div class="static-copy" id="staticCopy">
+        <h1>Fire first.<br>Everything else second.</h1>
+        <p>Wood-fired pizza, straight from a 900&deg; oven to your hands. No heat lamp, no shortcuts.</p>
+        <a href="#order" class="btn btn-accent">Order Ember</a>
+      </div>
+
+      <div class="band band-1" data-band="1" style="--a:0.00;--b:0.16">
+        <h2 class="split" data-entrance="drift">
+          <span class="visually-hidden">Everything here starts with fire.</span>
+        </h2>
+      </div>
+
+      <div class="band band-2" data-band="2" style="--a:0.30;--b:0.52">
+        <p class="chip blur-stack" aria-hidden="true">
+          <span class="soft">No heat lamp. No shortcuts.<br>Straight from a 900&deg; oven to your hands.</span>
+          <span class="sharp">No heat lamp. No shortcuts.<br>Straight from a 900&deg; oven to your hands.</span>
+        </p>
+        <p class="visually-hidden">No heat lamp. No shortcuts. Straight from a 900 degree oven to your hands.</p>
+      </div>
+
+      <div class="band band-3" data-band="3" style="--a:0.70;--b:1.00">
+        <div class="settle">
+          <h2 class="split" data-entrance="rise">
+            <span class="visually-hidden">This is Ember. Order it hot.</span>
+          </h2>
+          <a href="#order" class="btn btn-accent settle-cta">Order Ember</a>
+        </div>
+      </div>
+
+      <div class="scroll-cue" aria-hidden="true"><span></span></div>
+    </div>
+  </div>
+</section>
+
+<svg class="divider-flame" aria-hidden="true" viewBox="0 0 200 40">
+  <path class="divider-path" d="M0,20 C30,4 40,36 70,20 C100,4 110,36 140,20 C160,8 180,32 200,20" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
+
+<section id="fire" class="section reveal">
+  <div class="wrap two-col">
+    <div class="col-text">
+      <p class="kicker">01 &middot; The Fire</p>
+      <h2>Nine hundred degrees. Ninety seconds. Every single pie.</h2>
+      <p class="lede">Our oven runs on oak, not a dial. That's what gets the crust to char at the edge and stay thin and crisp underneath, not soggy, not raw in the middle. The same fire, the same wood, the same ninety seconds, every time someone orders.</p>
+      <ul class="fact-list">
+        <li><span class="flame-bullet" aria-hidden="true"></span>Hand-stretched dough, proofed 24 hours</li>
+        <li><span class="flame-bullet" aria-hidden="true"></span>San Marzano tomatoes, crushed the same day</li>
+        <li><span class="flame-bullet" aria-hidden="true"></span>Oak-fired oven held at 900&deg;F</li>
+      </ul>
+    </div>
+    <div class="col-image">
+      <img src="assets/fire-still.jpg" alt="Wood-fired oven glowing with oak flames" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section id="menu" class="section reveal">
+  <div class="wrap">
+    <p class="kicker">02 &middot; The Menu</p>
+    <h2>Six pizzas. No filler.</h2>
+    <p class="lede">We keep the menu short so every pie gets the attention it needs on the peel. This is what's fired today.</p>
+    <div class="menu-grid">
+      <article class="menu-card">
+        <img src="assets/menu-margherita.jpg" alt="Margherita pizza with fresh basil and mozzarella" loading="lazy">
+        <h3>Margherita</h3>
+        <p>San Marzano, fior di latte, basil, oak char.</p>
+        <span class="price">$16</span>
+      </article>
+      <article class="menu-card">
+        <img src="assets/menu-diavola.jpg" alt="Diavola pizza with spicy salami and chili" loading="lazy">
+        <h3>Diavola</h3>
+        <p>Spicy salami, calabrian chili, honey drizzle.</p>
+        <span class="price">$19</span>
+      </article>
+      <article class="menu-card">
+        <img src="assets/menu-funghi.jpg" alt="Wild mushroom pizza with truffle and pecorino" loading="lazy">
+        <h3>Funghi</h3>
+        <p>Wild mushroom, taleggio, thyme, pecorino.</p>
+        <span class="price">$18</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<svg class="divider-flame" aria-hidden="true" viewBox="0 0 200 40">
+  <path class="divider-path" d="M0,20 C30,4 40,36 70,20 C100,4 110,36 140,20 C160,8 180,32 200,20" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
+
+<section id="door" class="section reveal">
+  <div class="wrap two-col reverse">
+    <div class="col-text">
+      <p class="kicker">03 &middot; Oven To Door</p>
+      <h2>We fire it when you order it. Not before.</h2>
+      <p class="lede">Most delivery pizza sits. Ours doesn't. Your pie goes in the oven after you order, rides in a vented box that keeps steam from turning the crust soft, and gets to you while the cheese is still moving. Hold the flame below and see what that actually takes.</p>
+    </div>
+    <div class="col-interactive">
+      <div class="heat-hold" id="heatHold" tabindex="0" role="button" aria-label="Press and hold to feel the heat">
+        <svg viewBox="0 0 200 200" class="heat-ring" aria-hidden="true">
+          <circle cx="100" cy="100" r="88" class="heat-track"/>
+          <circle cx="100" cy="100" r="88" class="heat-fill" id="heatFill"/>
+        </svg>
+        <div class="heat-readout">
+          <span class="heat-num" id="heatNum">70</span>&deg;<span class="heat-unit">F</span>
+          <p class="heat-label" id="heatLabel">Hold to feel the heat</p>
+        </div>
+      </div>
+      <div class="heat-reveal" id="heatReveal">
+        <p class="kicker">Today's fire-baked special</p>
+        <p>Nduja and hot honey, blistered at the full 900&deg;. Only while the oven's already this hot.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="divider-flame" aria-hidden="true" viewBox="0 0 200 40">
+  <path class="divider-path" d="M0,20 C30,4 40,36 70,20 C100,4 110,36 140,20 C160,8 180,32 200,20" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
+
+<section class="section reveal proof">
+  <div class="wrap">
+    <p class="kicker">04 &middot; What People Say</p>
+    <div class="quote-grid">
+      <blockquote>
+        <p>"The crust actually holds the char all the way to the table. Ordered twice this week."</p>
+        <cite>Dani R.</cite>
+      </blockquote>
+      <blockquote>
+        <p>"First delivery pizza that showed up hot enough to still see steam. Box wasn't soggy either."</p>
+        <cite>Marcus T.</cite>
+      </blockquote>
+      <blockquote>
+        <p>"Same pizza every time I order it. That consistency is rare."</p>
+        <cite>Priya S.</cite>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<svg class="divider-flame" aria-hidden="true" viewBox="0 0 200 40">
+  <path class="divider-path" d="M0,20 C30,4 40,36 70,20 C100,4 110,36 140,20 C160,8 180,32 200,20" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
+
+<section id="faq" class="section reveal">
+  <div class="wrap narrow">
+    <p class="kicker">05 &middot; Questions</p>
+    <h2>What people ask before ordering</h2>
+    <div class="faq-list">
+      <details>
+        <summary>Does it actually arrive hot?</summary>
+        <p>Yes. We fire your pizza after you order, not before, and it travels in a vented box built to stop steam from softening the crust. Most orders arrive within 25 minutes of leaving the oven.</p>
+      </details>
+      <details>
+        <summary>Why does it cost more than chain delivery?</summary>
+        <p>Oak-fired ovens, 24-hour dough, and San Marzano tomatoes cost more than a heat lamp and a bag of pre-shredded cheese. You're paying for the fire, not the marketing.</p>
+      </details>
+      <details>
+        <summary>Is there a vegetarian option?</summary>
+        <p>Margherita and Funghi are both vegetarian. Ask and we'll leave off any topping.</p>
+      </details>
+      <details>
+        <summary>Do you do pickup?</summary>
+        <p>Yes, and it's the fastest way to get it hot. Order ahead and it'll be timed to come out of the oven when you walk in.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<svg class="divider-flame" aria-hidden="true" viewBox="0 0 200 40">
+  <path class="divider-path" d="M0,20 C30,4 40,36 70,20 C100,4 110,36 140,20 C160,8 180,32 200,20" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
+
+<section id="order" class="section reveal cta-section">
+  <div class="wrap narrow">
+    <p class="kicker">Get On The List</p>
+    <h2>Be the first to order when we open your block.</h2>
+    <p class="lede">Leave your email and we'll let you know the moment Ember's oven is lit near you.</p>
+    <form id="orderForm" class="order-form" novalidate>
+      <div class="field-row">
+        <label for="email" class="visually-hidden">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@email.com" required>
+        <button type="submit" class="btn btn-accent">Notify Me</button>
+      </div>
+      <p class="form-note" id="formNote">We'll only email you about Ember. No spam, unsubscribe anytime.</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <p class="nav-mark">Ember</p>
+      <p class="foot-note">Ember is a concept pizza brand built to showcase this website design. Its imagery is AI generated, not a real restaurant.</p>
+    </div>
+    <div class="foot-links">
+      <a href="#fire">The Fire</a>
+      <a href="#menu">Menu</a>
+      <a href="#door">Delivery</a>
+      <a href="#faq">Questions</a>
+      <a href="#order">Order</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
