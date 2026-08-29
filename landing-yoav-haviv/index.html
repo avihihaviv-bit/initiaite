@@ -418,24 +418,49 @@ header{
   .nav-links{
     order:3;width:100%;
     display:flex;flex-direction:row;position:static;
-    gap:20px;padding:2px 0 1px;
+    gap:6px;padding:2px 0 3px;
     background:transparent;border:0;box-shadow:none;
     overflow-x:auto;overscroll-behavior-x:contain;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;-ms-overflow-style:none;
-    /* soft fade on the overflowing edge so the row reads as scrollable
-       rather than as a word that got clipped */
-    -webkit-mask-image:linear-gradient(to left,#000 86%,transparent 100%);
-    mask-image:linear-gradient(to left,#000 86%,transparent 100%);
+    scroll-behavior:smooth;
+    /* touch-action is deliberately left at its default: the browser's own
+       direction locking already sends horizontal swipes to the strip and
+       vertical ones to the page. Pinning it to pan-x would win the
+       sideways gesture but dead-stop vertical page scrolling whenever a
+       finger happened to land on this 44px strip. */
+    /* Snap so a flick settles on a whole item instead of leaving half a
+       word at the edge. "proximity" (not "mandatory") keeps free
+       scrolling natural - it only tidies up the landing position. */
+    scroll-snap-type:x proximity;
+    scroll-padding-inline:14px;
   }
   .nav-links::-webkit-scrollbar{display:none}
-  .nav-links li{width:auto;flex:none}
+  .nav-links li{width:auto;flex:none;scroll-snap-align:start}
   .nav-links button{
-    display:block;width:auto;text-align:center;padding:5px 1px;
+    display:block;width:auto;text-align:center;
+    /* a real touch target rather than a 5px-tall strip of text */
+    padding:9px 12px;border-radius:9px;
     border-bottom:0;font-size:15.5px;white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
   }
+  .nav-links button.active{background:var(--surface-2)}
   /* the underline indicator sits right under each item in this layout */
-  .nav-links button::after{bottom:-3px}
+  .nav-links button::after{bottom:2px;right:12px;left:12px}
+  /* Fade only the edge that actually has more content behind it, so the
+     row shows where it can still go. Toggled from JS on scroll. */
+  .nav-links.can-start.can-end{
+    -webkit-mask-image:linear-gradient(to left,transparent 0,#000 8%,#000 92%,transparent 100%);
+    mask-image:linear-gradient(to left,transparent 0,#000 8%,#000 92%,transparent 100%);
+  }
+  .nav-links.can-end:not(.can-start){
+    -webkit-mask-image:linear-gradient(to left,#000 92%,transparent 100%);
+    mask-image:linear-gradient(to left,#000 92%,transparent 100%);
+  }
+  .nav-links.can-start:not(.can-end){
+    -webkit-mask-image:linear-gradient(to right,#000 92%,transparent 100%);
+    mask-image:linear-gradient(to right,#000 92%,transparent 100%);
+  }
 }
 
 /* intro animation - drafting compass + assembling blocks + logo reveal */
@@ -1714,6 +1739,42 @@ document.querySelectorAll('.nav-jump').forEach(btn=>{
 // unlinked content in between (e.g. before-after/testimonials/guide).
 const navLinks = document.querySelectorAll('.nav-links .nav-jump');
 const navSections = Array.from(navLinks).map(b=>document.querySelector(b.dataset.target)).filter(Boolean);
+const navStrip = document.getElementById('navLinks');
+let lastActiveId = null;
+let navTouchedAt = 0;
+
+// Fade only the edge that still has content behind it. Modern engines
+// report a negative scrollLeft in RTL, so compare on the absolute value.
+function updateNavEdges(){
+  if(!navStrip) return;
+  const max = navStrip.scrollWidth - navStrip.clientWidth;
+  if(max <= 2){ navStrip.classList.remove('can-start','can-end'); return; }
+  const pos = Math.abs(navStrip.scrollLeft);
+  navStrip.classList.toggle('can-start', pos > 2);
+  navStrip.classList.toggle('can-end', pos < max - 2);
+}
+
+// Bring the current section's item into view as the page scrolls, so the
+// visitor can always see where they are. Skipped for a moment after the
+// visitor touches the strip themselves - auto-scrolling under someone's
+// finger is exactly the "moves weirdly" feeling we are removing.
+function revealActiveNavItem(btn){
+  if(!navStrip || !btn) return;
+  if(navStrip.scrollWidth - navStrip.clientWidth <= 2) return;
+  if(Date.now() - navTouchedAt < 2500) return;
+  const strip = navStrip.getBoundingClientRect();
+  const item  = btn.getBoundingClientRect();
+  // Nudge by the minimum needed to bring the item just inside the edge,
+  // rather than yanking it to the centre. Small, predictable movement
+  // reads as the strip following you; re-centring reads as it lurching.
+  const pad = 18;
+  let delta = 0;
+  if(item.left  < strip.left  + pad) delta = item.left  - (strip.left  + pad);
+  else if(item.right > strip.right - pad) delta = item.right - (strip.right - pad);
+  if(Math.abs(delta) < 4) return;
+  navStrip.scrollBy({left: delta, behavior:'smooth'});
+}
+
 function updateActiveNav(){
   const headerH = document.querySelector('header').offsetHeight;
   const y = window.scrollY + headerH + 10;
@@ -1721,8 +1782,24 @@ function updateActiveNav(){
   navSections.forEach(sec => { if (sec.offsetTop <= y) current = sec; });
   const id = current ? '#' + current.id : null;
   navLinks.forEach(b => b.classList.toggle('active', b.dataset.target === id));
+  if(id !== lastActiveId){
+    lastActiveId = id;
+    if(id) revealActiveNavItem(Array.from(navLinks).find(b => b.dataset.target === id));
+  }
 }
 window.addEventListener('scroll', updateActiveNav, {passive:true});
+
+if(navStrip){
+  ['pointerdown','touchstart','wheel'].forEach(ev =>
+    navStrip.addEventListener(ev, ()=>{ navTouchedAt = Date.now(); }, {passive:true}));
+  navStrip.addEventListener('scroll', updateNavEdges, {passive:true});
+  window.addEventListener('resize', updateNavEdges);
+  // tapping an item also centres it, so the next one is reachable
+  navStrip.querySelectorAll('.nav-jump').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ navTouchedAt = 0; revealActiveNavItem(btn); });
+  });
+  updateNavEdges();
+}
 updateActiveNav();
 
 // about-us flip cards - tap support for touch devices
