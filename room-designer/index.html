@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מעצב חדרים תלת-ממדי</title>
+    <meta name="theme-color" content="#12233a">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%8B%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="app">
+        <!-- ============ Header / Toolbar ============ -->
+        <header class="rd-header">
+            <button class="icon-btn only-mobile" id="sidebar-toggle-btn" title="קטלוג ריהוט" aria-label="תפריט">☰</button>
+            <div class="rd-brand">
+                <span class="rd-brand-mark">🛋️</span>
+                <span class="rd-brand-title">מעצב החדר שלי</span>
+            </div>
+
+            <div class="rd-toolbar">
+                <button class="rd-btn" id="btn-new" title="פרויקט חדש">חדש</button>
+                <button class="rd-btn" id="btn-save" title="שמור">שמור</button>
+                <button class="rd-btn" id="btn-save-as" title="שמור בשם">שמור בשם…</button>
+                <button class="rd-btn" id="btn-load" title="טען פרויקט">טען…</button>
+                <span class="rd-sep"></span>
+                <button class="rd-btn icon-only" id="btn-undo" title="בטל (Ctrl+Z)">↶</button>
+                <button class="rd-btn icon-only" id="btn-redo" title="בצע שוב (Ctrl+Y)">↷</button>
+                <span class="rd-sep"></span>
+                <button class="rd-btn" id="btn-export-json" title="ייצוא כ-JSON">ייצוא JSON</button>
+                <button class="rd-btn" id="btn-import-json" title="ייבוא מקובץ JSON">ייבוא JSON</button>
+                <input type="file" id="file-import" accept="application/json" hidden>
+                <button class="rd-btn" id="btn-export-png" title="צילום מסך">📷 צילום</button>
+            </div>
+
+            <div class="rd-project-name" id="project-name-display">חדר חדש</div>
+        </header>
+
+        <div class="rd-body">
+            <!-- ============ Left Sidebar ============ -->
+            <aside class="rd-sidebar" id="sidebar">
+                <section class="rd-panel">
+                    <h3>תבניות מוכנות</h3>
+                    <div class="rd-template-row" id="templates-row"></div>
+                </section>
+
+                <section class="rd-panel">
+                    <h3>מידות החדר</h3>
+                    <label class="rd-field">
+                        <span>רוחב (מ')</span>
+                        <input type="range" id="room-width" min="2" max="12" step="0.1">
+                        <output id="room-width-out"></output>
+                    </label>
+                    <label class="rd-field">
+                        <span>עומק (מ')</span>
+                        <input type="range" id="room-depth" min="2" max="12" step="0.1">
+                        <output id="room-depth-out"></output>
+                    </label>
+                    <label class="rd-field">
+                        <span>גובה (מ')</span>
+                        <input type="range" id="room-height" min="2" max="4.5" step="0.1">
+                        <output id="room-height-out"></output>
+                    </label>
+                </section>
+
+                <section class="rd-panel">
+                    <h3>גימור החדר</h3>
+                    <label class="rd-field-row">
+                        <span>קיר</span>
+                        <input type="color" id="wall-color">
+                    </label>
+                    <label class="rd-field-row">
+                        <span>רצפה</span>
+                        <input type="color" id="floor-color">
+                    </label>
+                    <label class="rd-field-row">
+                        <span>חומר רצפה</span>
+                        <select id="floor-material">
+                            <option value="solid">חלק</option>
+                            <option value="wood">עץ</option>
+                            <option value="tile">אריחים</option>
+                        </select>
+                    </label>
+                    <label class="rd-field-row">
+                        <span>הצג תקרה</span>
+                        <input type="checkbox" id="show-ceiling">
+                    </label>
+                    <label class="rd-field-row">
+                        <span>תאורה</span>
+                        <div class="rd-segmented" id="lighting-toggle">
+                            <button data-preset="day" class="active">☀️ יום</button>
+                            <button data-preset="night">🌙 לילה</button>
+                        </div>
+                    </label>
+                </section>
+
+                <section class="rd-panel">
+                    <h3>הגדרות עריכה</h3>
+                    <label class="rd-field-row">
+                        <span>הצג רשת</span>
+                        <input type="checkbox" id="grid-visible" checked>
+                    </label>
+                    <label class="rd-field-row">
+                        <span>הצמדה לרשת</span>
+                        <input type="checkbox" id="snap-enabled" checked>
+                    </label>
+                </section>
+
+                <section class="rd-panel rd-panel-grow">
+                    <h3>קטלוג ריהוט</h3>
+                    <div id="catalog-list"></div>
+                </section>
+            </aside>
+
+            <!-- ============ 3D Viewport ============ -->
+            <main class="rd-viewport-wrap">
+                <div id="viewport"></div>
+                <div class="rd-viewport-hint" id="viewport-hint">גררו פריט מהקטלוג, לחצו עליו כדי לבחור ולהזיז אותו</div>
+            </main>
+
+            <!-- ============ Right Property Panel ============ -->
+            <aside class="rd-props" id="props-panel" hidden>
+                <h3 id="props-title">פריט נבחר</h3>
+                <label class="rd-field-row">
+                    <span>צבע</span>
+                    <input type="color" id="prop-color">
+                </label>
+                <label class="rd-field">
+                    <span>גודל</span>
+                    <input type="range" id="prop-scale" min="0.5" max="1.8" step="0.05">
+                    <output id="prop-scale-out"></output>
+                </label>
+                <div class="rd-prop-buttons">
+                    <button class="rd-btn icon-only" id="prop-rotate-left" title="סובב שמאלה (Q)">↺</button>
+                    <button class="rd-btn icon-only" id="prop-rotate-right" title="סובב ימינה (E)">↻</button>
+                </div>
+                <div class="rd-prop-buttons">
+                    <button class="rd-btn" id="prop-duplicate" title="שכפל (Ctrl+D)">שכפל</button>
+                    <button class="rd-btn rd-btn-danger" id="prop-delete" title="מחק (Delete)">מחק</button>
+                </div>
+                <p class="rd-hint">חצים: הזזה עדינה &nbsp;|&nbsp; Esc: ביטול בחירה</p>
+            </aside>
+        </div>
+
+        <!-- ============ Footer status bar ============ -->
+        <footer class="rd-status">
+            <span id="status-room-dims"></span>
+            <span id="status-item-count"></span>
+            <span id="status-snap"></span>
+        </footer>
+    </div>
+
+    <!-- ============ Modals ============ -->
+    <div class="rd-modal" id="modal-save-as">
+        <div class="rd-modal-content">
+            <h3>שמירת פרויקט בשם</h3>
+            <input type="text" id="save-as-name" placeholder="שם הפרויקט">
+            <div class="rd-modal-actions">
+                <button class="rd-btn" id="save-as-cancel">ביטול</button>
+                <button class="rd-btn rd-btn-primary" id="save-as-confirm">שמור</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-modal" id="modal-load">
+        <div class="rd-modal-content">
+            <h3>הפרויקטים שלי</h3>
+            <div id="load-list" class="rd-load-list"></div>
+            <div class="rd-modal-actions">
+                <button class="rd-btn" id="load-cancel">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="rd-toast" hidden></div>
+
+    <!-- ============ Three.js (CDN, global/UMD build) ============ -->
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- ============ App modules ============ -->
+    <script src="js/state.js"></script>
+    <script src="js/materials.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/room.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/interaction.js"></script>
+    <script src="js/furniture.js"></script>
+    <script src="js/templates.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

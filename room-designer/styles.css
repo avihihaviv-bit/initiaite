@@ -1,0 +1,282 @@
+/* room-designer/styles.css — fully self-contained, independent of the
+   Initiate // Patrol C2 app that lives at the repo root. */
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap');
+
+:root {
+    --rd-bg: #f4f1ec;
+    --rd-surface: #ffffff;
+    --rd-surface-2: #faf8f4;
+    --rd-border: #e2ddd3;
+    --rd-text: #2b2620;
+    --rd-text-dim: #6b6459;
+    --rd-accent: #b5713f;
+    --rd-accent-hover: #9c5f32;
+    --rd-danger: #c0433a;
+    --rd-danger-bg: #fbe9e7;
+    --rd-radius-sm: 6px;
+    --rd-radius-md: 10px;
+    --rd-shadow: 0 6px 24px rgba(43, 38, 32, 0.12);
+    --rd-header-h: 56px;
+    --rd-status-h: 32px;
+    --rd-sidebar-w: 300px;
+    --rd-props-w: 260px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Heebo', 'Segoe UI', system-ui, sans-serif;
+    background: var(--rd-bg);
+    color: var(--rd-text);
+}
+
+button, input, select {
+    font-family: inherit;
+    color: inherit;
+}
+
+h3 { margin: 0 0 10px; font-size: 14px; color: var(--rd-text-dim); font-weight: 600; }
+h4 { margin: 12px 0 6px; font-size: 12px; color: var(--rd-text-dim); font-weight: 600; }
+
+#app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+.rd-header {
+    height: var(--rd-header-h);
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 16px;
+    background: var(--rd-surface);
+    border-bottom: 1px solid var(--rd-border);
+    box-shadow: var(--rd-shadow);
+    z-index: 20;
+}
+
+.rd-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; white-space: nowrap; }
+.rd-brand-mark { font-size: 20px; }
+.rd-brand-title { font-size: 15px; }
+
+.rd-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+    scrollbar-width: thin;
+}
+
+.rd-sep { width: 1px; align-self: stretch; margin: 8px 4px; background: var(--rd-border); flex: none; }
+
+.rd-project-name {
+    font-size: 13px;
+    color: var(--rd-text-dim);
+    white-space: nowrap;
+    padding-inline-start: 8px;
+    border-inline-start: 1px solid var(--rd-border);
+}
+
+.rd-btn {
+    border: 1px solid var(--rd-border);
+    background: var(--rd-surface-2);
+    color: var(--rd-text);
+    border-radius: var(--rd-radius-sm);
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s;
+}
+.rd-btn:hover { background: #efe9df; border-color: #d5cdbe; }
+.rd-btn:disabled { opacity: .4; cursor: default; }
+.rd-btn.icon-only { padding: 7px 10px; font-size: 15px; }
+.rd-btn-primary { background: var(--rd-accent); border-color: var(--rd-accent); color: #fff; }
+.rd-btn-primary:hover { background: var(--rd-accent-hover); }
+.rd-btn-danger { background: var(--rd-danger-bg); border-color: #f0c6c1; color: var(--rd-danger); }
+.rd-btn-danger:hover { background: #f7d9d5; }
+.rd-btn-sm { padding: 4px 9px; font-size: 12px; }
+
+.icon-btn {
+    background: none; border: none; font-size: 20px; cursor: pointer; color: var(--rd-text);
+    width: 34px; height: 34px; border-radius: var(--rd-radius-sm);
+}
+.icon-btn:hover { background: var(--rd-surface-2); }
+.only-mobile { display: none; }
+
+/* ---------- Body layout ---------- */
+.rd-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+/* ---------- Sidebar ---------- */
+.rd-sidebar {
+    width: var(--rd-sidebar-w);
+    flex: none;
+    background: var(--rd-surface);
+    border-inline-end: 1px solid var(--rd-border);
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rd-panel { padding-bottom: 14px; border-bottom: 1px solid var(--rd-border); margin-bottom: 10px; flex: none; }
+.rd-panel:last-child { border-bottom: none; }
+.rd-panel-grow { flex: 1; min-height: 200px; display: flex; flex-direction: column; }
+.rd-panel-grow #catalog-list { overflow-y: auto; flex: 1; }
+
+.rd-template-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.rd-field { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--rd-text-dim); margin-bottom: 8px; }
+.rd-field input[type="range"] { width: 100%; }
+.rd-field output { align-self: flex-end; font-size: 11px; color: var(--rd-text); }
+
+.rd-field-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; margin-bottom: 8px; gap: 8px;
+}
+.rd-field-row input[type="color"] {
+    width: 34px; height: 26px; border: 1px solid var(--rd-border); border-radius: var(--rd-radius-sm);
+    padding: 0; background: none; cursor: pointer;
+}
+.rd-field-row select {
+    border: 1px solid var(--rd-border); border-radius: var(--rd-radius-sm); padding: 4px 6px; background: var(--rd-surface-2);
+}
+
+.rd-segmented { display: flex; border: 1px solid var(--rd-border); border-radius: var(--rd-radius-sm); overflow: hidden; }
+.rd-segmented button {
+    border: none; background: var(--rd-surface-2); padding: 5px 10px; font-size: 12px; cursor: pointer;
+}
+.rd-segmented button.active { background: var(--rd-accent); color: #fff; }
+
+.rd-cat-group h4:first-child { margin-top: 0; }
+.rd-cat-items { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+.rd-catalog-item {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--rd-border); background: var(--rd-surface-2);
+    border-radius: var(--rd-radius-sm); padding: 8px; font-size: 12px; cursor: pointer;
+    text-align: start;
+    transition: background .15s, transform .1s;
+}
+.rd-catalog-item:hover { background: #efe9df; }
+.rd-catalog-item:active { transform: scale(0.97); }
+.rd-swatch {
+    width: 16px; height: 16px; border-radius: 50%; flex: none;
+    background: var(--swatch, #999); border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* ---------- Viewport ---------- */
+.rd-viewport-wrap { flex: 1; position: relative; min-width: 0; background: #cfe0ee; }
+#viewport { position: absolute; inset: 0; }
+#viewport canvas { display: block; touch-action: none; }
+
+.rd-viewport-hint {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(43,38,32,0.75); color: #fff; font-size: 12px;
+    padding: 6px 14px; border-radius: 999px; pointer-events: none;
+    animation: rd-hint-fade 6s forwards;
+}
+@keyframes rd-hint-fade {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ---------- Right property panel ---------- */
+.rd-props {
+    width: var(--rd-props-w); flex: none; background: var(--rd-surface);
+    border-inline-start: 1px solid var(--rd-border); padding: 14px; overflow-y: auto;
+}
+.rd-prop-buttons { display: flex; gap: 8px; margin-bottom: 10px; }
+.rd-prop-buttons .rd-btn { flex: 1; }
+.rd-hint { font-size: 11px; color: var(--rd-text-dim); margin-top: 14px; line-height: 1.6; }
+
+/* ---------- Footer status bar ---------- */
+.rd-status {
+    height: var(--rd-status-h); flex: none; display: flex; align-items: center; gap: 18px;
+    padding: 0 16px; background: var(--rd-surface); border-top: 1px solid var(--rd-border);
+    font-size: 11px; color: var(--rd-text-dim);
+}
+
+/* ---------- Modals ---------- */
+.rd-modal {
+    display: none; position: fixed; inset: 0; background: rgba(43,38,32,0.45);
+    align-items: center; justify-content: center; z-index: 1000;
+}
+.rd-modal.open { display: flex; }
+.rd-modal-content {
+    background: var(--rd-surface); border-radius: var(--rd-radius-md); box-shadow: var(--rd-shadow);
+    padding: 20px; width: min(420px, 90vw); max-height: 80vh; overflow-y: auto;
+}
+.rd-modal-content input[type="text"] {
+    width: 100%; padding: 9px 10px; border: 1px solid var(--rd-border); border-radius: var(--rd-radius-sm);
+    font-size: 14px; margin-top: 4px;
+}
+.rd-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+.rd-load-list { display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto; }
+.rd-load-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    border: 1px solid var(--rd-border); border-radius: var(--rd-radius-sm); padding: 10px;
+}
+.rd-load-info { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.rd-load-info small { color: var(--rd-text-dim); font-size: 11px; }
+.rd-load-actions { display: flex; gap: 6px; flex: none; }
+
+/* ---------- Toast ---------- */
+.rd-toast {
+    position: fixed; bottom: 46px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: #2b2620; color: #fff; padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; z-index: 2000;
+    box-shadow: var(--rd-shadow);
+}
+.rd-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .only-mobile { display: inline-flex; align-items: center; justify-content: center; }
+    .rd-brand-title { display: none; }
+    .rd-project-name { display: none; }
+
+    .rd-sidebar {
+        position: fixed; top: var(--rd-header-h); bottom: 0;
+        inset-inline-start: -320px;
+        width: 85vw; max-width: 320px;
+        z-index: 900; box-shadow: var(--rd-shadow);
+        transition: inset-inline-start .2s ease;
+    }
+    .rd-sidebar.open { inset-inline-start: 0; }
+
+    .rd-props {
+        position: fixed; bottom: var(--rd-status-h); inset-inline-end: 0; top: auto;
+        width: 100%; max-width: 340px; max-height: 50vh;
+        border-top: 1px solid var(--rd-border);
+        box-shadow: var(--rd-shadow);
+        z-index: 800;
+    }
+}
+
+@media (max-width: 480px) {
+    .rd-toolbar .rd-btn:not(.icon-only) { padding: 7px 9px; font-size: 12px; }
+}
+
+/* ---------- Scrollbars (subtle, matches surface tone) ---------- */
+.rd-sidebar::-webkit-scrollbar, .rd-props::-webkit-scrollbar, .rd-toolbar::-webkit-scrollbar,
+#catalog-list::-webkit-scrollbar, .rd-load-list::-webkit-scrollbar {
+    width: 7px; height: 7px;
+}
+.rd-sidebar::-webkit-scrollbar-thumb, .rd-props::-webkit-scrollbar-thumb,
+#catalog-list::-webkit-scrollbar-thumb, .rd-load-list::-webkit-scrollbar-thumb {
+    background: #d5cdbe; border-radius: 999px;
+}

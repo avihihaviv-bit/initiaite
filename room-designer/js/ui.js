@@ -1,0 +1,378 @@
+// ui.js — all DOM wiring: sidebar, toolbar, property panel, modals, shortcuts.
+
+window.RD = window.RD || {};
+
+RD.UI = (function () {
+    const S = RD.State;
+    const F = RD.Furniture;
+    const T = RD.Templates;
+    const ST = RD.Storage;
+
+    let els = {};
+
+    function $(id) { return document.getElementById(id); }
+
+    function cacheEls() {
+        els = {
+            sidebarToggle: $('sidebar-toggle-btn'),
+            sidebar: $('sidebar'),
+            projectName: $('project-name-display'),
+
+            btnNew: $('btn-new'),
+            btnSave: $('btn-save'),
+            btnSaveAs: $('btn-save-as'),
+            btnLoad: $('btn-load'),
+            btnUndo: $('btn-undo'),
+            btnRedo: $('btn-redo'),
+            btnExportJson: $('btn-export-json'),
+            btnImportJson: $('btn-import-json'),
+            fileImport: $('file-import'),
+            btnExportPng: $('btn-export-png'),
+
+            templatesRow: $('templates-row'),
+            roomWidth: $('room-width'), roomWidthOut: $('room-width-out'),
+            roomDepth: $('room-depth'), roomDepthOut: $('room-depth-out'),
+            roomHeight: $('room-height'), roomHeightOut: $('room-height-out'),
+            wallColor: $('wall-color'),
+            floorColor: $('floor-color'),
+            floorMaterial: $('floor-material'),
+            showCeiling: $('show-ceiling'),
+            lightingToggle: $('lighting-toggle'),
+            gridVisible: $('grid-visible'),
+            snapEnabled: $('snap-enabled'),
+            catalogList: $('catalog-list'),
+
+            propsPanel: $('props-panel'),
+            propsTitle: $('props-title'),
+            propColor: $('prop-color'),
+            propScale: $('prop-scale'), propScaleOut: $('prop-scale-out'),
+            propRotateLeft: $('prop-rotate-left'),
+            propRotateRight: $('prop-rotate-right'),
+            propDuplicate: $('prop-duplicate'),
+            propDelete: $('prop-delete'),
+
+            statusDims: $('status-room-dims'),
+            statusCount: $('status-item-count'),
+            statusSnap: $('status-snap'),
+
+            modalSaveAs: $('modal-save-as'),
+            saveAsName: $('save-as-name'),
+            saveAsCancel: $('save-as-cancel'),
+            saveAsConfirm: $('save-as-confirm'),
+
+            modalLoad: $('modal-load'),
+            loadList: $('load-list'),
+            loadCancel: $('load-cancel'),
+
+            toast: $('toast')
+        };
+    }
+
+    function showToast(msg) {
+        els.toast.textContent = msg;
+        els.toast.hidden = false;
+        els.toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(function () {
+            els.toast.classList.remove('show');
+            setTimeout(function () { els.toast.hidden = true; }, 200);
+        }, 2200);
+    }
+
+    function openModal(el) { el.classList.add('open'); }
+    function closeModal(el) { el.classList.remove('open'); }
+
+    function refocusCamera() {
+        const room = S.get().room;
+        RD.Scene.focusRoom(room.width, room.depth, room.height);
+    }
+
+    // ---- Catalog + templates (static render) ----
+    function renderCatalog() {
+        const byCategory = {};
+        RD.Catalog.ITEMS.forEach(function (it) {
+            (byCategory[it.category] = byCategory[it.category] || []).push(it);
+        });
+        let html = '';
+        Object.keys(byCategory).forEach(function (cat) {
+            html += '<div class="rd-cat-group"><h4>' + cat + '</h4><div class="rd-cat-items">';
+            byCategory[cat].forEach(function (it) {
+                html += '<button class="rd-catalog-item" data-type="' + it.type + '" style="--swatch:' + it.defaultColor + '">' +
+                    '<span class="rd-swatch"></span><span>' + it.label + '</span></button>';
+            });
+            html += '</div></div>';
+        });
+        els.catalogList.innerHTML = html;
+        els.catalogList.querySelectorAll('.rd-catalog-item').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                F.addFromCatalog(btn.getAttribute('data-type'));
+                showToast('נוסף לחדר: ' + btn.textContent.trim());
+            });
+        });
+    }
+
+    function renderTemplates() {
+        let html = '';
+        T.list().forEach(function (t) {
+            html += '<button class="rd-btn rd-template-btn" data-key="' + t.key + '">' + t.label + '</button>';
+        });
+        els.templatesRow.innerHTML = html;
+        els.templatesRow.querySelectorAll('.rd-template-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (confirm('טעינת תבנית תחליף את הפרויקט הנוכחי. להמשיך?')) {
+                    T.apply(btn.getAttribute('data-key'));
+                    refocusCamera();
+                    showToast('תבנית נטענה');
+                }
+            });
+        });
+    }
+
+    // ---- Sync UI from state ----
+    function refreshRoomFields() {
+        const room = S.get().room;
+        els.roomWidth.value = room.width; els.roomWidthOut.textContent = room.width.toFixed(1);
+        els.roomDepth.value = room.depth; els.roomDepthOut.textContent = room.depth.toFixed(1);
+        els.roomHeight.value = room.height; els.roomHeightOut.textContent = room.height.toFixed(1);
+        els.wallColor.value = room.wallColor;
+        els.floorColor.value = room.floorColor;
+        els.floorMaterial.value = room.floorMaterial || 'solid';
+        els.showCeiling.checked = !!room.showCeiling;
+
+        const settings = S.get().settings;
+        els.gridVisible.checked = !!settings.gridVisible;
+        els.snapEnabled.checked = !!settings.snapEnabled;
+
+        const lighting = S.get().lighting;
+        els.lightingToggle.querySelectorAll('button').forEach(function (b) {
+            b.classList.toggle('active', b.getAttribute('data-preset') === lighting.preset);
+        });
+
+        els.projectName.textContent = S.get().meta.name;
+    }
+
+    function refreshPropsPanel() {
+        const id = S.get().selectedId;
+        if (!id) { els.propsPanel.hidden = true; return; }
+        const item = S.getItem(id);
+        if (!item) { els.propsPanel.hidden = true; return; }
+        const entry = RD.Catalog.get(item.type);
+        els.propsPanel.hidden = false;
+        els.propsTitle.textContent = entry ? entry.label : item.type;
+        els.propColor.value = item.color;
+        els.propScale.value = item.scale;
+        els.propScaleOut.textContent = Math.round(item.scale * 100) + '%';
+    }
+
+    function refreshStatus() {
+        const room = S.get().room;
+        const items = S.get().items;
+        const settings = S.get().settings;
+        els.statusDims.textContent = 'חדר: ' + room.width.toFixed(1) + '×' + room.depth.toFixed(1) + '×' + room.height.toFixed(1) + ' מ\'';
+        els.statusCount.textContent = 'פריטים: ' + items.length;
+        els.statusSnap.textContent = settings.snapEnabled ? ('הצמדה: ' + settings.snapSize + ' מ\'') : 'הצמדה: כבויה';
+    }
+
+    function refreshUndoRedo() {
+        els.btnUndo.disabled = !S.canUndo();
+        els.btnRedo.disabled = !S.canRedo();
+    }
+
+    function refreshAll() {
+        refreshRoomFields();
+        refreshPropsPanel();
+        refreshStatus();
+        refreshUndoRedo();
+        RD.Room.setGridVisible(S.get().settings.gridVisible);
+    }
+
+    // ---- Wiring ----
+    function wireRoomControls() {
+        function applyDims() {
+            S.setRoomDims(parseFloat(els.roomWidth.value), parseFloat(els.roomDepth.value), parseFloat(els.roomHeight.value));
+        }
+        [els.roomWidth, els.roomDepth, els.roomHeight].forEach(function (el) {
+            el.addEventListener('input', function () {
+                els.roomWidthOut.textContent = parseFloat(els.roomWidth.value).toFixed(1);
+                els.roomDepthOut.textContent = parseFloat(els.roomDepth.value).toFixed(1);
+                els.roomHeightOut.textContent = parseFloat(els.roomHeight.value).toFixed(1);
+            });
+            el.addEventListener('change', applyDims);
+        });
+
+        els.wallColor.addEventListener('input', function () { S.setRoomField('wallColor', els.wallColor.value); });
+        els.floorColor.addEventListener('input', function () { S.setRoomField('floorColor', els.floorColor.value); });
+        els.floorMaterial.addEventListener('change', function () { S.setRoomField('floorMaterial', els.floorMaterial.value); });
+        els.showCeiling.addEventListener('change', function () { S.setRoomField('showCeiling', els.showCeiling.checked); });
+
+        els.lightingToggle.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', function () { S.setLightingPreset(btn.getAttribute('data-preset')); });
+        });
+
+        els.gridVisible.addEventListener('change', function () {
+            S.get().settings.gridVisible = els.gridVisible.checked;
+            RD.Room.setGridVisible(els.gridVisible.checked);
+        });
+        els.snapEnabled.addEventListener('change', function () {
+            S.get().settings.snapEnabled = els.snapEnabled.checked;
+            refreshStatus();
+        });
+    }
+
+    function wirePropsPanel() {
+        els.propColor.addEventListener('input', function () { F.recolorSelected(els.propColor.value); });
+        els.propScale.addEventListener('input', function () {
+            els.propScaleOut.textContent = Math.round(parseFloat(els.propScale.value) * 100) + '%';
+            F.rescaleSelected(parseFloat(els.propScale.value));
+        });
+        els.propRotateLeft.addEventListener('click', function () { F.rotateSelected(-15); });
+        els.propRotateRight.addEventListener('click', function () { F.rotateSelected(15); });
+        els.propDuplicate.addEventListener('click', function () { F.duplicateSelected(); });
+        els.propDelete.addEventListener('click', function () { F.deleteSelected(); });
+    }
+
+    function renderLoadList() {
+        const projects = ST.list();
+        if (!projects.length) {
+            els.loadList.innerHTML = '<p class="rd-hint">אין פרויקטים שמורים עדיין.</p>';
+            return;
+        }
+        els.loadList.innerHTML = projects.map(function (p) {
+            const date = new Date(p.updatedAt).toLocaleString('he-IL');
+            return '<div class="rd-load-row" data-id="' + p.id + '">' +
+                '<div class="rd-load-info"><strong>' + escapeHtml(p.name) + '</strong><small>' + date + ' · ' + p.itemCount + ' פריטים</small></div>' +
+                '<div class="rd-load-actions">' +
+                '<button class="rd-btn rd-btn-sm" data-action="load">טען</button>' +
+                '<button class="rd-btn rd-btn-sm rd-btn-danger" data-action="delete">מחק</button>' +
+                '</div></div>';
+        }).join('');
+        els.loadList.querySelectorAll('.rd-load-row').forEach(function (row) {
+            const id = row.getAttribute('data-id');
+            row.querySelector('[data-action="load"]').addEventListener('click', function () {
+                ST.load(id);
+                refocusCamera();
+                closeModal(els.modalLoad);
+                showToast('הפרויקט נטען');
+            });
+            row.querySelector('[data-action="delete"]').addEventListener('click', function () {
+                if (confirm('למחוק את הפרויקט?')) { ST.remove(id); renderLoadList(); }
+            });
+        });
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function wireToolbar() {
+        els.btnNew.addEventListener('click', function () {
+            if (confirm('פרויקט חדש יאפס את החדר הנוכחי (ניתן עדיין לבטל עם Ctrl+Z רק עד השמירה הבאה). להמשיך?')) {
+                S.reset();
+                refocusCamera();
+                showToast('פרויקט חדש נוצר');
+            }
+        });
+
+        els.btnSave.addEventListener('click', function () {
+            if (S.get().meta.id) {
+                ST.saveCurrent();
+                showToast('נשמר');
+            } else {
+                els.saveAsName.value = S.get().meta.name;
+                openModal(els.modalSaveAs);
+            }
+        });
+
+        els.btnSaveAs.addEventListener('click', function () {
+            els.saveAsName.value = S.get().meta.name;
+            openModal(els.modalSaveAs);
+            els.saveAsName.focus();
+        });
+        els.saveAsCancel.addEventListener('click', function () { closeModal(els.modalSaveAs); });
+        els.saveAsConfirm.addEventListener('click', function () {
+            const name = els.saveAsName.value.trim() || 'חדר ללא שם';
+            ST.saveAs(name);
+            refreshRoomFields();
+            closeModal(els.modalSaveAs);
+            showToast('הפרויקט נשמר בשם "' + name + '"');
+        });
+
+        els.btnLoad.addEventListener('click', function () { renderLoadList(); openModal(els.modalLoad); });
+        els.loadCancel.addEventListener('click', function () { closeModal(els.modalLoad); });
+
+        els.btnUndo.addEventListener('click', function () { S.undo(); });
+        els.btnRedo.addEventListener('click', function () { S.redo(); });
+
+        els.btnExportJson.addEventListener('click', function () { ST.exportJSON(); showToast('הקובץ יוצא'); });
+        els.btnImportJson.addEventListener('click', function () { els.fileImport.click(); });
+        els.fileImport.addEventListener('change', function () {
+            const file = els.fileImport.files[0];
+            if (!file) return;
+            ST.importJSON(file, function (ok) {
+                if (ok) refocusCamera();
+                showToast(ok ? 'הפרויקט יובא בהצלחה' : 'ייבוא נכשל - קובץ לא תקין');
+                els.fileImport.value = '';
+            });
+        });
+
+        els.btnExportPng.addEventListener('click', function () {
+            ST.exportPNG(RD.Scene.get().renderer);
+            showToast('צילום מסך נשמר');
+        });
+
+        els.sidebarToggle.addEventListener('click', function () {
+            els.sidebar.classList.toggle('open');
+        });
+    }
+
+    function wireKeyboard() {
+        window.addEventListener('keydown', function (evt) {
+            const tag = (evt.target && evt.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+
+            const ctrl = evt.ctrlKey || evt.metaKey;
+            if (ctrl && evt.key.toLowerCase() === 'z' && !evt.shiftKey) { evt.preventDefault(); S.undo(); return; }
+            if (ctrl && (evt.key.toLowerCase() === 'y' || (evt.key.toLowerCase() === 'z' && evt.shiftKey))) { evt.preventDefault(); S.redo(); return; }
+            if (ctrl && evt.key.toLowerCase() === 'd') { evt.preventDefault(); F.duplicateSelected(); return; }
+            if (evt.key === 'Delete' || evt.key === 'Backspace') {
+                if (S.get().selectedId) { evt.preventDefault(); F.deleteSelected(); }
+                return;
+            }
+            if (evt.key.toLowerCase() === 'q') { F.rotateSelected(-15); return; }
+            if (evt.key.toLowerCase() === 'e') { F.rotateSelected(15); return; }
+            if (evt.key === 'Escape') { S.select(null); return; }
+            const step = 0.1;
+            if (evt.key === 'ArrowUp') { evt.preventDefault(); F.nudgeSelected(0, -step); return; }
+            if (evt.key === 'ArrowDown') { evt.preventDefault(); F.nudgeSelected(0, step); return; }
+            if (evt.key === 'ArrowLeft') { evt.preventDefault(); F.nudgeSelected(-step, 0); return; }
+            if (evt.key === 'ArrowRight') { evt.preventDefault(); F.nudgeSelected(step, 0); return; }
+        });
+    }
+
+    function subscribeState() {
+        S.on('state:replaced', function () { refreshAll(); });
+        S.on('room:resized', refreshAll);
+        S.on('room:styled', refreshAll);
+        S.on('lighting:changed', refreshAll);
+        S.on('item:added', refreshAll);
+        S.on('item:updated', refreshAll);
+        S.on('item:deleted', refreshAll);
+        S.on('selection:changed', function () { refreshPropsPanel(); });
+    }
+
+    function init() {
+        cacheEls();
+        renderCatalog();
+        renderTemplates();
+        wireRoomControls();
+        wirePropsPanel();
+        wireToolbar();
+        wireKeyboard();
+        subscribeState();
+        refreshAll();
+    }
+
+    return { init: init, showToast: showToast };
+})();
