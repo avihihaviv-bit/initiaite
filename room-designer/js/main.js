@@ -28,6 +28,7 @@
 
         RD.Furniture.init(ctx);
         RD.Labels.init(viewport, ctx);
+        RD.FirstPerson.init(ctx, document.getElementById('btn-walk'), document.getElementById('walk-hint'));
         RD.UI.init();
 
         let lastT = performance.now();
@@ -35,6 +36,7 @@
             const now = performance.now();
             const dt = Math.min(0.1, (now - lastT) / 1000);
             lastT = now;
+            RD.FirstPerson.tick(dt);
             RD.Room.updateWallVisibility(ctx.camera);
             RD.Furniture.tick(dt);
             RD.Labels.updateFrame();

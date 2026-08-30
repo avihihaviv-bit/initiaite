@@ -20,8 +20,6 @@ RD.UI = (function () {
 
     function cacheEls() {
         els = {
-            sidebarToggle: $('sidebar-toggle-btn'),
-            sidebar: $('sidebar'),
             projectName: $('project-name-display'),
 
             btnNew: $('btn-new'),
@@ -31,6 +29,7 @@ RD.UI = (function () {
             btnUndo: $('btn-undo'),
             btnRedo: $('btn-redo'),
             btnAdvisor: $('btn-advisor'),
+            btnWalk: $('btn-walk'),
             btnExportJson: $('btn-export-json'),
             btnImportJson: $('btn-import-json'),
             fileImport: $('file-import'),
@@ -526,13 +525,12 @@ RD.UI = (function () {
 
         els.adviceClose.addEventListener('click', function () { els.adviceCard.hidden = true; });
 
-        els.sidebarToggle.addEventListener('click', function () {
-            els.sidebar.classList.toggle('open');
-        });
+        els.btnWalk.addEventListener('click', function () { RD.FirstPerson.toggle(); });
     }
 
     function wireKeyboard() {
         window.addEventListener('keydown', function (evt) {
+            if (RD.FirstPerson && RD.FirstPerson.isActive()) return;
             const tag = (evt.target && evt.target.tagName || '').toLowerCase();
             if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
 

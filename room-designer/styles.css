@@ -87,7 +87,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 h3 { margin: 0 0 10px; font-size: 13px; letter-spacing: .02em; color: var(--rd-text-dim); font-weight: 600; text-transform: uppercase; }
 h4 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .03em; color: var(--rd-text-dim); font-weight: 600; text-transform: uppercase; }
 
-#app { height: 100vh; display: flex; flex-direction: column; }
+#app { height: 100vh; display: flex; flex-direction: column; transform-origin: top center; }
 
 /* ---------- Header ---------- */
 .rd-header {
@@ -141,10 +141,15 @@ h4 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .03em; color: var(--rd
     width: 34px; height: 34px; border-radius: var(--rd-radius-sm); flex: none;
 }
 .icon-btn:hover { background: var(--rd-surface-2); }
-.only-mobile { display: none; }
 
 /* ---------- Body layout ---------- */
 .rd-body { flex: 1; display: flex; min-height: 0; }
+
+/* ---------- Scale-to-fit host (js/viewport-scale.js) ----------
+   Below 1280px viewport width, #app is pinned to 1280px and scaled down by
+   this wrapper so the app renders as an exact, shrunk desktop replica
+   instead of switching to a different mobile layout. Inert at 1280px+. */
+#app-scale-host { margin: 0 auto; }
 
 /* ---------- Sidebar ---------- */
 .rd-sidebar {
@@ -223,6 +228,30 @@ details.rd-panel .rd-panel-body { padding-top: 2px; animation: rd-panel-in .15s 
 }
 @keyframes rd-hint-fade { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .rd-viewport-hint { animation: none; opacity: 0; } }
+
+.rd-walk-hint {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    background: #2b2620; color: #fff8f0; font-size: 12px;
+    padding: 7px 16px; border-radius: 999px; pointer-events: none;
+    box-shadow: var(--rd-shadow); z-index: 6;
+}
+.rd-walk-hint kbd { font-family: var(--rd-mono); background: rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 5px; font-size: 10px; }
+.only-touch { display: none; }
+@media (pointer: coarse) {
+    .only-desktop { display: none; }
+    .only-touch { display: inline; }
+}
+
+/* ---------- Walk-mode touch joystick (firstperson.js) ---------- */
+.rd-joystick-base {
+    position: absolute; bottom: 22px; left: 22px; width: 92px; height: 92px; border-radius: 50%;
+    background: rgba(43,38,32,0.35); border: 2px solid rgba(255,255,255,0.5); touch-action: none; z-index: 7;
+}
+.rd-joystick-knob {
+    position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin: -20px;
+    border-radius: 50%; background: rgba(255,255,255,0.85); box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform .04s linear;
+}
 
 /* ---------- Advice card (rich, multi-line feedback) ---------- */
 .rd-advice-card {
@@ -334,30 +363,6 @@ details.rd-panel .rd-panel-body { padding-top: 2px; animation: rd-panel-in .15s 
     font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; z-index: 2000; box-shadow: var(--rd-shadow);
 }
 .rd-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-    .only-mobile { display: inline-flex; align-items: center; justify-content: center; }
-    .rd-brand-title { display: none; }
-    .rd-project-name { display: none; }
-
-    .rd-sidebar {
-        position: fixed; top: var(--rd-header-h); bottom: 0; inset-inline-start: -320px;
-        width: 85vw; max-width: 320px; z-index: 900; box-shadow: var(--rd-shadow);
-        transition: inset-inline-start .2s ease;
-    }
-    .rd-sidebar.open { inset-inline-start: 0; }
-
-    .rd-props {
-        position: fixed; bottom: var(--rd-status-h); inset-inline-end: 0; top: auto;
-        width: 100%; max-width: 340px; max-height: 50vh; border-top: 1px solid var(--rd-border);
-        box-shadow: var(--rd-shadow); z-index: 800;
-    }
-}
-@media (max-width: 480px) {
-    .rd-toolbar .rd-btn:not(.icon-only) { padding: 7px 9px; font-size: 12px; }
-    .rd-modal-grid-2 { grid-template-columns: 1fr; }
-}
 
 /* ---------- Scrollbars ---------- */
 .rd-sidebar::-webkit-scrollbar, .rd-props::-webkit-scrollbar, .rd-toolbar::-webkit-scrollbar,

@@ -159,18 +159,36 @@ RD.Furniture = (function () {
     }
 
     function tintObject(obj, hex) {
+        // Several builders (addLegs, shared shelf/book materials, ...) reuse
+        // one material across multiple meshes. Caching the pre-tint emissive
+        // per-mesh would let a second mesh sharing that material capture the
+        // *already-tinted* value as its "original" and re-apply it on
+        // restore, leaving the tint stuck — so the cache (and the dedup
+        // guard) live on the material itself instead.
+        const seen = new Set();
         obj.traverse(function (child) {
-            if (child.isMesh && child.material && 'emissive' in child.material) {
-                if (!child.userData._baseEmissive) {
-                    child.userData._baseEmissive = child.material.emissive ? child.material.emissive.getHex() : 0;
-                }
-                child.material.emissive.setHex(hex == null ? child.userData._baseEmissive : hex);
+            if (!child.isMesh || !child.material || !('emissive' in child.material)) return;
+            const mat = child.material;
+            if (seen.has(mat)) return;
+            seen.add(mat);
+            if (mat.userData._baseEmissive === undefined) {
+                mat.userData._baseEmissive = mat.emissive ? mat.emissive.getHex() : 0;
             }
+            mat.emissive.setHex(hex == null ? mat.userData._baseEmissive : hex);
         });
     }
 
+    let highlightSuppressed = false;
+    function setHighlightSuppressed(suppressed) {
+        highlightSuppressed = !!suppressed;
+        updateHighlight();
+    }
+
+    // The blue selection tint reads as a subtle highlight from orbit
+    // distance, but up close in first-person it would cover most of the
+    // item in a garish blue — so it's suppressed entirely while walking.
     function updateHighlight() {
-        const selectedId = S.get().selectedId;
+        const selectedId = highlightSuppressed ? null : S.get().selectedId;
         Object.keys(liveObjects).forEach(function (id) {
             tintObject(liveObjects[id], id === selectedId ? 0x2a5a8a : null);
         });
@@ -208,6 +226,7 @@ RD.Furniture = (function () {
     }
 
     function onPointerDown(evt) {
+        if (RD.FirstPerson && RD.FirstPerson.isActive()) return;
         if (evt.button !== undefined && evt.button !== 0) return;
         const hits = I.pickObjects(evt, domEl, camera, pickableObjects());
         if (!hits.length) {
@@ -379,6 +398,7 @@ RD.Furniture = (function () {
         tick: tick,
         getFootprint: getFootprint,
         getLabel: getLabel,
+        setHighlightSuppressed: setHighlightSuppressed,
         addFromCatalog: addFromCatalog,
         addCustomItem: addCustomItem,
         placeAtBestSpot: placeAtBestSpot,

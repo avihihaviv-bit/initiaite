@@ -25,6 +25,7 @@ RD.Room = (function () {
     }
 
     function build(scene, room) {
+        lastRoomRef = room;
         if (group) {
             scene.remove(group);
             disposeObject(group);
@@ -88,6 +89,7 @@ RD.Room = (function () {
 
     function updateStyle(room) {
         if (!group) return;
+        lastRoomRef = room;
         M.applyFloorMaterial(floorMesh, room);
         ceilingMesh.material.color.set(room.ceilingColor);
         ceilingMesh.visible = !!room.showCeiling;
@@ -97,6 +99,17 @@ RD.Room = (function () {
     function setGridVisible(visible) {
         if (gridHelper) gridHelper.visible = !!visible;
     }
+
+    // The ceiling is hidden by default so orbit mode can look down into the
+    // room from outside; standing inside for a walkthrough needs it shown
+    // regardless of that setting, or the outdoor sky shows through the gap.
+    // Pass null to restore the state-driven value.
+    function setCeilingOverride(visible) {
+        if (!ceilingMesh) return;
+        ceilingMesh.visible = visible == null ? !!lastRoomRef.showCeiling : visible;
+    }
+
+    let lastRoomRef = {};
 
     // Hides whichever wall(s) sit between the camera and the room interior,
     // so orbiting never leaves you staring at the outside of a wall.
@@ -138,6 +151,7 @@ RD.Room = (function () {
         updateStyle: updateStyle,
         updateWallVisibility: updateWallVisibility,
         setGridVisible: setGridVisible,
+        setCeilingOverride: setCeilingOverride,
         getBounds: getBounds,
         wallSegments: wallSegments,
         getGroup: function () { return group; }

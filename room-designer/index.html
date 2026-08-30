@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מעצב חדרים תלת-ממדי</title>
     <meta name="theme-color" content="#12233a">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%8B%EF%B8%8F%3C/text%3E%3C/svg%3E">
@@ -11,10 +11,10 @@
 </head>
 <body>
 
+    <div id="app-scale-host">
     <div id="app">
         <!-- ============ Header / Toolbar ============ -->
         <header class="rd-header">
-            <button class="icon-btn only-mobile" id="sidebar-toggle-btn" title="קטלוג ריהוט" aria-label="תפריט">☰</button>
             <div class="rd-brand">
                 <span class="rd-brand-mark">🛋️</span>
                 <span class="rd-brand-title">מעצב החדר שלי</span>
@@ -30,6 +30,7 @@
                 <button class="rd-btn icon-only" id="btn-redo" title="בצע שוב (Ctrl+Y)">↷</button>
                 <span class="rd-sep"></span>
                 <button class="rd-btn rd-btn-accent" id="btn-advisor" title="ניתוח סידור הריהוט">🧭 ייעוץ עיצוב</button>
+                <button class="rd-btn" id="btn-walk" title="הסתובבו בתוך החדר בגובה עיניים">🚶 הליכה בחדר</button>
                 <span class="rd-sep"></span>
                 <button class="rd-btn" id="btn-export-json" title="ייצוא כ-JSON">ייצוא JSON</button>
                 <button class="rd-btn" id="btn-import-json" title="ייבוא מקובץ JSON">ייבוא JSON</button>
@@ -133,6 +134,11 @@
             <main class="rd-viewport-wrap">
                 <div id="viewport"></div>
                 <div class="rd-viewport-hint" id="viewport-hint">גררו פריט מהקטלוג, לחצו עליו כדי לבחור ולהזיז אותו</div>
+                <div class="rd-walk-hint" id="walk-hint" hidden>
+                    <span class="only-desktop">W A S D לתזוזה · גררו כדי להסתכל סביב</span>
+                    <span class="only-touch">השתמשו בג׳ויסטיק לתזוזה · גררו כדי להסתכל סביב</span>
+                    &nbsp;|&nbsp; <kbd>Esc</kbd> ליציאה
+                </div>
                 <div id="advice-card" class="rd-advice-card" hidden>
                     <div class="rd-advice-head">
                         <span id="advice-icon">✅</span>
@@ -185,6 +191,12 @@
             <span id="status-item-count"></span>
             <span id="status-snap"></span>
         </footer>
+
+        <!-- Lives inside #app (not with the modals below) so it scales along
+             with the rest of the UI on a narrow screen instead of appearing
+             at full native size, disconnected from the shrunk layout. -->
+        <div id="toast" class="rd-toast" hidden></div>
+    </div>
     </div>
 
     <!-- ============ Modals ============ -->
@@ -278,13 +290,12 @@
         </div>
     </div>
 
-    <div id="toast" class="rd-toast" hidden></div>
-
     <!-- ============ Three.js (CDN, global/UMD build) ============ -->
     <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <!-- ============ App modules ============ -->
+    <script src="js/viewport-scale.js"></script>
     <script src="js/state.js"></script>
     <script src="js/materials.js"></script>
     <script src="js/scene.js"></script>
@@ -295,6 +306,7 @@
     <script src="js/furniture.js"></script>
     <script src="js/advisor.js"></script>
     <script src="js/labels.js"></script>
+    <script src="js/firstperson.js"></script>
     <script src="js/templates.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/ui.js"></script>
