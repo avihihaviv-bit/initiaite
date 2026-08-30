@@ -41,7 +41,7 @@ RD.State = (function () {
             lighting: { preset: 'day', ambientIntensity: 0.65, sunIntensity: 0.9 },
             items: [],
             selectedId: null,
-            settings: { snapSize: 0.1, snapEnabled: true, gridVisible: true }
+            settings: { snapSize: 0.1, snapEnabled: true, gridVisible: true, showLabels: true }
         };
     }
 
@@ -104,6 +104,30 @@ RD.State = (function () {
             rotationY: opts.rotationY || 0,
             scale: opts.scale || 1,
             color: opts.color || catalogEntry.defaultColor
+        };
+        withHistory(function (s) {
+            s.items.push(item);
+            s.selectedId = item.id;
+        }, 'item:added', { id: item.id });
+        return item;
+    }
+
+    // A user-authored item that isn't in the static catalog: real dimensions,
+    // a free-text name, and an optional reference photo (data URL) travel on
+    // the item itself instead of being looked up from RD.Catalog.
+    function addCustomItem(spec) {
+        const item = {
+            id: uid(),
+            type: 'custom',
+            isCustom: true,
+            name: spec.name || 'פריט מותאם',
+            category: spec.category || 'עיצוב',
+            footprint: spec.footprint,
+            photo: spec.photo || null,
+            position: spec.position || { x: 0, y: 0, z: 0 },
+            rotationY: spec.rotationY || 0,
+            scale: spec.scale || 1,
+            color: spec.color || '#8a6b52'
         };
         withHistory(function (s) {
             s.items.push(item);
@@ -222,6 +246,7 @@ RD.State = (function () {
         setRoomField: setRoomField,
         setLightingPreset: setLightingPreset,
         addItem: addItem,
+        addCustomItem: addCustomItem,
         updateItem: updateItem,
         deleteItem: deleteItem,
         duplicateItem: duplicateItem,

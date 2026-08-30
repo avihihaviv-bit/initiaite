@@ -16,6 +16,39 @@ RD.Furniture = (function () {
 
     let dragging = null; // { id, footprint }
 
+    // ---- Item metadata that works for both catalog and custom items ----
+    function getFootprint(item) {
+        if (item.isCustom) return item.footprint;
+        const entry = C.get(item.type);
+        return entry ? entry.footprint : { w: 0.4, d: 0.4, h: 0.4 };
+    }
+
+    function getLabel(item) {
+        if (item.isCustom) return item.name || 'פריט מותאם';
+        const entry = C.get(item.type);
+        return entry ? entry.label : item.type;
+    }
+
+    function makeContactShadow(footprint) {
+        const size = Math.max(footprint.w, footprint.d) * 1.35;
+        const tex = M.makeCanvasTexture(function (ctx, s) {
+            const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+            g.addColorStop(0, 'rgba(0,0,0,0.32)');
+            g.addColorStop(0.7, 'rgba(0,0,0,0.14)');
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, s, s);
+        }, 128);
+        const mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(size, size),
+            new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = 0.006;
+        mesh.renderOrder = -1;
+        return mesh;
+    }
+
     function init(ctx) {
         scene = ctx.scene; camera = ctx.camera; renderer = ctx.renderer; controls = ctx.controls;
         domEl = renderer.domElement;
@@ -53,22 +86,31 @@ RD.Furniture = (function () {
         delete liveObjects[id];
     }
 
-    function createObjectForItem(item) {
-        const entry = C.get(item.type);
-        if (!entry) return null;
-        const obj = entry.build(item.color);
+    function createObjectForItem(item, animate) {
+        let obj, footprint;
+        if (item.isCustom) {
+            obj = RD.Custom.build(item.color, item.footprint, item.category);
+            footprint = item.footprint;
+        } else {
+            const entry = C.get(item.type);
+            if (!entry) return null;
+            obj = entry.build(item.color);
+            footprint = entry.footprint;
+        }
         obj.userData.itemId = item.id;
-        obj.userData.footprint = entry.footprint;
+        obj.userData.footprint = footprint;
         obj.position.set(item.position.x, item.position.y || 0, item.position.z);
         obj.rotation.y = item.rotationY || 0;
         obj.scale.setScalar(item.scale || 1);
+        obj.add(makeContactShadow(footprint));
+        obj.userData.spawnT = animate ? 0 : 1;
         return obj;
     }
 
     function rebuildAll() {
         clearAll();
         S.get().items.forEach(function (item) {
-            const obj = createObjectForItem(item);
+            const obj = createObjectForItem(item, false);
             if (obj) { liveObjects[item.id] = obj; itemGroup.add(obj); }
         });
         updateLampLights();
@@ -85,15 +127,14 @@ RD.Furniture = (function () {
             seen[item.id] = true;
             let obj = liveObjects[item.id];
             if (!obj) {
-                obj = createObjectForItem(item);
+                obj = createObjectForItem(item, true);
                 if (obj) { liveObjects[item.id] = obj; itemGroup.add(obj); }
                 return;
             }
             obj.position.set(item.position.x, item.position.y || 0, item.position.z);
             obj.rotation.y = item.rotationY || 0;
             obj.scale.setScalar(item.scale || 1);
-            const entry = C.get(item.type);
-            if (entry) M.setGroupColor(obj, item.color);
+            M.setGroupColor(obj, item.color);
         });
         Object.keys(liveObjects).forEach(function (id) {
             if (!seen[id]) removeObject(id);
@@ -117,20 +158,42 @@ RD.Furniture = (function () {
         });
     }
 
+    function tintObject(obj, hex) {
+        obj.traverse(function (child) {
+            if (child.isMesh && child.material && 'emissive' in child.material) {
+                if (!child.userData._baseEmissive) {
+                    child.userData._baseEmissive = child.material.emissive ? child.material.emissive.getHex() : 0;
+                }
+                child.material.emissive.setHex(hex == null ? child.userData._baseEmissive : hex);
+            }
+        });
+    }
+
     function updateHighlight() {
         const selectedId = S.get().selectedId;
         Object.keys(liveObjects).forEach(function (id) {
-            const obj = liveObjects[id];
-            const on = id === selectedId;
-            obj.traverse(function (child) {
-                if (child.isMesh && child.material && 'emissive' in child.material) {
-                    if (!child.userData._baseEmissive) {
-                        child.userData._baseEmissive = child.material.emissive ? child.material.emissive.getHex() : 0;
-                    }
-                    child.material.emissive.setHex(on ? 0x2a5a8a : child.userData._baseEmissive);
-                }
-            });
+            tintObject(liveObjects[id], id === selectedId ? 0x2a5a8a : null);
         });
+    }
+
+    // Live check while dragging: does the item's current spot overlap any
+    // other item? Tints it red as immediate feedback; the drop itself is
+    // never blocked, this is guidance, not a wall.
+    function checkDragOverlap(id) {
+        const item = S.getItem(id);
+        const obj = liveObjects[id];
+        if (!item || !obj) return;
+        const fp = getFootprint(item);
+        const scaled = { w: fp.w * (item.scale || 1), d: fp.d * (item.scale || 1) };
+        const box = I.itemBox(item.position.x, item.position.z, scaled, item.rotationY || 0, 0);
+        const overlapping = S.get().items.some(function (other) {
+            if (other.id === id) return false;
+            const ofp = getFootprint(other);
+            const oscaled = { w: ofp.w * (other.scale || 1), d: ofp.d * (other.scale || 1) };
+            const obox = I.itemBox(other.position.x, other.position.z, oscaled, other.rotationY || 0, 0);
+            return I.boxesOverlap(box, obox);
+        });
+        tintObject(obj, overlapping ? 0xb23a3a : 0x2a5a8a);
     }
 
     // ---- Pointer interaction: select + drag-to-move on the canvas ----
@@ -155,7 +218,7 @@ RD.Furniture = (function () {
         while (root.parent && root.parent !== itemGroup) root = root.parent;
         const id = root.userData.itemId;
         S.select(id);
-        dragging = { id: id, footprint: root.userData.footprint || { w: 0.4, d: 0.4 } };
+        dragging = { id: id, footprint: root.userData.footprint || { w: 0.4, d: 0.4 }, moved: false };
         S.beginDrag(id);
         controls.enabled = false;
         domEl.setPointerCapture(evt.pointerId);
@@ -174,13 +237,19 @@ RD.Furniture = (function () {
         const bounds = RD.Room.getBounds(S.get().room);
         const clamped = I.clampToBounds(x, z, bounds, dragging.footprint, item.rotationY || 0);
         S.dragItemTo(dragging.id, clamped.x, clamped.z);
+        dragging.moved = true;
+        checkDragOverlap(dragging.id);
     }
 
     function onPointerUp() {
         if (!dragging) return;
+        const id = dragging.id;
+        const moved = dragging.moved;
         dragging = null;
         controls.enabled = true;
         S.endDrag();
+        updateHighlight();
+        if (moved && RD.UI && RD.UI.reportQuickCheck) RD.UI.reportQuickCheck(id);
     }
 
     // ---- Actions used by the UI panel ----
@@ -214,7 +283,39 @@ RD.Furniture = (function () {
         const offset = nextSpawnOffset();
         const bounds = RD.Room.getBounds(S.get().room);
         const clamped = I.clampToBounds(offset.x, offset.z, bounds, entry.footprint, 0);
-        S.addItem(entry, { position: { x: clamped.x, y: 0, z: clamped.z } });
+        return S.addItem(entry, { position: { x: clamped.x, y: 0, z: clamped.z } });
+    }
+
+    // spec: { name, category, color, footprint:{w,d,h} in meters, photo }
+    function addCustomItem(spec) {
+        const offset = nextSpawnOffset();
+        const bounds = RD.Room.getBounds(S.get().room);
+        const clamped = I.clampToBounds(offset.x, offset.z, bounds, spec.footprint, 0);
+        return S.addCustomItem(Object.assign({}, spec, { position: { x: clamped.x, y: 0, z: clamped.z } }));
+    }
+
+    // Runs the placement advisor for an existing item (catalog or custom)
+    // and, if a spot was found, moves/resizes it there in one undo step.
+    function placeAtBestSpot(id) {
+        const result = RD.Advisor.findBestSpot(id);
+        if (!result) return null;
+        if (result.fits) {
+            S.updateItem(id, { position: { x: result.x, y: 0, z: result.z }, rotationY: result.rotationY, scale: result.scale });
+        }
+        return result;
+    }
+
+    // Sets one real-world dimension (cm) on the selected axis; since the
+    // model only has a single uniform `scale`, whichever dimension the user
+    // types drives it and the other two follow proportionally.
+    function setRealDimensionCm(id, axis, cmValue) {
+        const item = S.getItem(id);
+        if (!item || !cmValue || cmValue <= 0) return;
+        const fp = getFootprint(item);
+        const baseM = fp[axis];
+        if (!baseM) return;
+        const scale = Math.max(0.1, Math.min(4, (cmValue / 100) / baseM));
+        S.updateItem(id, { scale: scale });
     }
 
     function rotateSelected(deltaDeg) {
@@ -254,14 +355,34 @@ RD.Furniture = (function () {
         if (!id) return;
         const item = S.getItem(id);
         const bounds = RD.Room.getBounds(S.get().room);
-        const entry = C.get(item.type);
-        const clamped = I.clampToBounds(item.position.x + dx, item.position.z + dz, bounds, entry.footprint, item.rotationY || 0);
+        const footprint = getFootprint(item);
+        const clamped = I.clampToBounds(item.position.x + dx, item.position.z + dz, bounds, footprint, item.rotationY || 0);
         S.updateItem(id, { position: { x: clamped.x, y: item.position.y || 0, z: clamped.z } });
+    }
+
+    // Small pop-in tween when an item is added, so it doesn't just snap
+    // into existence. Called once per frame from the render loop.
+    function tick(dt) {
+        Object.keys(liveObjects).forEach(function (id) {
+            const obj = liveObjects[id];
+            if (obj.userData.spawnT == null || obj.userData.spawnT >= 1) return;
+            obj.userData.spawnT = Math.min(1, obj.userData.spawnT + dt / 0.22);
+            const item = S.getItem(id);
+            const target = item ? (item.scale || 1) : 1;
+            const eased = 1 - Math.pow(1 - obj.userData.spawnT, 3);
+            obj.scale.setScalar(target * (0.3 + 0.7 * eased));
+        });
     }
 
     return {
         init: init,
+        tick: tick,
+        getFootprint: getFootprint,
+        getLabel: getLabel,
         addFromCatalog: addFromCatalog,
+        addCustomItem: addCustomItem,
+        placeAtBestSpot: placeAtBestSpot,
+        setRealDimensionCm: setRealDimensionCm,
         rotateSelected: rotateSelected,
         recolorSelected: recolorSelected,
         rescaleSelected: rescaleSelected,

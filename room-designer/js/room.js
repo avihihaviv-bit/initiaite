@@ -108,6 +108,19 @@ RD.Room = (function () {
         });
     }
 
+    // Pure-data wall descriptors (no THREE dependency) for placement logic:
+    // each wall's usable inner run and the direction "into the room" from it.
+    function wallSegments(room) {
+        const b = getBounds(room);
+        const cx = (b.minX + b.maxX) / 2, cz = (b.minZ + b.maxZ) / 2;
+        return [
+            { id: 'back', axis: 'x', fixed: b.minZ, from: b.minX, to: b.maxX, normal: { x: 0, z: 1 }, center: { x: cx, z: b.minZ } },
+            { id: 'front', axis: 'x', fixed: b.maxZ, from: b.minX, to: b.maxX, normal: { x: 0, z: -1 }, center: { x: cx, z: b.maxZ } },
+            { id: 'left', axis: 'z', fixed: b.minX, from: b.minZ, to: b.maxZ, normal: { x: 1, z: 0 }, center: { x: b.minX, z: cz } },
+            { id: 'right', axis: 'z', fixed: b.maxX, from: b.minZ, to: b.maxZ, normal: { x: -1, z: 0 }, center: { x: b.maxX, z: cz } }
+        ];
+    }
+
     function getBounds(room) {
         // Inset by half the wall thickness plus a small clearance so
         // furniture can't visually clip into the inner wall face.
@@ -126,6 +139,7 @@ RD.Room = (function () {
         updateWallVisibility: updateWallVisibility,
         setGridVisible: setGridVisible,
         getBounds: getBounds,
+        wallSegments: wallSegments,
         getGroup: function () { return group; }
     };
 })();

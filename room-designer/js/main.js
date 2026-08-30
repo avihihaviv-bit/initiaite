@@ -27,10 +27,17 @@
         });
 
         RD.Furniture.init(ctx);
+        RD.Labels.init(viewport, ctx);
         RD.UI.init();
 
+        let lastT = performance.now();
         RD.Scene.startLoop(function () {
+            const now = performance.now();
+            const dt = Math.min(0.1, (now - lastT) / 1000);
+            lastT = now;
             RD.Room.updateWallVisibility(ctx.camera);
+            RD.Furniture.tick(dt);
+            RD.Labels.updateFrame();
         });
     }
 

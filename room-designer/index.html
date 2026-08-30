@@ -6,6 +6,7 @@
     <title>מעצב חדרים תלת-ממדי</title>
     <meta name="theme-color" content="#12233a">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%8B%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,6 +29,8 @@
                 <button class="rd-btn icon-only" id="btn-undo" title="בטל (Ctrl+Z)">↶</button>
                 <button class="rd-btn icon-only" id="btn-redo" title="בצע שוב (Ctrl+Y)">↷</button>
                 <span class="rd-sep"></span>
+                <button class="rd-btn rd-btn-accent" id="btn-advisor" title="ניתוח סידור הריהוט">🧭 ייעוץ עיצוב</button>
+                <span class="rd-sep"></span>
                 <button class="rd-btn" id="btn-export-json" title="ייצוא כ-JSON">ייצוא JSON</button>
                 <button class="rd-btn" id="btn-import-json" title="ייבוא מקובץ JSON">ייבוא JSON</button>
                 <input type="file" id="file-import" accept="application/json" hidden>
@@ -40,75 +43,88 @@
         <div class="rd-body">
             <!-- ============ Left Sidebar ============ -->
             <aside class="rd-sidebar" id="sidebar">
-                <section class="rd-panel">
-                    <h3>תבניות מוכנות</h3>
-                    <div class="rd-template-row" id="templates-row"></div>
-                </section>
+                <details class="rd-panel" open>
+                    <summary>תבניות מוכנות</summary>
+                    <div class="rd-panel-body">
+                        <div class="rd-template-row" id="templates-row"></div>
+                    </div>
+                </details>
 
-                <section class="rd-panel">
-                    <h3>מידות החדר</h3>
-                    <label class="rd-field">
-                        <span>רוחב (מ')</span>
-                        <input type="range" id="room-width" min="2" max="12" step="0.1">
-                        <output id="room-width-out"></output>
-                    </label>
-                    <label class="rd-field">
-                        <span>עומק (מ')</span>
-                        <input type="range" id="room-depth" min="2" max="12" step="0.1">
-                        <output id="room-depth-out"></output>
-                    </label>
-                    <label class="rd-field">
-                        <span>גובה (מ')</span>
-                        <input type="range" id="room-height" min="2" max="4.5" step="0.1">
-                        <output id="room-height-out"></output>
-                    </label>
-                </section>
+                <details class="rd-panel" open>
+                    <summary>מידות החדר</summary>
+                    <div class="rd-panel-body">
+                        <label class="rd-field">
+                            <span>רוחב (מ')</span>
+                            <input type="range" id="room-width" min="2" max="12" step="0.1">
+                            <output id="room-width-out"></output>
+                        </label>
+                        <label class="rd-field">
+                            <span>עומק (מ')</span>
+                            <input type="range" id="room-depth" min="2" max="12" step="0.1">
+                            <output id="room-depth-out"></output>
+                        </label>
+                        <label class="rd-field">
+                            <span>גובה (מ')</span>
+                            <input type="range" id="room-height" min="2" max="4.5" step="0.1">
+                            <output id="room-height-out"></output>
+                        </label>
+                    </div>
+                </details>
 
-                <section class="rd-panel">
-                    <h3>גימור החדר</h3>
-                    <label class="rd-field-row">
-                        <span>קיר</span>
-                        <input type="color" id="wall-color">
-                    </label>
-                    <label class="rd-field-row">
-                        <span>רצפה</span>
-                        <input type="color" id="floor-color">
-                    </label>
-                    <label class="rd-field-row">
-                        <span>חומר רצפה</span>
-                        <select id="floor-material">
-                            <option value="solid">חלק</option>
-                            <option value="wood">עץ</option>
-                            <option value="tile">אריחים</option>
-                        </select>
-                    </label>
-                    <label class="rd-field-row">
-                        <span>הצג תקרה</span>
-                        <input type="checkbox" id="show-ceiling">
-                    </label>
-                    <label class="rd-field-row">
-                        <span>תאורה</span>
-                        <div class="rd-segmented" id="lighting-toggle">
-                            <button data-preset="day" class="active">☀️ יום</button>
-                            <button data-preset="night">🌙 לילה</button>
-                        </div>
-                    </label>
-                </section>
+                <details class="rd-panel" open>
+                    <summary>גימור החדר</summary>
+                    <div class="rd-panel-body">
+                        <label class="rd-field-row">
+                            <span>קיר</span>
+                            <input type="color" id="wall-color">
+                        </label>
+                        <label class="rd-field-row">
+                            <span>רצפה</span>
+                            <input type="color" id="floor-color">
+                        </label>
+                        <label class="rd-field-row">
+                            <span>חומר רצפה</span>
+                            <select id="floor-material">
+                                <option value="solid">חלק</option>
+                                <option value="wood">עץ</option>
+                                <option value="tile">אריחים</option>
+                            </select>
+                        </label>
+                        <label class="rd-field-row">
+                            <span>הצג תקרה</span>
+                            <input type="checkbox" id="show-ceiling">
+                        </label>
+                        <label class="rd-field-row">
+                            <span>תאורה</span>
+                            <div class="rd-segmented" id="lighting-toggle">
+                                <button data-preset="day" class="active">☀️ יום</button>
+                                <button data-preset="night">🌙 לילה</button>
+                            </div>
+                        </label>
+                    </div>
+                </details>
 
-                <section class="rd-panel">
-                    <h3>הגדרות עריכה</h3>
-                    <label class="rd-field-row">
-                        <span>הצג רשת</span>
-                        <input type="checkbox" id="grid-visible" checked>
-                    </label>
-                    <label class="rd-field-row">
-                        <span>הצמדה לרשת</span>
-                        <input type="checkbox" id="snap-enabled" checked>
-                    </label>
-                </section>
+                <details class="rd-panel">
+                    <summary>הגדרות עריכה</summary>
+                    <div class="rd-panel-body">
+                        <label class="rd-field-row">
+                            <span>הצג רשת</span>
+                            <input type="checkbox" id="grid-visible" checked>
+                        </label>
+                        <label class="rd-field-row">
+                            <span>הצמדה לרשת</span>
+                            <input type="checkbox" id="snap-enabled" checked>
+                        </label>
+                        <label class="rd-field-row">
+                            <span>תוויות מעל פריטים</span>
+                            <input type="checkbox" id="show-labels" checked>
+                        </label>
+                    </div>
+                </details>
 
                 <section class="rd-panel rd-panel-grow">
                     <h3>קטלוג ריהוט</h3>
+                    <button class="rd-btn rd-btn-accent rd-btn-block" id="btn-add-custom">➕ הוסיפו מוצר משלכם (מידות אמיתיות)</button>
                     <div id="catalog-list"></div>
                 </section>
             </aside>
@@ -117,6 +133,14 @@
             <main class="rd-viewport-wrap">
                 <div id="viewport"></div>
                 <div class="rd-viewport-hint" id="viewport-hint">גררו פריט מהקטלוג, לחצו עליו כדי לבחור ולהזיז אותו</div>
+                <div id="advice-card" class="rd-advice-card" hidden>
+                    <div class="rd-advice-head">
+                        <span id="advice-icon">✅</span>
+                        <strong id="advice-title">בדיקת מיקום</strong>
+                        <button class="rd-advice-close" id="advice-close" aria-label="סגירה">✕</button>
+                    </div>
+                    <ul id="advice-list"></ul>
+                </div>
             </main>
 
             <!-- ============ Right Property Panel ============ -->
@@ -127,19 +151,31 @@
                     <input type="color" id="prop-color">
                 </label>
                 <label class="rd-field">
-                    <span>גודל</span>
+                    <span>גודל (יחסי)</span>
                     <input type="range" id="prop-scale" min="0.5" max="1.8" step="0.05">
                     <output id="prop-scale-out"></output>
                 </label>
+
+                <div class="rd-realsize">
+                    <h4>מידות אמיתיות (ס״מ)</h4>
+                    <div class="rd-realsize-row">
+                        <label><span>רוחב</span><input type="number" id="prop-width-cm" min="1" step="1"></label>
+                        <label><span>עומק</span><input type="number" id="prop-depth-cm" min="1" step="1"></label>
+                        <label><span>גובה</span><input type="number" id="prop-height-cm" min="1" step="1"></label>
+                    </div>
+                </div>
+
                 <div class="rd-prop-buttons">
                     <button class="rd-btn icon-only" id="prop-rotate-left" title="סובב שמאלה (Q)">↺</button>
                     <button class="rd-btn icon-only" id="prop-rotate-right" title="סובב ימינה (E)">↻</button>
                 </div>
+                <button class="rd-btn rd-btn-accent rd-btn-block" id="prop-find-spot" title="מצא מקום מתאים אוטומטית">✨ מצא לי מקום מתאים</button>
+                <button class="rd-btn rd-btn-block" id="prop-check" title="בדקו אם המיקום הנוכחי טוב">🔍 בדקו את המיקום</button>
                 <div class="rd-prop-buttons">
                     <button class="rd-btn" id="prop-duplicate" title="שכפל (Ctrl+D)">שכפל</button>
                     <button class="rd-btn rd-btn-danger" id="prop-delete" title="מחק (Delete)">מחק</button>
                 </div>
-                <p class="rd-hint">חצים: הזזה עדינה &nbsp;|&nbsp; Esc: ביטול בחירה</p>
+                <p class="rd-hint">חצים: הזזה עדינה &nbsp;|&nbsp; <kbd>Esc</kbd> ביטול בחירה</p>
             </aside>
         </div>
 
@@ -173,6 +209,75 @@
         </div>
     </div>
 
+    <div class="rd-modal" id="modal-custom-item">
+        <div class="rd-modal-content rd-modal-wide">
+            <h3>הוספת מוצר משלכם</h3>
+            <p class="rd-modal-lead">מצאתם רהיט בגוגל, באתר של חנות, או בכל מקום אחר? הזינו את הפרטים שלו — נבנה לו ייצוג מדויק במידה, ואם תרצו נמצא לו את המקום הכי מתאים בחדר.</p>
+
+            <label class="rd-modal-field">
+                <span>שם המוצר</span>
+                <input type="text" id="ci-name" placeholder='למשל: "ספת פינה - איקאה קיוואיק"'>
+            </label>
+
+            <div class="rd-modal-grid-2">
+                <label class="rd-modal-field">
+                    <span>קטגוריה</span>
+                    <select id="ci-category">
+                        <option value="ישיבה">ישיבה (ספה, כורסה, מיטה)</option>
+                        <option value="שולחנות">שולחנות</option>
+                        <option value="אחסון">אחסון (ארון, שידה, מדף)</option>
+                        <option value="תאורה">תאורה</option>
+                        <option value="עיצוב">עיצוב / אחר</option>
+                    </select>
+                </label>
+                <label class="rd-modal-field">
+                    <span>צבע</span>
+                    <input type="color" id="ci-color" value="#8a6b52">
+                </label>
+            </div>
+
+            <label class="rd-modal-check">
+                <input type="checkbox" id="ci-know-size" checked>
+                <span>יש לי מידות מדויקות (מהאתר או מהאריזה)</span>
+            </label>
+
+            <div class="rd-modal-grid-3" id="ci-size-fields">
+                <label><span>רוחב (ס״מ)</span><input type="number" id="ci-width" min="1" step="1"></label>
+                <label><span>עומק (ס״מ)</span><input type="number" id="ci-depth" min="1" step="1"></label>
+                <label><span>גובה (ס״מ)</span><input type="number" id="ci-height" min="1" step="1"></label>
+            </div>
+            <p class="rd-modal-note" id="ci-size-note" hidden>נשתמש בהערכת מידה טיפוסית לקטגוריה שנבחרה — אפשר לדייק אחר כך בפאנל הפריט.</p>
+
+            <label class="rd-modal-field">
+                <span>תמונת המוצר (אופציונלי — תוצג כתווית מעל הפריט בחדר)</span>
+                <input type="file" id="ci-photo" accept="image/*">
+            </label>
+            <div class="rd-modal-preview" id="ci-preview" hidden>
+                <img id="ci-preview-img" alt="">
+                <button class="rd-btn rd-btn-sm" id="ci-preview-remove">הסר תמונה</button>
+            </div>
+
+            <div class="rd-modal-actions rd-modal-actions-split">
+                <button class="rd-btn" id="ci-cancel">ביטול</button>
+                <div class="rd-modal-actions">
+                    <button class="rd-btn" id="ci-add-plain">הוסף למרכז החדר</button>
+                    <button class="rd-btn rd-btn-primary" id="ci-add-smart">✨ הוסף ומצא מקום מתאים</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-modal" id="modal-advisor">
+        <div class="rd-modal-content rd-modal-wide">
+            <h3>ייעוץ עיצוב לחדר</h3>
+            <p class="rd-modal-lead">ניתוח גיאומטרי אמיתי של הסידור הנוכחי — מרחקים, חפיפות ומעברים, לא ניחושים.</p>
+            <ul class="rd-advisor-list" id="advisor-list"></ul>
+            <div class="rd-modal-actions">
+                <button class="rd-btn" id="advisor-close">סגור</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="rd-toast" hidden></div>
 
     <!-- ============ Three.js (CDN, global/UMD build) ============ -->
@@ -185,8 +290,11 @@
     <script src="js/scene.js"></script>
     <script src="js/room.js"></script>
     <script src="js/catalog.js"></script>
+    <script src="js/custom.js"></script>
     <script src="js/interaction.js"></script>
     <script src="js/furniture.js"></script>
+    <script src="js/advisor.js"></script>
+    <script src="js/labels.js"></script>
     <script src="js/templates.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/ui.js"></script>

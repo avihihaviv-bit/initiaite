@@ -7,8 +7,14 @@ RD.UI = (function () {
     const F = RD.Furniture;
     const T = RD.Templates;
     const ST = RD.Storage;
+    const A = RD.Advisor;
 
     let els = {};
+    let customPhotoDataUrl = null;
+
+    const CATEGORY_ICON = { 'ישיבה': '🛋️', 'שולחנות': '🪑', 'אחסון': '🗄️', 'תאורה': '💡', 'עיצוב': '🖼️' };
+    const SEVERITY_ICON = { issue: '⚠️', notice: 'ℹ️', good: '✅' };
+    const SEVERITY_RANK = { issue: 0, notice: 1, good: 2 };
 
     function $(id) { return document.getElementById(id); }
 
@@ -24,6 +30,7 @@ RD.UI = (function () {
             btnLoad: $('btn-load'),
             btnUndo: $('btn-undo'),
             btnRedo: $('btn-redo'),
+            btnAdvisor: $('btn-advisor'),
             btnExportJson: $('btn-export-json'),
             btnImportJson: $('btn-import-json'),
             fileImport: $('file-import'),
@@ -40,14 +47,19 @@ RD.UI = (function () {
             lightingToggle: $('lighting-toggle'),
             gridVisible: $('grid-visible'),
             snapEnabled: $('snap-enabled'),
+            showLabels: $('show-labels'),
             catalogList: $('catalog-list'),
+            btnAddCustom: $('btn-add-custom'),
 
             propsPanel: $('props-panel'),
             propsTitle: $('props-title'),
             propColor: $('prop-color'),
             propScale: $('prop-scale'), propScaleOut: $('prop-scale-out'),
+            propWidthCm: $('prop-width-cm'), propDepthCm: $('prop-depth-cm'), propHeightCm: $('prop-height-cm'),
             propRotateLeft: $('prop-rotate-left'),
             propRotateRight: $('prop-rotate-right'),
+            propFindSpot: $('prop-find-spot'),
+            propCheck: $('prop-check'),
             propDuplicate: $('prop-duplicate'),
             propDelete: $('prop-delete'),
 
@@ -64,6 +76,20 @@ RD.UI = (function () {
             loadList: $('load-list'),
             loadCancel: $('load-cancel'),
 
+            modalCustom: $('modal-custom-item'),
+            ciName: $('ci-name'), ciCategory: $('ci-category'), ciColor: $('ci-color'),
+            ciKnowSize: $('ci-know-size'), ciSizeFields: $('ci-size-fields'), ciSizeNote: $('ci-size-note'),
+            ciWidth: $('ci-width'), ciDepth: $('ci-depth'), ciHeight: $('ci-height'),
+            ciPhoto: $('ci-photo'), ciPreview: $('ci-preview'), ciPreviewImg: $('ci-preview-img'), ciPreviewRemove: $('ci-preview-remove'),
+            ciCancel: $('ci-cancel'), ciAddPlain: $('ci-add-plain'), ciAddSmart: $('ci-add-smart'),
+
+            modalAdvisor: $('modal-advisor'),
+            advisorList: $('advisor-list'),
+            advisorClose: $('advisor-close'),
+
+            adviceCard: $('advice-card'), adviceIcon: $('advice-icon'), adviceTitle: $('advice-title'),
+            adviceList: $('advice-list'), adviceClose: $('advice-close'),
+
             toast: $('toast')
         };
     }
@@ -77,6 +103,30 @@ RD.UI = (function () {
             els.toast.classList.remove('show');
             setTimeout(function () { els.toast.hidden = true; }, 200);
         }, 2200);
+    }
+
+    function worstSeverity(findings) {
+        let worst = 'good';
+        findings.forEach(function (f) { if (SEVERITY_RANK[f.severity] < SEVERITY_RANK[worst]) worst = f.severity; });
+        return worst;
+    }
+
+    function showAdviceCard(title, findings) {
+        els.adviceTitle.textContent = title;
+        els.adviceIcon.textContent = SEVERITY_ICON[worstSeverity(findings)];
+        els.adviceList.innerHTML = findings.map(function (f) {
+            return '<li data-severity="' + f.severity + '">' + escapeHtml(f.text) + '</li>';
+        }).join('');
+        els.adviceCard.hidden = false;
+        clearTimeout(showAdviceCard._t);
+        showAdviceCard._t = setTimeout(function () { els.adviceCard.hidden = true; }, 9000);
+    }
+
+    function reportQuickCheck(itemId) {
+        const item = S.getItem(itemId);
+        if (!item) return;
+        const findings = A.quickCheck(itemId);
+        showAdviceCard('בדיקת מיקום: ' + F.getLabel(item), findings);
     }
 
     function openModal(el) { el.classList.add('open'); }
@@ -95,7 +145,7 @@ RD.UI = (function () {
         });
         let html = '';
         Object.keys(byCategory).forEach(function (cat) {
-            html += '<div class="rd-cat-group"><h4>' + cat + '</h4><div class="rd-cat-items">';
+            html += '<div class="rd-cat-group"><h4>' + (CATEGORY_ICON[cat] || '') + ' ' + cat + '</h4><div class="rd-cat-items">';
             byCategory[cat].forEach(function (it) {
                 html += '<button class="rd-catalog-item" data-type="' + it.type + '" style="--swatch:' + it.defaultColor + '">' +
                     '<span class="rd-swatch"></span><span>' + it.label + '</span></button>';
@@ -142,6 +192,7 @@ RD.UI = (function () {
         const settings = S.get().settings;
         els.gridVisible.checked = !!settings.gridVisible;
         els.snapEnabled.checked = !!settings.snapEnabled;
+        els.showLabels.checked = settings.showLabels !== false;
 
         const lighting = S.get().lighting;
         els.lightingToggle.querySelectorAll('button').forEach(function (b) {
@@ -156,12 +207,17 @@ RD.UI = (function () {
         if (!id) { els.propsPanel.hidden = true; return; }
         const item = S.getItem(id);
         if (!item) { els.propsPanel.hidden = true; return; }
-        const entry = RD.Catalog.get(item.type);
         els.propsPanel.hidden = false;
-        els.propsTitle.textContent = entry ? entry.label : item.type;
+        els.propsTitle.textContent = F.getLabel(item);
         els.propColor.value = item.color;
         els.propScale.value = item.scale;
         els.propScaleOut.textContent = Math.round(item.scale * 100) + '%';
+
+        const fp = F.getFootprint(item);
+        const s = item.scale || 1;
+        els.propWidthCm.value = Math.round(fp.w * s * 100);
+        els.propDepthCm.value = Math.round(fp.d * s * 100);
+        els.propHeightCm.value = Math.round(fp.h * s * 100);
     }
 
     function refreshStatus() {
@@ -217,6 +273,10 @@ RD.UI = (function () {
             S.get().settings.snapEnabled = els.snapEnabled.checked;
             refreshStatus();
         });
+        els.showLabels.addEventListener('change', function () {
+            S.get().settings.showLabels = els.showLabels.checked;
+            RD.Labels.sync();
+        });
     }
 
     function wirePropsPanel() {
@@ -229,6 +289,32 @@ RD.UI = (function () {
         els.propRotateRight.addEventListener('click', function () { F.rotateSelected(15); });
         els.propDuplicate.addEventListener('click', function () { F.duplicateSelected(); });
         els.propDelete.addEventListener('click', function () { F.deleteSelected(); });
+
+        function wireDim(el, axis) {
+            el.addEventListener('change', function () {
+                const id = S.get().selectedId;
+                if (!id) return;
+                F.setRealDimensionCm(id, axis, parseFloat(el.value));
+            });
+        }
+        wireDim(els.propWidthCm, 'w');
+        wireDim(els.propDepthCm, 'd');
+        wireDim(els.propHeightCm, 'h');
+
+        els.propFindSpot.addEventListener('click', function () {
+            const id = S.get().selectedId;
+            if (!id) return;
+            const result = F.placeAtBestSpot(id);
+            if (!result) return;
+            showAdviceCard('מיקום מומלץ: ' + F.getLabel(S.getItem(id)), result.reasons.map(function (t) {
+                return { severity: result.fits ? 'good' : 'issue', text: t };
+            }));
+        });
+        els.propCheck.addEventListener('click', function () {
+            const id = S.get().selectedId;
+            if (!id) return;
+            reportQuickCheck(id);
+        });
     }
 
     function renderLoadList() {
@@ -264,6 +350,122 @@ RD.UI = (function () {
         return String(str).replace(/[&<>"']/g, function (c) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
+    }
+
+    // ---- Custom item modal ----
+    function resetCustomForm() {
+        els.ciName.value = '';
+        els.ciCategory.value = 'ישיבה';
+        els.ciColor.value = '#8a6b52';
+        els.ciKnowSize.checked = true;
+        customPhotoDataUrl = null;
+        els.ciPhoto.value = '';
+        els.ciPreview.hidden = true;
+        updateCustomSizeFields();
+    }
+
+    function updateCustomSizeFields() {
+        const known = els.ciKnowSize.checked;
+        els.ciSizeFields.hidden = !known;
+        els.ciSizeNote.hidden = known;
+        if (known && !els.ciWidth.value) {
+            const d = RD.Custom.defaultFootprint(els.ciCategory.value);
+            els.ciWidth.value = Math.round(d.w * 100);
+            els.ciDepth.value = Math.round(d.d * 100);
+            els.ciHeight.value = Math.round(d.h * 100);
+        }
+    }
+
+    function readCustomFootprint() {
+        if (els.ciKnowSize.checked) {
+            const w = parseFloat(els.ciWidth.value), d = parseFloat(els.ciDepth.value), h = parseFloat(els.ciHeight.value);
+            if (w > 0 && d > 0 && h > 0) return { w: w / 100, d: d / 100, h: h / 100 };
+        }
+        return RD.Custom.defaultFootprint(els.ciCategory.value);
+    }
+
+    function buildCustomSpec() {
+        return {
+            name: els.ciName.value.trim() || 'פריט מותאם',
+            category: els.ciCategory.value,
+            color: els.ciColor.value,
+            footprint: readCustomFootprint(),
+            photo: customPhotoDataUrl
+        };
+    }
+
+    function wireCustomItemModal() {
+        els.btnAddCustom.addEventListener('click', function () {
+            resetCustomForm();
+            openModal(els.modalCustom);
+            els.ciName.focus();
+        });
+        els.ciCancel.addEventListener('click', function () { closeModal(els.modalCustom); });
+        els.ciKnowSize.addEventListener('change', updateCustomSizeFields);
+        els.ciCategory.addEventListener('change', function () {
+            if (!els.ciKnowSize.checked) return;
+            const d = RD.Custom.defaultFootprint(els.ciCategory.value);
+            els.ciWidth.value = Math.round(d.w * 100);
+            els.ciDepth.value = Math.round(d.d * 100);
+            els.ciHeight.value = Math.round(d.h * 100);
+        });
+
+        els.ciPhoto.addEventListener('change', function () {
+            const file = els.ciPhoto.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function () {
+                customPhotoDataUrl = reader.result;
+                els.ciPreviewImg.src = customPhotoDataUrl;
+                els.ciPreview.hidden = false;
+            };
+            reader.readAsDataURL(file);
+        });
+        els.ciPreviewRemove.addEventListener('click', function () {
+            customPhotoDataUrl = null;
+            els.ciPhoto.value = '';
+            els.ciPreview.hidden = true;
+        });
+
+        els.ciAddPlain.addEventListener('click', function () {
+            const spec = buildCustomSpec();
+            F.addCustomItem(spec);
+            closeModal(els.modalCustom);
+            showToast('"' + spec.name + '" נוסף לחדר');
+        });
+        els.ciAddSmart.addEventListener('click', function () {
+            const spec = buildCustomSpec();
+            const item = F.addCustomItem(spec);
+            closeModal(els.modalCustom);
+            const result = F.placeAtBestSpot(item.id);
+            if (result) {
+                showAdviceCard('"' + spec.name + '" — ' + (result.fits ? 'מוקם אוטומטית' : 'לא נמצא מקום'), result.reasons.map(function (t) {
+                    return { severity: result.fits ? 'good' : 'issue', text: t };
+                }));
+            }
+        });
+    }
+
+    // ---- Advisor modal ----
+    function wireAdvisorModal() {
+        els.btnAdvisor.addEventListener('click', function () {
+            const findings = A.analyzeRoom();
+            findings.sort(function (a, b) { return SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]; });
+            els.advisorList.innerHTML = findings.map(function (f, i) {
+                return '<li data-severity="' + f.severity + '" data-index="' + i + '"><span class="rd-advisor-icon">' + SEVERITY_ICON[f.severity] + '</span><span>' + escapeHtml(f.text) + '</span></li>';
+            }).join('');
+            els.advisorList.querySelectorAll('li').forEach(function (li, i) {
+                li.addEventListener('click', function () {
+                    const f = findings[i];
+                    if (f.itemId) {
+                        S.select(f.itemId);
+                        closeModal(els.modalAdvisor);
+                    }
+                });
+            });
+            openModal(els.modalAdvisor);
+        });
+        els.advisorClose.addEventListener('click', function () { closeModal(els.modalAdvisor); });
     }
 
     function wireToolbar() {
@@ -322,6 +524,8 @@ RD.UI = (function () {
             showToast('צילום מסך נשמר');
         });
 
+        els.adviceClose.addEventListener('click', function () { els.adviceCard.hidden = true; });
+
         els.sidebarToggle.addEventListener('click', function () {
             els.sidebar.classList.toggle('open');
         });
@@ -368,11 +572,13 @@ RD.UI = (function () {
         renderTemplates();
         wireRoomControls();
         wirePropsPanel();
+        wireCustomItemModal();
+        wireAdvisorModal();
         wireToolbar();
         wireKeyboard();
         subscribeState();
         refreshAll();
     }
 
-    return { init: init, showToast: showToast };
+    return { init: init, showToast: showToast, reportQuickCheck: reportQuickCheck };
 })();
