@@ -8,7 +8,9 @@ RD.FirstPerson = (function () {
     const S = RD.State;
     const EYE_HEIGHT = 1.65;
     const BODY_RADIUS = 0.28;
-    const SPEED = 2.0; // m/s
+    const SPEED = 2.0; // m/s, top speed once fully accelerated
+    const ACCEL = 9; // how fast speed ramps up to SPEED (1/s)
+    const DECEL = 12; // how fast it ramps back down to a stop (1/s)
     const LOOK_SPEED = 0.0032;
     const PITCH_LIMIT = 1.15; // radians, ~66deg up/down
 
@@ -17,6 +19,7 @@ RD.FirstPerson = (function () {
     let active = false;
     let pos = { x: 0, z: 0 };
     let yaw = 0, pitch = 0;
+    let speedFactor = 0, lastDir = { x: 0, z: 0 };
     const keys = {};
     let looking = false;
     let lastLookX = 0, lastLookY = 0;
@@ -137,14 +140,23 @@ RD.FirstPerson = (function () {
         if (keys['KeyD'] || keys['ArrowRight']) mx += 1;
         if (joystick && joystick.pointerId != null) { mx += joystick.dx; mz += joystick.dz; }
 
-        const len = Math.hypot(mx, mz);
-        if (len > 0.001) {
-            mx /= len; mz /= len;
+        // Eased acceleration/deceleration instead of snapping straight to
+        // full speed — holding a movement key keeps the last direction
+        // while ramping down smoothly the instant it's released.
+        const inputLen = Math.hypot(mx, mz);
+        const hasInput = inputLen > 0.001;
+        if (hasInput) { lastDir.x = mx / inputLen; lastDir.z = mz / inputLen; }
+        const targetFactor = hasInput ? Math.min(1, inputLen) : 0;
+        const rate = targetFactor > speedFactor ? ACCEL : DECEL;
+        speedFactor += (targetFactor - speedFactor) * Math.min(1, rate * dt);
+        if (speedFactor < 0.001) speedFactor = 0;
+
+        if (speedFactor > 0) {
             const forward = { x: Math.sin(yaw), z: Math.cos(yaw) };
             const right = { x: Math.cos(yaw), z: -Math.sin(yaw) };
-            const step = SPEED * dt * Math.min(1, len);
-            const dx = (forward.x * -mz + right.x * mx) * step;
-            const dz = (forward.z * -mz + right.z * mx) * step;
+            const step = SPEED * speedFactor * dt;
+            const dx = (forward.x * -lastDir.z + right.x * lastDir.x) * step;
+            const dz = (forward.z * -lastDir.z + right.z * lastDir.x) * step;
             tryMove(dx, dz);
         }
         applyCamera();
@@ -176,6 +188,7 @@ RD.FirstPerson = (function () {
     function enter() {
         if (active || !ctx) return;
         active = true;
+        speedFactor = 0; lastDir.x = 0; lastDir.z = 0;
         savedCameraState = { position: ctx.camera.position.clone(), target: ctx.controls.target.clone() };
         ctx.controls.enabled = false;
 

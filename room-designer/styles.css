@@ -87,7 +87,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 h3 { margin: 0 0 10px; font-size: 13px; letter-spacing: .02em; color: var(--rd-text-dim); font-weight: 600; text-transform: uppercase; }
 h4 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .03em; color: var(--rd-text-dim); font-weight: 600; text-transform: uppercase; }
 
-#app { height: 100vh; display: flex; flex-direction: column; transform-origin: top center; }
+#app { height: 100vh; display: flex; flex-direction: column; transform-origin: top center; transition: opacity .5s ease; }
+#app.rd-boot { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { #app { transition: none; } }
 
 /* ---------- Header ---------- */
 .rd-header {

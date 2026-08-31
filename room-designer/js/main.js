@@ -3,6 +3,13 @@
 
 (function () {
     function boot() {
+        // Restore whatever was last in progress (even if never explicitly
+        // saved) before anything else reads state, so the initial room
+        // build/camera/lighting all reflect it from the start.
+        const autosave = RD.Storage.loadAutosave();
+        if (autosave) RD.State.replace(autosave);
+        RD.Storage.initAutosave();
+
         const viewport = document.getElementById('viewport');
         const ctx = RD.Scene.init(viewport);
 
@@ -13,7 +20,7 @@
 
         rebuildRoom();
         RD.Scene.applyLightingPreset(RD.State.get().lighting);
-        RD.Scene.focusRoom(RD.State.get().room.width, RD.State.get().room.depth, RD.State.get().room.height);
+        RD.Scene.playIntro(RD.State.get().room.width, RD.State.get().room.depth, RD.State.get().room.height);
 
         RD.State.on('room:resized', rebuildRoom);
         RD.State.on('room:styled', function () { RD.Room.updateStyle(RD.State.get().room); });
@@ -30,6 +37,10 @@
         RD.Labels.init(viewport, ctx);
         RD.FirstPerson.init(ctx, document.getElementById('btn-walk'), document.getElementById('walk-hint'));
         RD.UI.init();
+
+        requestAnimationFrame(function () {
+            document.getElementById('app').classList.remove('rd-boot');
+        });
 
         let lastT = performance.now();
         RD.Scene.startLoop(function () {

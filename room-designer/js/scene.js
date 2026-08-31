@@ -7,7 +7,7 @@ RD.Scene = (function () {
     let renderer, scene, camera, controls;
     let ambientLight, sunLight;
     let container;
-    let groundMesh, skyDome;
+    let groundMesh, mountainMat, celestialSprite;
 
     function skyTexture(top, bottom) {
         return M.makeCanvasTexture(function (ctx, s) {
@@ -38,6 +38,56 @@ RD.Scene = (function () {
         }, 256);
     }
 
+    function groundTexture(base, speck) {
+        return M.makeCanvasTexture(function (ctx, s) {
+            ctx.fillStyle = base;
+            ctx.fillRect(0, 0, s, s);
+            let seed = 11;
+            function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+            ctx.fillStyle = speck;
+            for (let i = 0; i < 700; i++) {
+                const x = rnd() * s, y = rnd() * s, r = rnd() * 2.4 + 0.4;
+                ctx.globalAlpha = 0.12 + rnd() * 0.22;
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }, 256);
+    }
+
+    // A soft radial-gradient billboard for the sun/moon glow.
+    function glowSprite(inner, size) {
+        const tex = M.makeCanvasTexture(function (ctx, s) {
+            const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+            g.addColorStop(0, inner);
+            g.addColorStop(0.35, inner);
+            g.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, s, s);
+        }, 128);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+        sprite.scale.set(size, size, 1);
+        sprite.renderOrder = -2;
+        return sprite;
+    }
+
+    // A distant, hazy mountain ring so the horizon has depth instead of
+    // ending abruptly at the tree line.
+    function buildMountainRing() {
+        const group = new THREE.Group();
+        mountainMat = M.hexMat('#9db2d1', { roughness: 1 });
+        let seed = 21;
+        function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+        for (let i = 0; i < 11; i++) {
+            const angle = (i / 11) * Math.PI * 2 + rnd() * 0.25;
+            const radius = 30 + rnd() * 12;
+            const h = 5 + rnd() * 6, r = 7 + rnd() * 5;
+            const peak = new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), mountainMat);
+            peak.position.set(Math.cos(angle) * radius, h / 2 - 1.2, Math.sin(angle) * radius);
+            group.add(peak);
+        }
+        return group;
+    }
+
     // A simple low-poly tree so the outside world isn't an empty plane.
     function buildTree(scale) {
         const g = new THREE.Group();
@@ -57,22 +107,30 @@ RD.Scene = (function () {
     }
 
     function buildEnvironment() {
+        const groundTex = groundTexture('#8fae6e', '#6f9350');
+        groundTex.repeat.set(26, 26);
         groundMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(80, 80),
-            new THREE.MeshStandardMaterial({ color: 0x8fae6e, roughness: 1 })
+            new THREE.PlaneGeometry(90, 90),
+            new THREE.MeshStandardMaterial({ map: groundTex, roughness: 1 })
         );
         groundMesh.rotation.x = -Math.PI / 2;
         groundMesh.position.y = -0.02;
         groundMesh.receiveShadow = true;
         scene.add(groundMesh);
 
+        scene.add(buildMountainRing());
+
+        celestialSprite = glowSprite('rgba(255,244,214,0.95)', 14);
+        celestialSprite.position.set(-16, 20, -22);
+        scene.add(celestialSprite);
+
         const trees = new THREE.Group();
         let seed = 3;
         function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-        for (let i = 0; i < 14; i++) {
-            const angle = (i / 14) * Math.PI * 2 + rnd() * 0.3;
-            const radius = 10 + rnd() * 6;
-            const tree = buildTree(0.9 + rnd() * 0.6);
+        for (let i = 0; i < 18; i++) {
+            const angle = (i / 18) * Math.PI * 2 + rnd() * 0.3;
+            const radius = 9 + rnd() * 9;
+            const tree = buildTree(0.8 + rnd() * 0.7);
             tree.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
             trees.add(tree);
         }
@@ -139,6 +197,39 @@ RD.Scene = (function () {
         controls.update();
     }
 
+    // A one-time establishing shot on first load: sweeps in from a wide,
+    // elevated view down to the normal focused position instead of just
+    // snapping there. Skipped for prefers-reduced-motion.
+    function playIntro(width, depth, height) {
+        const target = new THREE.Vector3(0, height / 2, 0);
+        const dist = Math.max(width, depth, height) * 1.6 + 2;
+        const finalPos = new THREE.Vector3(dist * 0.55, dist * 0.6, dist * 0.7);
+
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        controls.target.copy(target);
+        if (reduced) {
+            camera.position.copy(finalPos);
+            controls.update();
+            return;
+        }
+
+        const startPos = new THREE.Vector3(finalPos.x * 2.4, finalPos.y * 1.9 + 5, finalPos.z * 2.4);
+        camera.position.copy(startPos);
+        controls.update();
+        controls.enabled = false;
+        const duration = 1600;
+        const startTime = performance.now();
+        function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+        function step(now) {
+            const t = Math.min(1, (now - startTime) / duration);
+            camera.position.lerpVectors(startPos, finalPos, easeOutCubic(t));
+            controls.update();
+            if (t < 1) requestAnimationFrame(step);
+            else controls.enabled = true;
+        }
+        requestAnimationFrame(step);
+    }
+
     function applyLightingPreset(lighting) {
         if (lighting.preset === 'night') {
             if (scene.background && scene.background.dispose) scene.background.dispose();
@@ -148,7 +239,21 @@ RD.Scene = (function () {
             ambientLight.color.set(0x8fa8ff);
             sunLight.intensity = 0.08;
             sunLight.color.set(0x8fa8ff);
-            if (groundMesh) groundMesh.material.color.set(0x233a2e);
+            if (groundMesh) groundMesh.material.color.set(0x2e4a3a);
+            if (mountainMat) mountainMat.color.set(0x121b32);
+            if (celestialSprite) {
+                celestialSprite.material.map.dispose();
+                const tex = M.makeCanvasTexture(function (ctx, s) {
+                    const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+                    g.addColorStop(0, 'rgba(226,232,255,0.95)');
+                    g.addColorStop(0.35, 'rgba(226,232,255,0.9)');
+                    g.addColorStop(1, 'rgba(226,232,255,0)');
+                    ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+                }, 128);
+                celestialSprite.material.map = tex;
+                celestialSprite.scale.set(6, 6, 1);
+                celestialSprite.position.set(14, 16, -20);
+            }
         } else {
             if (scene.background && scene.background.dispose) scene.background.dispose();
             scene.background = skyTexture('#8fbfe8', '#e8f1e0');
@@ -157,7 +262,21 @@ RD.Scene = (function () {
             ambientLight.color.set(0xffffff);
             sunLight.intensity = lighting.sunIntensity != null ? lighting.sunIntensity : 0.9;
             sunLight.color.set(0xfff2e0);
-            if (groundMesh) groundMesh.material.color.set(0x8fae6e);
+            if (groundMesh) groundMesh.material.color.set(0xffffff);
+            if (mountainMat) mountainMat.color.set(0x9db2d1);
+            if (celestialSprite) {
+                celestialSprite.material.map.dispose();
+                const tex = M.makeCanvasTexture(function (ctx, s) {
+                    const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+                    g.addColorStop(0, 'rgba(255,244,214,0.95)');
+                    g.addColorStop(0.35, 'rgba(255,244,214,0.9)');
+                    g.addColorStop(1, 'rgba(255,244,214,0)');
+                    ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+                }, 128);
+                celestialSprite.material.map = tex;
+                celestialSprite.scale.set(14, 14, 1);
+                celestialSprite.position.set(-16, 20, -22);
+            }
         }
     }
 
@@ -179,6 +298,7 @@ RD.Scene = (function () {
         init: init,
         get: get,
         focusRoom: focusRoom,
+        playIntro: playIntro,
         applyLightingPreset: applyLightingPreset,
         startLoop: startLoop,
         handleResize: handleResize

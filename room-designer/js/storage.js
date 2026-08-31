@@ -76,6 +76,34 @@ RD.Storage = (function () {
         writeAll(all);
     }
 
+    // ---- Autosave: a safety net so in-progress work survives a reload
+    // even if the user never clicks "שמור", separate from the named
+    // project list above. ----
+    const AUTOSAVE_KEY = 'rd_autosave_v1';
+    let autosaveTimer = null;
+
+    function scheduleAutosave() {
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(function () {
+            try { localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(RD.State.snapshot())); }
+            catch (e) { console.warn('room-designer: autosave failed', e); }
+        }, 700);
+    }
+
+    function loadAutosave() {
+        try {
+            const raw = localStorage.getItem(AUTOSAVE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function initAutosave() {
+        ['item:added', 'item:updated', 'item:deleted', 'room:resized', 'room:styled', 'lighting:changed', 'state:replaced']
+            .forEach(function (evt) { RD.State.on(evt, scheduleAutosave); });
+    }
+
     function exportJSON() {
         const snap = RD.State.snapshot();
         const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
@@ -133,6 +161,8 @@ RD.Storage = (function () {
         remove: remove,
         exportJSON: exportJSON,
         importJSON: importJSON,
-        exportPNG: exportPNG
+        exportPNG: exportPNG,
+        loadAutosave: loadAutosave,
+        initAutosave: initAutosave
     };
 })();
