@@ -152,8 +152,11 @@ RD.FirstPerson = (function () {
         if (speedFactor < 0.001) speedFactor = 0;
 
         if (speedFactor > 0) {
+            // right = forward × up, matching how camera yaw is actually
+            // applied — the previous signs here were flipped, which made
+            // A strafe right and D strafe left.
             const forward = { x: Math.sin(yaw), z: Math.cos(yaw) };
-            const right = { x: Math.cos(yaw), z: -Math.sin(yaw) };
+            const right = { x: -Math.cos(yaw), z: Math.sin(yaw) };
             const step = SPEED * speedFactor * dt;
             const dx = (forward.x * -lastDir.z + right.x * lastDir.x) * step;
             const dz = (forward.z * -lastDir.z + right.z * lastDir.x) * step;
