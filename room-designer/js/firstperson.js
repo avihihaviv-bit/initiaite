@@ -21,6 +21,7 @@ RD.FirstPerson = (function () {
     let yaw = 0, pitch = 0;
     let speedFactor = 0, lastDir = { x: 0, z: 0 };
     const keys = {};
+    let joystickRelease = null;
     let looking = false;
     let lastLookX = 0, lastLookY = 0;
     let joystick = null; // { active, startX, startY, dx, dz }
@@ -95,6 +96,16 @@ RD.FirstPerson = (function () {
     }
     function onPointerUp() { looking = false; }
 
+    // Stops any movement the room "remembers" from a key or touch that
+    // never got its release event — switching tabs/apps mid-press, an OS
+    // gesture stealing a touch — so it never keeps walking with no input.
+    function resetInputs() {
+        for (const k in keys) keys[k] = false;
+        speedFactor = 0;
+        looking = false;
+        if (joystickRelease) joystickRelease();
+    }
+
     // ---- Touch joystick (mobile movement) ----
     function initJoystick(container) {
         const base = document.createElement('div');
@@ -123,12 +134,18 @@ RD.FirstPerson = (function () {
             evt.stopPropagation();
         });
         function release(evt) {
-            if (joystick.pointerId !== evt.pointerId) return;
+            if (evt && joystick.pointerId !== evt.pointerId) return;
             joystick.pointerId = null; joystick.dx = 0; joystick.dz = 0;
             knob.style.transform = 'translate(0,0)';
         }
         base.addEventListener('pointerup', release);
         base.addEventListener('pointercancel', release);
+        // A real device can drop pointerup/pointercancel in edge cases (an
+        // OS back-swipe gesture stealing the touch, capture lost mid-drag) —
+        // without this, the joystick keeps reporting its last offset and the
+        // room keeps "walking" on its own with no finger on the screen.
+        base.addEventListener('lostpointercapture', release);
+        return release;
     }
 
     function tick(dt) {
@@ -212,8 +229,10 @@ RD.FirstPerson = (function () {
         window.addEventListener('pointerup', onPointerUp);
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
+        window.addEventListener('blur', resetInputs);
+        document.addEventListener('visibilitychange', resetInputs);
 
-        if ('ontouchstart' in window) initJoystick(domEl.parentElement);
+        if ('ontouchstart' in window) joystickRelease = initJoystick(domEl.parentElement);
         if (els.hint) els.hint.hidden = false;
         if (els.btn) { els.btn.textContent = '🚪 צא ממצב הליכה'; els.btn.classList.add('rd-btn-accent'); }
     }
@@ -235,7 +254,10 @@ RD.FirstPerson = (function () {
         window.removeEventListener('pointerup', onPointerUp);
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
-        for (const k in keys) keys[k] = false;
+        window.removeEventListener('blur', resetInputs);
+        document.removeEventListener('visibilitychange', resetInputs);
+        resetInputs();
+        joystickRelease = null;
         if (joystick) { joystick.el.remove(); joystick = null; }
         if (els.hint) els.hint.hidden = true;
         if (els.btn) { els.btn.textContent = '🚶 הליכה בחדר'; els.btn.classList.remove('rd-btn-accent'); }
