@@ -69,9 +69,12 @@ RD.FirstPerson = (function () {
         const tag = (evt.target && evt.target.tagName || '').toLowerCase();
         if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
         if (evt.key === 'Escape') { exit(); return; }
-        keys[evt.key.toLowerCase()] = true;
+        // `code` is the physical key (layout-independent) — `key` would
+        // report a Hebrew letter for the W/A/S/D positions on a Hebrew
+        // keyboard layout, silently breaking movement.
+        keys[evt.code] = true;
     }
-    function onKeyUp(evt) { keys[evt.key.toLowerCase()] = false; }
+    function onKeyUp(evt) { keys[evt.code] = false; }
 
     function onPointerDown(evt) {
         if (!active) return;
@@ -128,10 +131,10 @@ RD.FirstPerson = (function () {
     function tick(dt) {
         if (!active) return;
         let mx = 0, mz = 0;
-        if (keys['w'] || keys['arrowup']) mz -= 1;
-        if (keys['s'] || keys['arrowdown']) mz += 1;
-        if (keys['a'] || keys['arrowleft']) mx -= 1;
-        if (keys['d'] || keys['arrowright']) mx += 1;
+        if (keys['KeyW'] || keys['ArrowUp']) mz -= 1;
+        if (keys['KeyS'] || keys['ArrowDown']) mz += 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) mx -= 1;
+        if (keys['KeyD'] || keys['ArrowRight']) mx += 1;
         if (joystick && joystick.pointerId != null) { mx += joystick.dx; mz += joystick.dz; }
 
         const len = Math.hypot(mx, mz);

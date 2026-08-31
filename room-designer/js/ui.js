@@ -36,9 +36,9 @@ RD.UI = (function () {
             btnExportPng: $('btn-export-png'),
 
             templatesRow: $('templates-row'),
-            roomWidth: $('room-width'), roomWidthOut: $('room-width-out'),
-            roomDepth: $('room-depth'), roomDepthOut: $('room-depth-out'),
-            roomHeight: $('room-height'), roomHeightOut: $('room-height-out'),
+            roomWidth: $('room-width'), roomWidthNum: $('room-width-num'),
+            roomDepth: $('room-depth'), roomDepthNum: $('room-depth-num'),
+            roomHeight: $('room-height'), roomHeightNum: $('room-height-num'),
             wallColor: $('wall-color'),
             floorColor: $('floor-color'),
             floorMaterial: $('floor-material'),
@@ -180,9 +180,9 @@ RD.UI = (function () {
     // ---- Sync UI from state ----
     function refreshRoomFields() {
         const room = S.get().room;
-        els.roomWidth.value = room.width; els.roomWidthOut.textContent = room.width.toFixed(1);
-        els.roomDepth.value = room.depth; els.roomDepthOut.textContent = room.depth.toFixed(1);
-        els.roomHeight.value = room.height; els.roomHeightOut.textContent = room.height.toFixed(1);
+        els.roomWidth.value = room.width; els.roomWidthNum.value = room.width.toFixed(1);
+        els.roomDepth.value = room.depth; els.roomDepthNum.value = room.depth.toFixed(1);
+        els.roomHeight.value = room.height; els.roomHeightNum.value = room.height.toFixed(1);
         els.wallColor.value = room.wallColor;
         els.floorColor.value = room.floorColor;
         els.floorMaterial.value = room.floorMaterial || 'solid';
@@ -246,13 +246,21 @@ RD.UI = (function () {
         function applyDims() {
             S.setRoomDims(parseFloat(els.roomWidth.value), parseFloat(els.roomDepth.value), parseFloat(els.roomHeight.value));
         }
-        [els.roomWidth, els.roomDepth, els.roomHeight].forEach(function (el) {
-            el.addEventListener('input', function () {
-                els.roomWidthOut.textContent = parseFloat(els.roomWidth.value).toFixed(1);
-                els.roomDepthOut.textContent = parseFloat(els.roomDepth.value).toFixed(1);
-                els.roomHeightOut.textContent = parseFloat(els.roomHeight.value).toFixed(1);
+        // Slider drag <-> typed number, kept in sync both ways so either one
+        // can drive an exact room size (e.g. typing "3.4" for 3.40 מ').
+        [[els.roomWidth, els.roomWidthNum], [els.roomDepth, els.roomDepthNum], [els.roomHeight, els.roomHeightNum]].forEach(function (pair) {
+            const slider = pair[0], num = pair[1];
+            slider.addEventListener('input', function () { num.value = parseFloat(slider.value).toFixed(1); });
+            slider.addEventListener('change', applyDims);
+            num.addEventListener('change', function () {
+                const min = parseFloat(num.min), max = parseFloat(num.max);
+                let v = parseFloat(num.value);
+                if (isNaN(v)) v = parseFloat(slider.value);
+                v = Math.min(max, Math.max(min, v));
+                num.value = v.toFixed(1);
+                slider.value = v;
+                applyDims();
             });
-            el.addEventListener('change', applyDims);
         });
 
         els.wallColor.addEventListener('input', function () { S.setRoomField('wallColor', els.wallColor.value); });
