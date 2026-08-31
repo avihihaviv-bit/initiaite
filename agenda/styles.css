@@ -1,0 +1,198 @@
+:root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --border: #e4e1da;
+    --text: #26241f;
+    --text-mute: #86816f;
+    --accent: #c9622b;
+    --accent-soft: #f3e2d3;
+    --done: #9b9584;
+    --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+}
+
+.app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.app-header h1 {
+    font-size: 22px;
+    margin: 0;
+    width: 100%;
+}
+
+.day-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.nav-btn:hover { background: var(--accent-soft); }
+
+.day-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+    text-align: center;
+}
+
+.day-label #day-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.day-label #day-date {
+    font-size: 12px;
+    color: var(--text-mute);
+}
+
+.today-btn {
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.add-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.task-time-input {
+    flex: 0 0 100px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 14px;
+}
+
+.task-title-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 14px;
+}
+
+.add-btn {
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.task-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+}
+
+.task-item.done {
+    opacity: 0.6;
+}
+
+.task-item.done .task-title {
+    text-decoration: line-through;
+    color: var(--done);
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.task-time {
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--text-mute);
+    min-width: 42px;
+}
+
+.task-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    word-break: break-word;
+}
+
+.delete-btn {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-mute);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.delete-btn:hover { color: var(--accent); }
+
+.empty-state {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 14px;
+    margin-top: 40px;
+}
+
+.empty-state.hidden { display: none; }
