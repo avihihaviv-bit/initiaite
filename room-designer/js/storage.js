@@ -100,7 +100,7 @@ RD.Storage = (function () {
     }
 
     function initAutosave() {
-        ['item:added', 'item:updated', 'item:deleted', 'room:resized', 'room:styled', 'lighting:changed', 'state:replaced']
+        ['item:added', 'item:updated', 'item:deleted', 'room:resized', 'room:styled', 'lighting:changed', 'settings:changed', 'state:replaced']
             .forEach(function (evt) { RD.State.on(evt, scheduleAutosave); });
     }
 

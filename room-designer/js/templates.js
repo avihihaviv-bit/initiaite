@@ -28,7 +28,7 @@ RD.Templates = (function () {
             lighting: { preset: 'day', ambientIntensity: 0.65, sunIntensity: 0.9 },
             items: items,
             selectedId: null,
-            settings: { snapSize: 0.1, snapEnabled: true, gridVisible: true }
+            settings: { snapSize: 0.1, snapEnabled: true, gridVisible: true, showLabels: true }
         };
     }
 

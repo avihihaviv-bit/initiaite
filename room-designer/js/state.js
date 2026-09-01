@@ -94,6 +94,15 @@ RD.State = (function () {
         withHistory(function (s) { s.lighting.preset = preset; }, 'lighting:changed');
     }
 
+    // ---- Settings (grid/snap/labels toggles) ----
+    // Deliberately not part of undo/redo history (a display toggle isn't
+    // something you'd want Ctrl+Z to touch) but still needs to emit so
+    // autosave actually picks it up — see storage.js's initAutosave.
+    function setSetting(key, value) {
+        state.settings[key] = value;
+        emit('settings:changed', { key: key, value: value });
+    }
+
     // ---- Items ----
     function addItem(catalogEntry, opts) {
         opts = opts || {};
@@ -245,6 +254,7 @@ RD.State = (function () {
         setRoomDims: setRoomDims,
         setRoomField: setRoomField,
         setLightingPreset: setLightingPreset,
+        setSetting: setSetting,
         addItem: addItem,
         addCustomItem: addCustomItem,
         updateItem: updateItem,

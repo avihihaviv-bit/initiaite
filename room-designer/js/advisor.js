@@ -10,7 +10,7 @@ RD.Advisor = (function () {
     const S = RD.State;
     const I = RD.Interaction;
 
-    const WALL_HUG_CATEGORIES = { 'ישיבה': true, 'אחסון': true };
+    const WALL_HUG_CATEGORIES = { 'ישיבה': true, 'אחסון': true, 'חדר שינה': true };
     const cm = function (m) { return Math.round(m * 100); };
 
     function categoryOf(item) {

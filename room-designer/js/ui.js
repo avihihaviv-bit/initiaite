@@ -12,7 +12,7 @@ RD.UI = (function () {
     let els = {};
     let customPhotoDataUrl = null;
 
-    const CATEGORY_ICON = { 'ישיבה': '🛋️', 'שולחנות': '🪑', 'אחסון': '🗄️', 'תאורה': '💡', 'עיצוב': '🖼️' };
+    const CATEGORY_ICON = { 'ישיבה': '🛋️', 'שולחנות': '🪑', 'אחסון': '🗄️', 'תאורה': '💡', 'עיצוב': '🖼️', 'חדר שינה': '🛏️' };
     const SEVERITY_ICON = { issue: '⚠️', notice: 'ℹ️', good: '✅' };
     const SEVERITY_RANK = { issue: 0, notice: 1, good: 2 };
 
@@ -277,15 +277,15 @@ RD.UI = (function () {
         });
 
         els.gridVisible.addEventListener('change', function () {
-            S.get().settings.gridVisible = els.gridVisible.checked;
+            S.setSetting('gridVisible', els.gridVisible.checked);
             RD.Room.setGridVisible(els.gridVisible.checked);
         });
         els.snapEnabled.addEventListener('change', function () {
-            S.get().settings.snapEnabled = els.snapEnabled.checked;
+            S.setSetting('snapEnabled', els.snapEnabled.checked);
             refreshStatus();
         });
         els.showLabels.addEventListener('change', function () {
-            S.get().settings.showLabels = els.showLabels.checked;
+            S.setSetting('showLabels', els.showLabels.checked);
             RD.Labels.sync();
         });
     }
@@ -370,6 +370,12 @@ RD.UI = (function () {
         els.ciCategory.value = 'ישיבה';
         els.ciColor.value = '#8a6b52';
         els.ciKnowSize.checked = true;
+        // Cleared so updateCustomSizeFields' "!value" check refills them
+        // with the reset category's defaults instead of leaving whatever
+        // dimensions the previous custom item was created with.
+        els.ciWidth.value = '';
+        els.ciDepth.value = '';
+        els.ciHeight.value = '';
         customPhotoDataUrl = null;
         els.ciPhoto.value = '';
         els.ciPreview.hidden = true;
