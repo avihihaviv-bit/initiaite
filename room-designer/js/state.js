@@ -16,6 +16,27 @@ RD.State = (function () {
         (listeners[event] || []).forEach(function (cb) { cb(payload); });
     }
 
+    // Shape-checks any state object coming from outside this session
+    // (autosave, a named save, an imported JSON file) before it's ever
+    // handed to replace(). A malformed object reaching replace() doesn't
+    // fail loudly — it crashes main.js's boot() partway through, which
+    // leaves #app stuck at its initial opacity:0 forever (a permanently
+    // blank screen with no visible error), so this check is the one
+    // real gate against that.
+    function isValidState(obj) {
+        if (!obj || typeof obj !== 'object') return false;
+        const room = obj.room;
+        if (!room || typeof room.width !== 'number' || typeof room.depth !== 'number' || typeof room.height !== 'number') return false;
+        if (!Array.isArray(obj.items)) return false;
+        if (!obj.items.every(function (it) {
+            return it && typeof it === 'object' && it.position &&
+                typeof it.position.x === 'number' && typeof it.position.z === 'number';
+        })) return false;
+        if (!obj.settings || typeof obj.settings !== 'object') return false;
+        if (!obj.lighting || typeof obj.lighting !== 'object') return false;
+        return true;
+    }
+
     function uid() {
         return 'itm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
     }
@@ -251,6 +272,7 @@ RD.State = (function () {
         get: get,
         getItem: getItem,
         blankState: blankState,
+        isValidState: isValidState,
         setRoomDims: setRoomDims,
         setRoomField: setRoomField,
         setLightingPreset: setLightingPreset,

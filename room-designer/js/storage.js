@@ -64,7 +64,7 @@ RD.Storage = (function () {
     function load(id) {
         const all = readAll();
         const p = all[id];
-        if (!p) return false;
+        if (!p || !RD.State.isValidState(p)) return false;
         RD.State.replace(p);
         RD.State.setProjectMeta(id, p.meta.name);
         return true;
@@ -93,7 +93,12 @@ RD.Storage = (function () {
     function loadAutosave() {
         try {
             const raw = localStorage.getItem(AUTOSAVE_KEY);
-            return raw ? JSON.parse(raw) : null;
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            // A malformed entry (partial write, leftover schema from an
+            // earlier version) must be treated as if there were no
+            // autosave at all, never handed to the app as real state.
+            return RD.State.isValidState(data) ? data : null;
         } catch (e) {
             return null;
         }
@@ -123,7 +128,7 @@ RD.Storage = (function () {
         reader.onload = function () {
             try {
                 const data = JSON.parse(reader.result);
-                if (!data || !data.room || !Array.isArray(data.items)) {
+                if (!RD.State.isValidState(data)) {
                     throw new Error('קובץ לא תקין');
                 }
                 data.meta = data.meta || {};

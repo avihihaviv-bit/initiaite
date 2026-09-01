@@ -2,7 +2,43 @@
 // and drives the render loop.
 
 (function () {
+    // #app starts at opacity:0 (class="rd-boot" in index.html) and only
+    // becomes visible once boot() finishes — so an uncaught exception
+    // anywhere in boot() previously left the whole page permanently blank
+    // with no error shown at all. This is the safety net: any boot failure
+    // is caught, the most likely cause (a corrupted autosave — normally
+    // screened out by RD.State.isValidState, but this covers anything
+    // that check doesn't) is cleared, and a real recovery screen is shown
+    // instead of silence.
+    function showBootFailure(err) {
+        console.error('room-designer: boot failed', err);
+        try { localStorage.removeItem('rd_autosave_v1'); } catch (e) {}
+        const el = document.createElement('div');
+        el.setAttribute('dir', 'rtl');
+        el.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;' +
+            'background:#f4f1ec;color:#2b2620;font-family:Heebo,Segoe UI,system-ui,sans-serif;text-align:center;padding:24px;';
+        el.innerHTML =
+            '<div style="max-width:420px">' +
+            '<div style="font-size:40px;margin-bottom:12px">🛠️</div>' +
+            '<h2 style="margin:0 0 8px">משהו השתבש בטעינה</h2>' +
+            '<p style="color:#6b6459;margin:0 0 20px;line-height:1.5">כנראה שהפרויקט השמור היה פגום. איפסנו את הנתונים השמורים אוטומטית — לחיצה על הכפתור תטען מחדש עם חדר ריק ותקין.</p>' +
+            '<button id="rd-boot-retry" style="background:#b5713f;color:#fff;border:none;border-radius:7px;padding:10px 22px;font-size:14px;cursor:pointer">רענון והתחלה מחדש</button>' +
+            '</div>';
+        document.body.appendChild(el);
+        document.getElementById('rd-boot-retry').addEventListener('click', function () { location.reload(); });
+        const app = document.getElementById('app');
+        if (app) app.style.display = 'none';
+    }
+
     function boot() {
+        try {
+            bootInner();
+        } catch (err) {
+            showBootFailure(err);
+        }
+    }
+
+    function bootInner() {
         // Restore whatever was last in progress (even if never explicitly
         // saved) before anything else reads state, so the initial room
         // build/camera/lighting all reflect it from the start.
