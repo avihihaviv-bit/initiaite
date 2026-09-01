@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Info, LogOut, ShieldAlert, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
@@ -12,7 +12,7 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { computeAchievements } from '@/utils/achievements';
 import { kgToLb, lbToKg, cmToFtIn, ftInToCm } from '@/utils/units';
 import { todayISO } from '@/utils/date';
-import { calculateFullTargets, recommendedProteinRange } from '@/utils/nutritionCalculator';
+import { calculateFullTargets, calculateTargetRanges, recommendedProteinRange } from '@/utils/nutritionCalculator';
 import { ProteinRangeWarningModal } from '@/components/profile/ProteinRangeWarningModal';
 import type { ActivityLevel, Goal, TrainingType, UserProfile } from '@/types';
 
@@ -56,6 +56,7 @@ export function ProfilePage() {
   const diaryEntries = useAppStore((s) => s.diaryEntries);
   const { targets, bmr, tdee, minorGuardrail } = useTargets();
   const todayDiary = useDiaryForDate(todayISO());
+  const targetRanges = useMemo(() => calculateTargetRanges(profile), [profile]);
 
   const [form, setForm] = useState(profile);
   useEffect(() => setForm(profile), [profile]);
@@ -152,23 +153,34 @@ export function ProfilePage() {
       <div className="rounded-xl2 bg-gradient-to-br from-primary-500 to-primary-600 p-5 text-white shadow-elevated">
         <p className="text-sm font-medium text-primary-50">Estimated daily target</p>
         <p className="mt-1 text-3xl font-bold tabular-nums">~{targets.calories.toLocaleString()} kcal</p>
+        <p className="text-xs text-primary-50">
+          Range: {targetRanges.calories.min.toLocaleString()}–{targetRanges.calories.max.toLocaleString()} kcal
+        </p>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
           <div>
             <p className="font-bold">{targets.proteinG}g</p>
             <p className="text-xs text-primary-50">Protein</p>
+            <p className="text-[10px] text-primary-100">
+              {targetRanges.protein.min}–{targetRanges.protein.max}g
+            </p>
           </div>
           <div>
             <p className="font-bold">{targets.carbsG}g</p>
             <p className="text-xs text-primary-50">Carbs</p>
+            <p className="text-[10px] text-primary-100">From remaining cals</p>
           </div>
           <div>
             <p className="font-bold">{targets.fatG}g</p>
             <p className="text-xs text-primary-50">Fat</p>
+            <p className="text-[10px] text-primary-100">
+              {targetRanges.fat.min}–{targetRanges.fat.max}g
+            </p>
           </div>
         </div>
         <p className="mt-3 flex items-start gap-1.5 text-xs text-primary-50">
           <Info size={13} className="mt-0.5 shrink-0" />
-          Estimated via Mifflin-St Jeor (BMR {bmr} kcal × activity = TDEE {tdee} kcal). Not medical advice.
+          Estimated via Mifflin-St Jeor (BMR {bmr} kcal × activity = TDEE {tdee} kcal). These are flexible ranges, not exact
+          numbers to hit — not medical advice.
         </p>
       </div>
 

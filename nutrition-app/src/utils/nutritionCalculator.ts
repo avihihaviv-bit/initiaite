@@ -134,18 +134,41 @@ export function calculateCalorieTarget(profile: UserProfile): CalorieTargetResul
  * target against `recommendedProteinRange` before accepting it — this
  * function does not judge the input itself, it just uses it.
  */
+/** Rounds to the nearest multiple of `step` (e.g. roundToNearest(87, 5) === 85). */
+export function roundToNearest(n: number, step: number): number {
+  return Math.round(n / step) * step;
+}
+
+/**
+ * Computes the three macro targets, then runs a validation/reconciliation
+ * pass: protein and fat are rounded to a clean 5g step for a friendlier
+ * display, which can drift the reconstructed calorie total
+ * (protein*4 + fat*9 + carbs*4) a few kcal away from targetCalories. Carbs —
+ * the macro explicitly defined as "whatever calories remain" — absorbs that
+ * rounding drift so the three macros always add back up to the calorie
+ * target, never silently diverging from it.
+ */
 export function calculateMacroTargets(profile: UserProfile, targetCalories: number): MacroTargets {
-  const proteinPerKg = recommendedProteinPerKg(profile);
-  const computedProteinG = Math.round(profile.weightKg * proteinPerKg);
+  const proteinRange = recommendedProteinRange(profile);
+  const computedProteinG = roundToNearest((proteinRange.minG + proteinRange.maxG) / 2, 5);
   const proteinG = profile.customProteinTargetG ?? computedProteinG;
   const proteinCals = proteinG * 4;
 
-  const fatPct = profile.isMinor ? 0.3 : 0.28; // healthy minimum share of calories; teens get a slightly higher floor
-  const fatCals = targetCalories * fatPct;
-  const fatG = Math.round(fatCals / 9);
+  const fatPct = fatPercentFor(profile).recommended;
+  const fatG = roundToNearest((targetCalories * fatPct) / 9, 5);
+  const fatCals = fatG * 9;
 
-  const remainingCals = Math.max(targetCalories - proteinCals - fatCals, 0);
-  const carbsG = Math.round(remainingCals / 4);
+  let carbsG = roundToNearest(Math.max(targetCalories - proteinCals - fatCals, 0) / 4, 5);
+
+  // Validation: does protein*4 + fat*9 + carbs*4 reconcile back to the
+  // calorie target? If rounding pushed it off by more than a few kcal,
+  // absorb the difference into carbs (never into protein or fat, which are
+  // the macros the user actually sees as a fixed recommendation).
+  const reconstructed = proteinCals + fatCals + carbsG * 4;
+  const delta = targetCalories - reconstructed;
+  if (Math.abs(delta) >= 5) {
+    carbsG = Math.max(0, carbsG + roundToNearest(delta / 4, 5));
+  }
 
   return { calories: targetCalories, proteinG, carbsG, fatG };
 }
@@ -172,11 +195,69 @@ export interface ProteinRange {
   maxG: number;
 }
 
-/** The recommended protein range (±15% around the computed factor) used to validate a manual override. */
+/** The recommended protein range (±15% around the computed factor), rounded to a clean 5g step — used both to validate a manual override and to display "80-100g" style ranges instead of one rigid number. */
 export function recommendedProteinRange(profile: Pick<UserProfile, 'goal' | 'isMinor' | 'weightKg'>): ProteinRange {
   const perKg = recommendedProteinPerKg(profile);
   const mid = profile.weightKg * perKg;
-  return { minG: Math.round(mid * 0.85), maxG: Math.round(mid * 1.15) };
+  return { minG: roundToNearest(mid * 0.85, 5), maxG: roundToNearest(mid * 1.15, 5) };
+}
+
+/**
+ * Fat, expressed as a share of total calories rather than one fixed number —
+ * a healthy-range recommendation. Teens get a slightly higher floor (fat is
+ * important for hormonal development) but the same flexible band shape.
+ */
+function fatPercentFor(profile: Pick<UserProfile, 'isMinor'>): { min: number; max: number; recommended: number } {
+  return profile.isMinor ? { min: 0.28, max: 0.35, recommended: 0.3 } : { min: 0.25, max: 0.35, recommended: 0.28 };
+}
+
+export interface RangeValue {
+  min: number;
+  max: number;
+  recommended: number;
+}
+
+export interface TargetRanges {
+  calories: RangeValue;
+  protein: RangeValue;
+  fat: RangeValue;
+  /** Carbs stay a single derived number — "whatever calories remain" isn't naturally a range. */
+  carbsG: number;
+}
+
+/**
+ * The range-based view of daily targets ("2,300-2,500 kcal, recommended
+ * 2,400") used by the Onboarding review step and Profile page's target
+ * summary, so the plan reads as a flexible estimate rather than one number
+ * the user must hit exactly. The single-number MacroTargets from
+ * calculateFullTargets remain the source of truth used everywhere else
+ * (Dashboard progress bars, diary, AI recommendations) — this is an
+ * additional display layer, not a replacement.
+ */
+export function calculateTargetRanges(profile: UserProfile): TargetRanges {
+  const { targetCalories } = calculateCalorieTarget(profile);
+  const protein = recommendedProteinRange(profile);
+  const fatPct = fatPercentFor(profile);
+  const macros = calculateMacroTargets(profile, targetCalories);
+
+  return {
+    calories: {
+      min: roundToNearest(targetCalories * 0.96, 25),
+      max: roundToNearest(targetCalories * 1.04, 25),
+      recommended: targetCalories,
+    },
+    protein: {
+      min: protein.minG,
+      max: protein.maxG,
+      recommended: roundToNearest((protein.minG + protein.maxG) / 2, 5),
+    },
+    fat: {
+      min: roundToNearest((targetCalories * fatPct.min) / 9, 5),
+      max: roundToNearest((targetCalories * fatPct.max) / 9, 5),
+      recommended: roundToNearest((targetCalories * fatPct.recommended) / 9, 5),
+    },
+    carbsG: macros.carbsG,
+  };
 }
 
 export function calculateFullTargets(profile: UserProfile): { calorieResult: CalorieTargetResult; macros: MacroTargets } {

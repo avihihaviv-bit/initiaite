@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Mic, Send, Sparkles, TrendingDown, TrendingUp, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Mic, Send, Sparkles, TrendingDown, TrendingUp, X } from 'lucide-react';
 import { answerAssistant, QUICK_ACTIONS } from '@/services/AssistantService';
 import { useAssistantContext } from '@/hooks/useAssistantContext';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
@@ -19,6 +20,7 @@ interface ChatMessage {
 
 export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ctx = useAssistantContext();
+  const navigate = useNavigate();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', text: "Hey! What can I help you with?" },
@@ -98,7 +100,14 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
                     }`}
                   >
                     <p>{m.text}</p>
-                    {m.card && <div className="mt-2.5">{renderCard(m.card)}</div>}
+                    {m.card && (
+                      <div className="mt-2.5">
+                        {renderCard(m.card, (view) => {
+                          onClose();
+                          navigate(`/coach?view=${view}`);
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -163,8 +172,18 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
-function renderCard(card: AssistantCard) {
+function renderCard(card: AssistantCard, openCoach: (view: 'eat' | 'analyze' | 'recipe' | 'plan') => void) {
   switch (card.type) {
+    case 'open_coach':
+      return (
+        <button
+          onClick={() => openCoach(card.view)}
+          className="flex w-full items-center justify-between gap-2 rounded-xl bg-white p-3 text-left text-sm font-semibold text-primary-700 shadow-card transition hover:bg-primary-50"
+        >
+          {card.label}
+          <ArrowRight size={15} />
+        </button>
+      );
     case 'food_confirm':
       return <FoodConfirmCard mentions={card.mentions} onConfirmed={() => {}} />;
     case 'meal_recommendations':

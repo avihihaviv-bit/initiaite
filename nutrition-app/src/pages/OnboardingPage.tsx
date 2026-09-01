@@ -6,7 +6,8 @@ import { OptionCard } from '@/components/ui/OptionCard';
 import { Chip } from '@/components/ui/Chip';
 import { useAppStore } from '@/store/useAppStore';
 import { generateId } from '@/utils/id';
-import { calculateFullTargets } from '@/utils/nutritionCalculator';
+import { calculateFullTargets, calculateTargetRanges } from '@/utils/nutritionCalculator';
+import type { TargetRanges } from '@/utils/nutritionCalculator';
 import type { ActivityLevel, Goal, GoalPace, Sex, TrainingType, UserProfile } from '@/types';
 
 const ACTIVITY_OPTIONS: { value: ActivityLevel; title: string; description: string; icon: string }[] = [
@@ -118,6 +119,7 @@ export function OnboardingPage() {
 
   const previewProfile = step >= 5 ? buildProfile() : null;
   const preview = previewProfile ? calculateFullTargets(previewProfile) : null;
+  const previewRanges = previewProfile ? calculateTargetRanges(previewProfile) : null;
 
   function finish() {
     const profile = buildProfile();
@@ -160,8 +162,13 @@ export function OnboardingPage() {
             {step === 2 && <ActivityStep form={form} update={update} />}
             {step === 3 && <TrainingStep form={form} update={update} toggleTrainingType={toggleTrainingType} />}
             {step === 4 && <GoalStep form={form} update={update} isMinor={isMinor} />}
-            {step === 5 && preview && previewProfile && (
-              <ReviewStep profile={previewProfile} calorieResult={preview.calorieResult} macros={preview.macros} />
+            {step === 5 && preview && previewProfile && previewRanges && (
+              <ReviewStep
+                profile={previewProfile}
+                calorieResult={preview.calorieResult}
+                macros={preview.macros}
+                ranges={previewRanges}
+              />
             )}
           </motion.div>
         </AnimatePresence>
@@ -417,10 +424,12 @@ function ReviewStep({
   profile,
   calorieResult,
   macros,
+  ranges,
 }: {
   profile: UserProfile;
   calorieResult: ReturnType<typeof calculateFullTargets>['calorieResult'];
   macros: ReturnType<typeof calculateFullTargets>['macros'];
+  ranges: TargetRanges;
 }) {
   return (
     <div>
@@ -441,12 +450,15 @@ function ReviewStep({
         <p className="text-sm font-medium text-primary-50">Estimated daily target</p>
         <p className="mt-1 text-4xl font-bold tabular-nums">~{macros.calories.toLocaleString()}</p>
         <p className="text-sm text-primary-50">kcal / day</p>
+        <p className="mt-1 text-xs text-primary-50">
+          Range: {ranges.calories.min.toLocaleString()}–{ranges.calories.max.toLocaleString()} kcal
+        </p>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2.5">
-        <MacroPreview label="Protein" emoji="🥩" value={macros.proteinG} />
-        <MacroPreview label="Carbs" emoji="🍚" value={macros.carbsG} />
-        <MacroPreview label="Fat" emoji="🥑" value={macros.fatG} />
+        <MacroPreview label="Protein" emoji="🥩" value={macros.proteinG} range={`${ranges.protein.min}–${ranges.protein.max}g`} />
+        <MacroPreview label="Carbs" emoji="🍚" value={macros.carbsG} range="From remaining calories" />
+        <MacroPreview label="Fat" emoji="🥑" value={macros.fatG} range={`${ranges.fat.min}–${ranges.fat.max}g`} />
       </div>
 
       {calorieResult.wasCapped && (
@@ -458,18 +470,20 @@ function ReviewStep({
 
       <p className="mt-4 flex items-start gap-2 text-xs text-muted">
         <Info size={14} className="mt-0.5 shrink-0" />
-        This is an estimate, not medical advice. You can fine-tune everything later in your profile.
+        These are estimated ranges, not numbers you need to hit exactly — real metabolism and needs vary. Not medical advice.
+        You can fine-tune everything later in your profile.
       </p>
     </div>
   );
 }
 
-function MacroPreview({ label, emoji, value }: { label: string; emoji: string; value: number }) {
+function MacroPreview({ label, emoji, value, range }: { label: string; emoji: string; value: number; range?: string }) {
   return (
     <div className="rounded-xl bg-white p-3 text-center shadow-card">
       <p className="text-lg">{emoji}</p>
       <p className="mt-1 text-base font-bold tabular-nums text-ink">{value}g</p>
       <p className="text-xs text-muted">{label}</p>
+      {range && <p className="mt-0.5 text-[10px] text-gray-400">{range}</p>}
     </div>
   );
 }

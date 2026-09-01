@@ -6,11 +6,13 @@ import type {
   DiaryEntry,
   FavoriteItem,
   FoodRef,
+  MealPlanDay,
   MeasurementEntry,
   MeasurementType,
   PhotoCategory,
   ProgressPhoto,
   RecentItem,
+  SavedMealPlan,
   UserProfile,
   WeightLogEntry,
 } from '@/types';
@@ -27,6 +29,7 @@ interface AppState {
   waterLog: Record<string, number>; // date -> ml
   measurements: MeasurementEntry[];
   progressPhotos: ProgressPhoto[];
+  savedMealPlans: SavedMealPlan[];
 
   setProfile: (profile: UserProfile) => void;
   updateProfile: (partial: Partial<UserProfile>) => void;
@@ -56,6 +59,10 @@ interface AppState {
   addProgressPhoto: (category: PhotoCategory, dataUrl: string, date?: string) => void;
   deleteProgressPhoto: (id: string) => void;
   deleteAllProgressPhotos: () => void;
+
+  saveMealPlan: (plan: { name: string; days: MealPlanDay[] }) => string;
+  updateMealPlan: (id: string, partial: Partial<Pick<SavedMealPlan, 'name' | 'days'>>) => void;
+  deleteMealPlan: (id: string) => void;
 }
 
 const MAX_RECENT_ITEMS = 20;
@@ -78,6 +85,7 @@ export const useAppStore = create<AppState>()(
       waterLog: {},
       measurements: [],
       progressPhotos: [],
+      savedMealPlans: [],
 
       setProfile: (profile) => set({ profile }),
 
@@ -177,6 +185,22 @@ export const useAppStore = create<AppState>()(
 
       deleteAllProgressPhotos: () => set({ progressPhotos: [] }),
 
+      saveMealPlan: (plan) => {
+        const id = generateId('plan');
+        set((state) => ({
+          savedMealPlans: [...state.savedMealPlans, { id, name: plan.name, days: plan.days, createdAt: new Date().toISOString() }],
+        }));
+        return id;
+      },
+
+      updateMealPlan: (id, partial) =>
+        set((state) => ({
+          savedMealPlans: state.savedMealPlans.map((p) => (p.id === id ? { ...p, ...partial } : p)),
+        })),
+
+      deleteMealPlan: (id) =>
+        set((state) => ({ savedMealPlans: state.savedMealPlans.filter((p) => p.id !== id) })),
+
       resetAllData: () =>
         set({
           profile: null,
@@ -189,6 +213,7 @@ export const useAppStore = create<AppState>()(
           waterLog: {},
           measurements: [],
           progressPhotos: [],
+          savedMealPlans: [],
         }),
     }),
     {

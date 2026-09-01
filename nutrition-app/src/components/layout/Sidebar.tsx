@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Apple, BookOpen, Camera, Home, PlusCircle, Ruler, Salad, Sparkles, Store, User } from 'lucide-react';
+import { Apple, Bot, BookOpen, Camera, Home, PlusCircle, Ruler, Salad, Sparkles, Store, User } from 'lucide-react';
 import { useUIStore } from '@/store/useUIStore';
 
 const NAV_ITEMS = [
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/add', label: 'Add Food', icon: PlusCircle },
   { to: '/add/scan', label: 'Scan', icon: Camera },
   { to: '/add/restaurants', label: 'Restaurants', icon: Store },
+  { to: '/coach', label: 'AI Coach', icon: Bot },
   { to: '/stats', label: 'Statistics', icon: Salad },
   { to: '/measurements', label: 'Measurements', icon: Ruler },
   { to: '/favorites', label: 'Favorites', icon: Apple },

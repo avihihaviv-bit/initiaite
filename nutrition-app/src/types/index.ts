@@ -31,6 +31,8 @@ export type GoalPace = 'moderate' | 'fast';
 
 export type DataQuality = 'verified' | 'estimated' | 'ai_estimate';
 
+export type DietaryRestriction = 'vegetarian' | 'vegan' | 'gluten_free' | 'dairy_free' | 'kosher';
+
 export interface UserProfile {
   id: string;
   name?: string;
@@ -46,6 +48,13 @@ export interface UserProfile {
   isMinor: boolean;
   /** Manual protein override in grams/day — replaces the computed target when set. */
   customProteinTargetG?: number;
+  /** Food ids the user has said they like — used to bias AI recipe/meal-plan suggestions, never to restrict search. */
+  likedFoodIds?: string[];
+  /** Food ids the user has said they dislike — the AI Coach avoids these in recipes and meal plans. */
+  dislikedFoodIds?: string[];
+  dietaryRestrictions?: DietaryRestriction[];
+  /** Free-text allergy notes entered by the user — surfaced to the AI Coach as context, never auto-detected. */
+  allergyNotes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -146,7 +155,7 @@ export interface DiaryEntry {
   servingLabel: string; // display label of chosen serving, e.g. "150g" or "1 slice"
   nutrition: NutritionFacts; // computed for the logged quantity
   dataQuality: DataQuality;
-  source: 'search' | 'scan' | 'restaurant' | 'favorite' | 'recent';
+  source: 'search' | 'scan' | 'restaurant' | 'favorite' | 'recent' | 'ai_coach';
   loggedAt: string; // ISO timestamp
   aiConfidence?: 'low' | 'medium' | 'high';
   notes?: string;
@@ -257,4 +266,64 @@ export interface ActivityData {
   exerciseMinutes: number;
   distanceKm: number;
   flightsClimbed?: number;
+}
+
+// ---------------------------------------------------------------------------
+// AI Nutrition Coach: recipes and meal plans. Every recipe/plan here is
+// assembled deterministically from the local food database (see
+// utils/recipeGenerator.ts, utils/mealPlanBuilder.ts) — there is no live LLM
+// call, consistent with the rest of the app's "AI" features.
+// ---------------------------------------------------------------------------
+
+export type RecipeStyle =
+  | 'high_protein'
+  | 'healthy'
+  | 'quick'
+  | 'cheap'
+  | 'filling'
+  | 'sweet'
+  | 'vegetarian'
+  | 'balanced';
+
+export type RecipeMealType = MealType | 'dessert';
+
+export interface RecipeIngredient {
+  foodId?: string; // absent for a flavor-only add-in (herbs, lemon, spices) that carries no tracked nutrition
+  label: string; // e.g. "150g chicken breast" or "A pinch of black pepper"
+  grams?: number;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  mealType: RecipeMealType;
+  nutrition: NutritionFacts;
+  ingredients: RecipeIngredient[];
+  instructions: string[];
+  prepMinutes: number;
+  cookMinutes: number;
+  whyItFits: string;
+  styles: RecipeStyle[];
+}
+
+/** A single meal within a generated multi-day plan — reuses the same {foodId, grams} shape as a recommended meal. */
+export interface MealPlanSlot {
+  id: string;
+  mealType: MealType;
+  name: string;
+  emoji: string;
+  items: { foodId: string; grams: number }[];
+}
+
+export interface MealPlanDay {
+  dayIndex: number;
+  date: string; // YYYY-MM-DD
+  slots: MealPlanSlot[];
+}
+
+export interface SavedMealPlan {
+  id: string;
+  name: string;
+  createdAt: string;
+  days: MealPlanDay[];
 }

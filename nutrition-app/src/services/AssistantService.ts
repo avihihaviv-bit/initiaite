@@ -18,7 +18,8 @@ export type AssistantCard =
   | { type: 'meal_recommendations'; recs: RecommendedMeal[] }
   | { type: 'restaurant_matches'; matches: RestaurantMatch[] }
   | { type: 'daily_summary'; summary: DailySummary }
-  | { type: 'stats_insights'; insights: StatsInsight[] };
+  | { type: 'stats_insights'; insights: StatsInsight[] }
+  | { type: 'open_coach'; view: 'eat' | 'analyze' | 'recipe' | 'plan'; label: string };
 
 export interface AssistantAnswer {
   text: string;
@@ -108,6 +109,34 @@ export function answerAssistant(rawInput: string, ctx: AssistantContext): Assist
       text: ctx.isMinor
         ? "Recomposition at your age is mostly about consistent strength training, enough protein, balanced meals, and good recovery — not chasing a specific number on the scale."
         : "Recomposition (building muscle while losing fat) relies on strength training, enough protein, and staying close to maintenance calories — it's a slow, steady process rather than a quick transformation.",
+    };
+  }
+
+  // 4.6 Recipe creation
+  if (/\b(recipe|cook (me|something)|make me (a|some))\b/.test(q)) {
+    return {
+      text: 'The AI Recipe Creator can build one to your calories, protein, cooking time, and what you have on hand.',
+      card: { type: 'open_coach', view: 'recipe', label: 'Open Recipe Creator' },
+    };
+  }
+
+  // 4.7 Meal plan build/analyze
+  if (/\bmeal plan|weekly plan|plan (my|the) (week|meals)\b/.test(q)) {
+    return {
+      text: 'I can build a multi-day plan around your targets, or review one you already have.',
+      card: { type: 'open_coach', view: 'plan', label: 'Open Meal Plan Builder' },
+    };
+  }
+
+  // 4.8 What's missing today — a quick cross-macro summary
+  if (/what('s| is)? (missing|left)|what do i (still )?need/.test(q)) {
+    const bits: string[] = [];
+    if (remaining.calories > 0) bits.push(`${Math.round(remaining.calories)} kcal`);
+    if (remaining.proteinG > 0) bits.push(`${Math.round(remaining.proteinG)}g protein`);
+    if (remaining.carbsG > 0) bits.push(`${Math.round(remaining.carbsG)}g carbs`);
+    if (remaining.fatG > 0) bits.push(`${Math.round(remaining.fatG)}g fat`);
+    return {
+      text: bits.length > 0 ? `You still have about ${bits.join(', ')} remaining today.` : "You've reached all your targets for today — nice work.",
     };
   }
 
