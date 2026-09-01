@@ -13,7 +13,6 @@ const ScanFoodPage = lazy(() => import('@/pages/ScanFoodPage').then((m) => ({ de
 const RestaurantsPage = lazy(() => import('@/pages/RestaurantsPage').then((m) => ({ default: m.RestaurantsPage })));
 const RestaurantDetailPage = lazy(() => import('@/pages/RestaurantDetailPage').then((m) => ({ default: m.RestaurantDetailPage })));
 const StatisticsPage = lazy(() => import('@/pages/StatisticsPage').then((m) => ({ default: m.StatisticsPage })));
-const CoachPage = lazy(() => import('@/pages/CoachPage').then((m) => ({ default: m.CoachPage })));
 const FavoritesPage = lazy(() => import('@/pages/FavoritesPage').then((m) => ({ default: m.FavoritesPage })));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
 
@@ -40,7 +39,6 @@ export default function App() {
           <Route path="/add/restaurants" element={<RestaurantsPage />} />
           <Route path="/add/restaurants/:id" element={<RestaurantDetailPage />} />
           <Route path="/stats" element={<StatisticsPage />} />
-          <Route path="/coach" element={<CoachPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />

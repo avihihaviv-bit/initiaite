@@ -9,15 +9,19 @@ export interface Achievement {
   achieved: boolean;
 }
 
-export function computeAchievements(entries: DiaryEntry[], proteinTargetG: number): Achievement[] {
+export function computeStreak(entries: DiaryEntry[]): number {
   const loggedDates = new Set(entries.map((e) => e.date));
-
   let streak = 0;
   let cursor = todayISO();
   while (loggedDates.has(cursor)) {
     streak += 1;
     cursor = addDays(cursor, -1);
   }
+  return streak;
+}
+
+export function computeAchievements(entries: DiaryEntry[], proteinTargetG: number): Achievement[] {
+  const streak = computeStreak(entries);
 
   const proteinByDate = new Map<string, number>();
   for (const e of entries) {

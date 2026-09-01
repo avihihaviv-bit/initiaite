@@ -1,22 +1,27 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Sparkles } from 'lucide-react';
+import { Info, Plus, TrendingUp } from 'lucide-react';
+import { ExplainPlanModal } from '@/components/dashboard/ExplainPlanModal';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { MacroCard } from '@/components/dashboard/MacroCard';
 import { SmartSuggestions } from '@/components/dashboard/SmartSuggestions';
 import { WaterTracker } from '@/components/dashboard/WaterTracker';
 import { ActivityCard } from '@/components/dashboard/ActivityCard';
 import { MealRecommendations } from '@/components/dashboard/MealRecommendations';
+import { DailyAIInsight } from '@/components/dashboard/DailyAIInsight';
 import { MealSection } from '@/components/diary/MealSection';
 import { Button } from '@/components/ui/Button';
 import { useTargets } from '@/hooks/useTargets';
 import { useDiaryForDate, MEAL_TYPES } from '@/hooks/useDiary';
 import { todayISO } from '@/utils/date';
 import { formatKcal } from '@/utils/format';
+import { greeting } from '@/utils/mealTime';
 
 export function DashboardPage() {
   const date = todayISO();
   const { targets } = useTargets();
   const diary = useDiaryForDate(date);
+  const [explainOpen, setExplainOpen] = useState(false);
 
   const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
 
@@ -24,16 +29,27 @@ export function DashboardPage() {
     <div className="space-y-7 pb-6">
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-muted">{todayLabel}</p>
+          <p className="text-sm text-muted">
+            {greeting()} 👋 · {todayLabel}
+          </p>
           <h1 className="text-2xl font-bold text-ink">Today</h1>
         </div>
-        <Link
-          to="/add"
-          className="hidden items-center gap-1.5 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white shadow-card transition hover:bg-primary-600 active:scale-95 sm:flex"
-        >
-          <Plus size={16} />
-          Add Food
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/stats"
+            aria-label="Statistics"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-muted shadow-card transition hover:text-ink"
+          >
+            <TrendingUp size={17} />
+          </Link>
+          <Link
+            to="/add"
+            className="hidden items-center gap-1.5 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white shadow-card transition hover:bg-primary-600 active:scale-95 sm:flex"
+          >
+            <Plus size={16} />
+            Add Food
+          </Link>
+        </div>
       </header>
 
       {/* Calorie summary */}
@@ -51,27 +67,26 @@ export function DashboardPage() {
 
         <ProgressRing consumed={diary.totals.calories} goal={targets.calories} />
 
-        <Link to="/add" className="mt-5 w-full sm:hidden">
+        <button
+          onClick={() => setExplainOpen(true)}
+          className="mt-3 flex items-center gap-1 text-xs font-medium text-muted hover:text-primary-600"
+        >
+          <Info size={12} />
+          Explain how this was calculated
+        </button>
+
+        <Link to="/add" className="mt-4 w-full sm:hidden">
           <Button fullWidth size="lg" icon={<Plus size={18} />}>
             Add Food
           </Button>
         </Link>
       </div>
 
+      <ExplainPlanModal open={explainOpen} onClose={() => setExplainOpen(false)} />
+
       <SmartSuggestions totals={diary.totals} targets={targets} hasEntries={diary.entries.length > 0} />
 
-      <Link
-        to="/coach"
-        className="flex items-center gap-3 rounded-xl2 bg-ink p-4 text-white shadow-card transition hover:-translate-y-0.5 active:scale-[0.98] lg:hidden"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-          <Sparkles size={18} />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold">Ask your AI Coach</p>
-          <p className="text-xs text-white/60">&quot;What should I eat?&quot; &middot; &quot;How am I doing?&quot;</p>
-        </div>
-      </Link>
+      <DailyAIInsight />
 
       {/* Macros */}
       <div>

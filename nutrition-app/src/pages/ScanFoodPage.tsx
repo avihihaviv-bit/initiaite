@@ -9,6 +9,7 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { ScanAnimation } from '@/components/food/ScanAnimation';
 import { calculateNutrition } from '@/utils/nutritionCalculator';
 import { findFoodById } from '@/data/foods';
 import type { MealType, ScanResult, ScannedFoodCandidate } from '@/types';
@@ -144,10 +145,8 @@ export function ScanFoodPage() {
         <div className="overflow-hidden rounded-xl2 bg-white shadow-card">
           <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
             <img src={imageDataUrl} alt="Captured food" className="h-full w-full object-cover" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 text-white">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              <p className="text-sm font-medium">Analyzing your photo…</p>
-            </div>
+            <div className="absolute inset-0 bg-black/35" />
+            <ScanAnimation />
           </div>
         </div>
       )}

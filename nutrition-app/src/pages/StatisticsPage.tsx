@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Footprints, Scale } from 'lucide-react';
+import { Footprints, Scale, Sparkles } from 'lucide-react';
 import { CaloriesChart } from '@/components/stats/CaloriesChart';
 import { ProteinChart } from '@/components/stats/ProteinChart';
 import { WeightChart } from '@/components/stats/WeightChart';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { useLastNDaysStats } from '@/hooks/useHistoryStats';
 import { useTargets } from '@/hooks/useTargets';
 import { useAppStore } from '@/store/useAppStore';
+import { generateStatsInsights } from '@/utils/insights';
 
 export function StatisticsPage() {
   const stats = useLastNDaysStats(7);
@@ -21,6 +22,7 @@ export function StatisticsPage() {
   const [healthModalOpen, setHealthModalOpen] = useState(false);
 
   const hasAnyData = stats.some((d) => d.hasEntries);
+  const insights = generateStatsInsights(stats, targets.proteinG);
 
   return (
     <div className="space-y-4 pb-6">
@@ -33,6 +35,19 @@ export function StatisticsPage() {
 
       {hasAnyData ? (
         <>
+          <div className="rounded-xl2 bg-ink p-4 text-white shadow-card">
+            <h3 className="flex items-center gap-1.5 text-sm font-bold">
+              <Sparkles size={15} className="text-white/70" />
+              AI Insights
+            </h3>
+            <ul className="mt-2 space-y-1">
+              {insights.map((ins, i) => (
+                <li key={i} className="text-xs text-white/70">
+                  {ins.text}
+                </li>
+              ))}
+            </ul>
+          </div>
           <CaloriesChart data={stats} goal={targets.calories} />
           <ProteinChart data={stats} goal={targets.proteinG} />
           <ConsistencyCard data={stats} goal={targets.calories} />

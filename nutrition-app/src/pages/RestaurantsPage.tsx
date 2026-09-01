@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Store } from 'lucide-react';
-import { restaurantService, allCuisines } from '@/services/RestaurantService';
+import { Search, Sparkles, Store } from 'lucide-react';
+import { restaurantService, allCuisines, matchRestaurants } from '@/services/RestaurantService';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAddContext } from '@/hooks/useAddContext';
+import { useAssistantContext } from '@/hooks/useAssistantContext';
+import { RestaurantMatchList } from '@/components/assistant/RestaurantMatchList';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -37,12 +39,32 @@ export function RestaurantsPage() {
 
   const cuisines = allCuisines().length ? CUISINE_PRESETS : [];
 
+  const assistantCtx = useAssistantContext();
+  const remaining = {
+    calories: Math.max(assistantCtx.targets.calories - assistantCtx.totals.calories, 0),
+    proteinG: Math.max(assistantCtx.targets.proteinG - assistantCtx.totals.proteinG, 0),
+    carbsG: Math.max(assistantCtx.targets.carbsG - assistantCtx.totals.carbsG, 0),
+    fatG: Math.max(assistantCtx.targets.fatG - assistantCtx.totals.fatG, 0),
+  };
+  const bestMatches = useMemo(() => matchRestaurants(remaining, undefined, 2), [remaining.calories, remaining.proteinG]);
+  const showAiPicks = !query && !cuisine && bestMatches.length > 0;
+
   return (
     <div className="space-y-5 pb-6">
       <header>
         <h1 className="text-2xl font-bold text-ink">Restaurants</h1>
         <p className="mt-1 text-sm text-muted">Search by restaurant, city, or cuisine.</p>
       </header>
+
+      {showAiPicks && (
+        <div className="rounded-xl2 bg-ink p-4 text-white shadow-card">
+          <h3 className="mb-2 flex items-center gap-1.5 text-sm font-bold">
+            <Sparkles size={15} className="text-white/70" />
+            Best options for you
+          </h3>
+          <RestaurantMatchList matches={bestMatches} />
+        </div>
+      )}
 
       <div className="relative">
         <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />

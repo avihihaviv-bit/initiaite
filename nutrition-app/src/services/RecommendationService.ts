@@ -54,6 +54,10 @@ function computeTotals(items: RecommendedMealItem[]): NutritionFacts {
   return sumNutrition(parts);
 }
 
+export function scoreNutritionAgainstRemaining(totals: NutritionFacts, remaining: MacroTargets): number {
+  return scoreAgainst(totals, remaining);
+}
+
 function scoreAgainst(totals: NutritionFacts, remaining: MacroTargets): number {
   const calRef = Math.max(remaining.calories, 150);
   const proteinRef = Math.max(remaining.proteinG, 10);
@@ -67,7 +71,7 @@ function scoreAgainst(totals: NutritionFacts, remaining: MacroTargets): number {
   return Math.max(0, Math.min(100, Math.round(raw)));
 }
 
-function reasonFor(totals: NutritionFacts, remaining: MacroTargets, score: number): string {
+export function reasonFor(totals: NutritionFacts, remaining: MacroTargets, score: number): string {
   const fitsCalories = totals.calories <= remaining.calories * 1.1;
   const highProtein = remaining.proteinG > 0 && totals.proteinG >= remaining.proteinG * 0.6;
 

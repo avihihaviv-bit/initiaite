@@ -4,9 +4,15 @@ import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { FloatingAIButton } from '@/components/assistant/FloatingAIButton';
+import { AIAssistantPanel } from '@/components/assistant/AIAssistantPanel';
+import { useUIStore } from '@/store/useUIStore';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const assistantOpen = useUIStore((s) => s.assistantOpen);
+  const openAssistant = useUIStore((s) => s.openAssistant);
+  const closeAssistant = useUIStore((s) => s.closeAssistant);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -30,6 +36,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </main>
       <BottomNav />
+      <FloatingAIButton onClick={openAssistant} />
+      <AIAssistantPanel open={assistantOpen} onClose={closeAssistant} />
     </div>
   );
 }
