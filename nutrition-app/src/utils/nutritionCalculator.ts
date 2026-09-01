@@ -11,20 +11,18 @@ import type {
 // ---------------------------------------------------------------------------
 // NUTRITION CALCULATION ENGINE
 //
-// BMR: Mifflin-St Jeor equation (1990) — widely regarded as the most
-// accurate predictive equation for the general population, more so than
-// the older Harris-Benedict formula.
-//   Male:   BMR = 10*kg + 6.25*cm - 5*age + 5
-//   Female: BMR = 10*kg + 6.25*cm - 5*age - 161
+// BMR: Harris-Benedict, revised (Roza & Shizgal, 1984).
+//   Male:   BMR = 88.362 + (13.397*kg) + (4.799*cm) - (5.677*age)
+//   Female: BMR = 447.593 + (9.247*kg) + (3.098*cm) - (4.330*age)
 //
-// TDEE = BMR * activity multiplier (Katch-McArdle activity factors).
+// TDEE = BMR * activity multiplier.
 //
 // All results are ESTIMATES. Individual metabolism varies +/-10-15% from
 // these formulas, which is why the UI always labels them as such and never
 // presents them as exact figures.
 // ---------------------------------------------------------------------------
 
-const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
+export const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
   sedentary: 1.2, // little or no exercise
   light: 1.375, // light exercise 1-3 days/week
   moderate: 1.55, // moderate exercise 3-5 days/week
@@ -34,8 +32,11 @@ const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
 
 export function calculateBMR(profile: Pick<UserProfile, 'sex' | 'weightKg' | 'heightCm' | 'age'>): number {
   const { sex, weightKg, heightCm, age } = profile;
-  const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
-  return Math.round(sex === 'male' ? base + 5 : base - 161);
+  const bmr =
+    sex === 'male'
+      ? 88.362 + 13.397 * weightKg + 4.799 * heightCm - 5.677 * age
+      : 447.593 + 9.247 * weightKg + 3.098 * heightCm - 4.33 * age;
+  return Math.round(bmr);
 }
 
 export function calculateTDEE(profile: Pick<UserProfile, 'sex' | 'weightKg' | 'heightCm' | 'age' | 'activityLevel'>): number {
@@ -151,11 +152,17 @@ export function roundToNearest(n: number, step: number): number {
 export function calculateMacroTargets(profile: UserProfile, targetCalories: number): MacroTargets {
   const proteinRange = recommendedProteinRange(profile);
   const computedProteinG = roundToNearest((proteinRange.minG + proteinRange.maxG) / 2, 5);
-  const proteinG = profile.customProteinTargetG ?? computedProteinG;
+  // weightKg * 2.0 is treated as an absolute adult ceiling regardless of
+  // which goal-based factor produced the computed value (and regardless of
+  // a manual override) — protein is never recommended, nor accepted from a
+  // custom target, above that per-kg maximum for an adult. Minors already
+  // sit well under this via their own lower factor table.
+  const proteinCeilingG = profile.isMinor ? proteinRange.maxG : roundToNearest(profile.weightKg * 2.0, 5);
+  const requestedProteinG = profile.customProteinTargetG ?? computedProteinG;
+  const proteinG = Math.min(requestedProteinG, proteinCeilingG);
   const proteinCals = proteinG * 4;
 
-  const fatPct = fatPercentFor(profile).recommended;
-  const fatG = roundToNearest((targetCalories * fatPct) / 9, 5);
+  const fatG = roundToNearest(recommendedFatPerKg(profile) * profile.weightKg, 5);
   const fatCals = fatG * 9;
 
   let carbsG = roundToNearest(Math.max(targetCalories - proteinCals - fatCals, 0) / 4, 5);
@@ -203,12 +210,13 @@ export function recommendedProteinRange(profile: Pick<UserProfile, 'goal' | 'isM
 }
 
 /**
- * Fat, expressed as a share of total calories rather than one fixed number —
- * a healthy-range recommendation. Teens get a slightly higher floor (fat is
- * important for hormonal development) but the same flexible band shape.
+ * Fat, anchored to bodyweight like protein rather than a fixed slice of
+ * total calories — 1.2g/kg for adults (important for hormonal health),
+ * 1.0g/kg for minors (a gentler, still growth-appropriate amount; the app
+ * never applies the adult formula directly to a under-18 profile).
  */
-function fatPercentFor(profile: Pick<UserProfile, 'isMinor'>): { min: number; max: number; recommended: number } {
-  return profile.isMinor ? { min: 0.28, max: 0.35, recommended: 0.3 } : { min: 0.25, max: 0.35, recommended: 0.28 };
+function recommendedFatPerKg(profile: Pick<UserProfile, 'isMinor'>): number {
+  return profile.isMinor ? 1.0 : 1.2;
 }
 
 export interface RangeValue {
@@ -237,7 +245,7 @@ export interface TargetRanges {
 export function calculateTargetRanges(profile: UserProfile): TargetRanges {
   const { targetCalories } = calculateCalorieTarget(profile);
   const protein = recommendedProteinRange(profile);
-  const fatPct = fatPercentFor(profile);
+  const fatMid = recommendedFatPerKg(profile) * profile.weightKg;
   const macros = calculateMacroTargets(profile, targetCalories);
 
   return {
@@ -252,9 +260,9 @@ export function calculateTargetRanges(profile: UserProfile): TargetRanges {
       recommended: roundToNearest((protein.minG + protein.maxG) / 2, 5),
     },
     fat: {
-      min: roundToNearest((targetCalories * fatPct.min) / 9, 5),
-      max: roundToNearest((targetCalories * fatPct.max) / 9, 5),
-      recommended: roundToNearest((targetCalories * fatPct.recommended) / 9, 5),
+      min: roundToNearest(fatMid * 0.85, 5),
+      max: roundToNearest(fatMid * 1.15, 5),
+      recommended: roundToNearest(fatMid, 5),
     },
     carbsG: macros.carbsG,
   };
@@ -337,4 +345,15 @@ export function sumNutrition(items: NutritionFacts[]): NutritionFacts {
 
 export function calculateAge(birthYear: number): number {
   return new Date().getFullYear() - birthYear;
+}
+
+/**
+ * Protein grams per 100 kcal — a higher value means a better protein-to-
+ * calorie ratio than raw protein grams alone would show (e.g. a 600kcal
+ * dish with 40g protein is a worse ratio than a 300kcal dish with 30g).
+ * Used to rank foods/dishes for high-protein recommendations.
+ */
+export function proteinDensity(nutrition: Pick<NutritionFacts, 'proteinG' | 'calories'>): number {
+  if (nutrition.calories <= 0) return 0;
+  return (nutrition.proteinG / nutrition.calories) * 100;
 }

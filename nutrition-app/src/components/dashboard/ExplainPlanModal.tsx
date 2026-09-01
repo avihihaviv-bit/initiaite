@@ -12,7 +12,7 @@ export function ExplainPlanModal({ open, onClose }: { open: boolean; onClose: ()
         <div>
           <p className="font-semibold">1. Resting energy (BMR)</p>
           <p className="mt-1 text-xs text-muted">
-            Mifflin-St Jeor formula, using your age, sex, height, and weight — the calories your body burns at rest.
+            Harris-Benedict formula, using your age, sex, height, and weight — the calories your body burns at rest.
           </p>
           <p className="mt-1.5 rounded-lg bg-gray-50 px-3 py-2 text-xs font-medium tabular-nums">≈ {bmr} kcal/day</p>
         </div>

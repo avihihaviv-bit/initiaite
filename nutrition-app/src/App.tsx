@@ -1,6 +1,7 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
+import { useLocaleStore, isRTL } from '@/store/useLocaleStore';
 import { AppShell } from '@/components/layout/AppShell';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -20,6 +21,12 @@ const AICoachPage = lazy(() => import('@/pages/AICoachPage').then((m) => ({ defa
 
 export default function App() {
   const onboardingComplete = useAppStore((s) => s.onboardingComplete);
+  const language = useLocaleStore((s) => s.language);
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL(language) ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
 
   if (!onboardingComplete) {
     return (

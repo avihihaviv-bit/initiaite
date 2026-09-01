@@ -12,14 +12,23 @@ export interface TargetsResult {
   minorGuardrail: boolean;
 }
 
-const FALLBACK_TARGETS: MacroTargets = { calories: 2000, proteinG: 100, carbsG: 250, fatG: 65 };
+/**
+ * Deliberately all-zero, never a plausible-looking guess (e.g. "2000 kcal").
+ * `hasProfile: false` is the real signal callers must check — this exists
+ * only so the type stays a non-nullable MacroTargets; it should never be
+ * displayed to a user as if it were their computed target. In practice this
+ * branch is unreachable in the running app (App.tsx never renders a screen
+ * that calls useTargets() before onboarding sets a profile), but it must
+ * never fabricate numbers if that invariant is ever broken.
+ */
+const NO_PROFILE_TARGETS: MacroTargets = { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 };
 
 export function useTargets(): TargetsResult {
   const profile = useAppStore((s) => s.profile);
 
   return useMemo(() => {
     if (!profile) {
-      return { hasProfile: false, targets: FALLBACK_TARGETS, bmr: 0, tdee: 0, wasCapped: false, minorGuardrail: false };
+      return { hasProfile: false, targets: NO_PROFILE_TARGETS, bmr: 0, tdee: 0, wasCapped: false, minorGuardrail: false };
     }
     const { calorieResult, macros } = nutritionService.computeTargets(profile);
     return {

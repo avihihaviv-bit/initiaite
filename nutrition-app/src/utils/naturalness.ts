@@ -75,3 +75,24 @@ export function naturalnessSummaryText(score: number): string {
   if (score >= 20) return 'Your day included mostly processed foods, with some whole ones.';
   return 'Your day included mostly processed foods.';
 }
+
+/** A food counts toward "clean/whole" calories at this naturalness score or above — matches the "Mostly Natural" tier boundary. */
+const CLEAN_FOOD_THRESHOLD = 60;
+
+/**
+ * Percent of today's logged calories that came from minimally processed /
+ * whole foods (score >= CLEAN_FOOD_THRESHOLD). A separate, complementary
+ * metric to the weighted average score above — this one answers "how much
+ * of what I ate was whole food" rather than "how natural was it on
+ * average." Purely informational: never a target the user must hit, never
+ * framed as foods being "good" or "bad".
+ */
+export function cleanFoodPercentage(items: { naturalness?: NaturalnessInfo; calories: number }[]): number | null {
+  const valid = items.filter((i) => i.naturalness && i.calories > 0);
+  const totalCalories = valid.reduce((sum, i) => sum + i.calories, 0);
+  if (totalCalories === 0) return null;
+  const cleanCalories = valid
+    .filter((i) => i.naturalness!.score >= CLEAN_FOOD_THRESHOLD)
+    .reduce((sum, i) => sum + i.calories, 0);
+  return Math.round((cleanCalories / totalCalories) * 100);
+}

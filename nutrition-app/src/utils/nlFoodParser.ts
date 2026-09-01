@@ -34,6 +34,28 @@ const NUMBER_WORDS: Record<string, number> = {
   ten: 10,
   couple: 2,
   few: 3,
+  // Hebrew number words — masculine and feminine forms both map to the same quantity.
+  אחד: 1,
+  אחת: 1,
+  שתיים: 2,
+  שני: 2,
+  שתי: 2,
+  שלוש: 3,
+  שלושה: 3,
+  ארבע: 4,
+  ארבעה: 4,
+  חמש: 5,
+  חמישה: 5,
+  שש: 6,
+  שישה: 6,
+  שבע: 7,
+  שבעה: 7,
+  שמונה: 8,
+  תשע: 9,
+  תשעה: 9,
+  עשר: 10,
+  עשרה: 10,
+  כמה: 3,
 };
 
 // Word-boundary anchored so these only match whole unit words — e.g. an
@@ -47,6 +69,24 @@ const UNIT_WORDS: { pattern: RegExp; unit: ServingUnit }[] = [
   { pattern: /\bbowls?\b/i, unit: 'serving' },
   { pattern: /\bcups?\b/i, unit: 'serving' },
   { pattern: /\b(?:g|grams?)\b/i, unit: 'g' },
+];
+
+// JS regex \b treats Hebrew letters as non-word characters, so a \b-anchored
+// pattern silently fails to match Hebrew words at all — these are matched
+// by plain substring instead (safe here since the phrases are short and
+// these unit words don't collide with common Hebrew food-name substrings).
+const HEBREW_UNIT_WORDS: { word: string; unit: ServingUnit }[] = [
+  { word: 'פרוסות', unit: 'piece' },
+  { word: 'פרוסה', unit: 'piece' },
+  { word: 'חתיכות', unit: 'piece' },
+  { word: 'חתיכה', unit: 'piece' },
+  { word: 'מנות', unit: 'serving' },
+  { word: 'מנה', unit: 'serving' },
+  { word: 'צלחת', unit: 'serving' },
+  { word: 'קערה', unit: 'serving' },
+  { word: 'כוסות', unit: 'serving' },
+  { word: 'כוס', unit: 'serving' },
+  { word: 'גרם', unit: 'g' },
 ];
 
 export interface ParsedFoodMention {
@@ -64,6 +104,12 @@ const SYNONYM_TO_FOOD_ID: Record<string, string> = {
   yoghurt: 'greek-yogurt',
   oats: 'oatmeal',
   porridge: 'oatmeal',
+  // Hebrew colloquial terms — most Hebrew food names are matched directly
+  // against each food's `nameHe` field (see findBestFoodMatch), this map is
+  // only for terms that don't literally appear in any nameHe string.
+  טוסט: 'whole-wheat-bread',
+  דייסה: 'oatmeal',
+  חזה: 'chicken-breast',
 };
 
 function extractQuantity(segment: string): { quantity: number; rest: string } {
@@ -72,7 +118,9 @@ function extractQuantity(segment: string): { quantity: number; rest: string } {
   if (numMatch) {
     return { quantity: Number(numMatch[1]), rest: trimmed.slice(numMatch[0].length) };
   }
-  const wordMatch = trimmed.match(/^([a-z]+)\s+/i);
+  // Matches a leading number word in either Latin or Hebrew script — \w and
+  // \b don't cover Hebrew letters, so this uses an explicit character class.
+  const wordMatch = trimmed.match(/^([a-zא-ת]+)\s+/i);
   if (wordMatch && NUMBER_WORDS[wordMatch[1].toLowerCase()]) {
     return { quantity: NUMBER_WORDS[wordMatch[1].toLowerCase()], rest: trimmed.slice(wordMatch[0].length) };
   }
@@ -83,15 +131,23 @@ function detectUnit(text: string): ServingUnit | null {
   for (const { pattern, unit } of UNIT_WORDS) {
     if (pattern.test(text)) return unit;
   }
+  for (const { word, unit } of HEBREW_UNIT_WORDS) {
+    if (text.includes(word)) return unit;
+  }
   return null;
 }
+
+// Splits on anything that's neither a Latin nor a Hebrew letter, so a mixed
+// or all-Hebrew phrase still tokenizes correctly (the previous [^a-z]-only
+// split silently dropped every Hebrew word).
+const WORD_SPLIT = /[^a-zא-ת]+/;
 
 function findBestFoodMatch(text: string): MatchableFood | null {
   const words = text
     .toLowerCase()
     .replace(/\bof\b/g, ' ')
-    .split(/[^a-z]+/)
-    .filter((w) => w.length > 2 && !UNIT_WORDS.some(({ pattern }) => pattern.test(w)));
+    .split(WORD_SPLIT)
+    .filter((w) => w.length > 2 && !UNIT_WORDS.some(({ pattern }) => pattern.test(w)) && !HEBREW_UNIT_WORDS.some(({ word }) => word === w));
 
   if (words.length === 0) return null;
 
@@ -109,11 +165,12 @@ function findBestFoodMatch(text: string): MatchableFood | null {
     // (e.g. "Chicken Breast (cooked)" splits to [...,"cooked", ""]) — without
     // it, nw === "" makes `w.startsWith(nw)` true for every word, so the
     // first food in the array would spuriously "match" any query.
-    const nameWords = food.name.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+    const nameWords = food.name.toLowerCase().split(WORD_SPLIT).filter(Boolean);
+    const nameHeWords = ('nameHe' in food ? food.nameHe : undefined)?.split(WORD_SPLIT).filter(Boolean) ?? [];
     const categoryWord = ('category' in food ? food.category : undefined)?.toLowerCase() ?? '';
     let score = 0;
     for (const w of words) {
-      if (nameWords.some((nw) => nw === w)) score += 2;
+      if (nameWords.some((nw) => nw === w) || nameHeWords.some((nw) => nw === w)) score += 2;
       else if (nameWords.some((nw) => nw.length >= 3 && (nw.startsWith(w) || w.startsWith(nw)))) score += 1;
       if (categoryWord === w) score += 1;
     }

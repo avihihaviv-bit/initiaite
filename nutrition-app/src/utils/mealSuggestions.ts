@@ -1,5 +1,5 @@
 import { findFoodById } from '@/data/foods';
-import { calculateNutrition, sumNutrition } from '@/utils/nutritionCalculator';
+import { calculateNutrition, proteinDensity, sumNutrition } from '@/utils/nutritionCalculator';
 import { weightedNaturalness } from '@/utils/naturalness';
 import { reasonFor, scoreNutritionAgainstRemaining } from '@/services/RecommendationService';
 import type { MacroTargets, MealType, NutritionFacts, UserProfile } from '@/types';
@@ -100,11 +100,7 @@ export interface MealSuggestionResult {
   options: MealOption[]; // one per category, when available: quick, balanced, treat
 }
 
-export function suggestMealOptions(
-  remaining: MacroTargets,
-  _mealType: MealType,
-  profile?: UserProfile | null,
-): MealSuggestionResult {
+function eligibleScoredTemplates(remaining: MacroTargets, profile?: UserProfile | null): MealOption[] {
   const dislikedIds = new Set(profile?.dislikedFoodIds ?? []);
   const isVegetarian = profile?.dietaryRestrictions?.includes('vegetarian') ?? false;
 
@@ -113,7 +109,15 @@ export function suggestMealOptions(
     return !t.items.some((i) => dislikedIds.has(i.foodId));
   });
 
-  const scored = eligible.map((t) => scoreTemplate(t, remaining)).filter((o): o is MealOption => !!o);
+  return eligible.map((t) => scoreTemplate(t, remaining)).filter((o): o is MealOption => !!o);
+}
+
+export function suggestMealOptions(
+  remaining: MacroTargets,
+  _mealType: MealType,
+  profile?: UserProfile | null,
+): MealSuggestionResult {
+  const scored = eligibleScoredTemplates(remaining, profile);
   if (scored.length === 0) return { best: null, options: [] };
 
   const best = [...scored].sort((a, b) => b.matchScore - a.matchScore)[0];
@@ -125,4 +129,28 @@ export function suggestMealOptions(
   }
 
   return { best, options };
+}
+
+export type MealBias = 'protein' | 'calories';
+
+/**
+ * "Find high protein" / "Low-calorie meal" quick actions — re-ranks the
+ * same template pool by protein density (protein per calorie) or by
+ * lowest-calorie fit against what's remaining, instead of the
+ * Quick/Balanced/Treat categorization.
+ */
+export function suggestMealOptionsByBias(
+  remaining: MacroTargets,
+  profile: UserProfile | null | undefined,
+  bias: MealBias,
+  limit = 3,
+): MealOption[] {
+  const scored = eligibleScoredTemplates(remaining, profile);
+  if (bias === 'protein') {
+    return [...scored].sort((a, b) => proteinDensity(b.totals) - proteinDensity(a.totals)).slice(0, limit);
+  }
+  return [...scored]
+    .filter((o) => o.totals.calories <= Math.max(remaining.calories, 150) * 1.15)
+    .sort((a, b) => a.totals.calories - b.totals.calories)
+    .slice(0, limit);
 }

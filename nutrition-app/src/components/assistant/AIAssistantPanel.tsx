@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Mic, Send, Sparkles, TrendingDown, TrendingUp, X } from 'lucide-react';
-import { answerAssistant, QUICK_ACTIONS } from '@/services/AssistantService';
+import { answerAssistant, getQuickActions } from '@/services/AssistantService';
 import { useAssistantContext } from '@/hooks/useAssistantContext';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useLocaleStore } from '@/store/useLocaleStore';
 import { FoodConfirmCard } from './FoodConfirmCard';
 import { MealRecList } from './MealRecList';
 import { RestaurantMatchList } from './RestaurantMatchList';
@@ -22,11 +23,13 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
   const ctx = useAssistantContext();
   const navigate = useNavigate();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const language = useLocaleStore((s) => s.language);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', text: "Hey! What can I help you with?" },
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const quickActions = getQuickActions(language);
 
   const speech = useSpeechRecognition((finalText) => {
     setInput('');
@@ -121,7 +124,7 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
             </div>
 
             <div className="flex flex-wrap gap-1.5 px-4 pb-2">
-              {QUICK_ACTIONS.map((qa) => (
+              {quickActions.map((qa) => (
                 <button
                   key={qa}
                   onClick={() => send(qa)}
@@ -172,7 +175,7 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
-function renderCard(card: AssistantCard, openCoach: (view: 'eat' | 'analyze' | 'recipe' | 'plan') => void) {
+export function renderCard(card: AssistantCard, openCoach: (view: 'eat' | 'analyze' | 'recipe' | 'plan') => void) {
   switch (card.type) {
     case 'open_coach':
       return (

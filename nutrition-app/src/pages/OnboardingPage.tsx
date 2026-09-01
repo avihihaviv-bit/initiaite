@@ -434,7 +434,7 @@ function ReviewStep({
   return (
     <div>
       <h2 className="text-xl font-bold text-ink">Your daily plan</h2>
-      <p className="mt-1 text-sm text-muted">An estimate based on the Mifflin-St Jeor formula — everyone&apos;s metabolism varies.</p>
+      <p className="mt-1 text-sm text-muted">An estimate based on the Harris-Benedict formula — everyone&apos;s metabolism varies.</p>
 
       {calorieResult.minorGuardrail && (
         <div className="mt-4 flex gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">

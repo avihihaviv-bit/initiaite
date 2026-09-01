@@ -102,7 +102,7 @@ export function WhatToEatView() {
   );
 }
 
-function OptionCard({
+export function OptionCard({
   option,
   onAdd,
   added,

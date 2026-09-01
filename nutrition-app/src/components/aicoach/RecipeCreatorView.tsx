@@ -4,6 +4,7 @@ import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { generateRecipe, applyRegenerateModifier } from '@/utils/recipeGenerator';
 import type { RecipeConstraints, RegenerateModifier } from '@/utils/recipeGenerator';
+import { useAICoachData } from '@/hooks/useAICoachData';
 import type { Recipe, RecipeMealType, RecipeStyle } from '@/types';
 import { RecipeCard } from './RecipeCard';
 
@@ -33,10 +34,13 @@ const STYLE_OPTIONS: { value: RecipeStyle; label: string }[] = [
 ];
 
 export function RecipeCreatorView() {
+  // Defaults are derived from the user's real remaining calories/protein for
+  // today (not a generic placeholder) — still freely editable below.
+  const { remaining } = useAICoachData();
   const [mealType, setMealType] = useState<RecipeMealType>('lunch');
-  const [calorieMin, setCalorieMin] = useState(300);
-  const [calorieMax, setCalorieMax] = useState(500);
-  const [minProteinG, setMinProteinG] = useState(25);
+  const [calorieMin, setCalorieMin] = useState(() => clamp(Math.round(remaining.calories * 0.25), 200, 900));
+  const [calorieMax, setCalorieMax] = useState(() => clamp(Math.round(remaining.calories * 0.45), 300, 1200));
+  const [minProteinG, setMinProteinG] = useState(() => clamp(Math.round(remaining.proteinG * 0.35), 15, 60));
   const [maxCookMinutes, setMaxCookMinutes] = useState(30);
   const [styles, setStyles] = useState<RecipeStyle[]>([]);
   const [ingredientInput, setIngredientInput] = useState('');
@@ -188,6 +192,10 @@ export function RecipeCreatorView() {
       {recipe && <RecipeCard recipe={recipe} onRegenerate={regenerate} />}
     </div>
   );
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n));
 }
 
 function FormRow({ label, children }: { label: string; children: React.ReactNode }) {

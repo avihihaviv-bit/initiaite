@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Info, LogOut, ShieldAlert, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
+import { useLocaleStore } from '@/store/useLocaleStore';
 import { healthService } from '@/services/HealthService';
 import { HealthConnectModal } from '@/components/health/HealthConnectModal';
 import { useTargets } from '@/hooks/useTargets';
@@ -49,6 +50,8 @@ export function ProfilePage() {
   const resetAllData = useAppStore((s) => s.resetAllData);
   const units = useAppStore((s) => s.units);
   const setUnits = useAppStore((s) => s.setUnits);
+  const language = useLocaleStore((s) => s.language);
+  const setLanguage = useLocaleStore((s) => s.setLanguage);
   const trackWeight = useAppStore((s) => s.trackWeight);
   const setTrackWeight = useAppStore((s) => s.setTrackWeight);
   const weightLog = useAppStore((s) => s.weightLog);
@@ -179,7 +182,7 @@ export function ProfilePage() {
         </div>
         <p className="mt-3 flex items-start gap-1.5 text-xs text-primary-50">
           <Info size={13} className="mt-0.5 shrink-0" />
-          Estimated via Mifflin-St Jeor (BMR {bmr} kcal × activity = TDEE {tdee} kcal). These are flexible ranges, not exact
+          Estimated via Harris-Benedict (BMR {bmr} kcal × activity = TDEE {tdee} kcal). These are flexible ranges, not exact
           numbers to hit — not medical advice.
         </p>
       </div>
@@ -429,6 +432,18 @@ export function ProfilePage() {
           </Chip>
           <Chip selected={units === 'imperial'} onClick={() => setUnits('imperial')}>
             lb / ft-in
+          </Chip>
+        </div>
+        <h2 className="pt-2 text-sm font-bold text-ink">Language</h2>
+        <p className="text-xs text-muted">
+          The AI Coach area and chat fully understand and reply in Hebrew. Other screens stay in English for now.
+        </p>
+        <div className="flex gap-2">
+          <Chip selected={language === 'en'} onClick={() => setLanguage('en')}>
+            English
+          </Chip>
+          <Chip selected={language === 'he'} onClick={() => setLanguage('he')}>
+            עברית
           </Chip>
         </div>
       </section>
