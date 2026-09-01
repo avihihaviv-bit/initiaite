@@ -465,14 +465,30 @@ RD.UI = (function () {
     }
 
     // ---- Advisor modal ----
+    // Findings are grouped by severity into three priority sections instead
+    // of one flat list — same real geometric findings from RD.Advisor,
+    // just organized by how urgent each one actually is.
+    const PRIORITY_GROUPS = [
+        { severity: 'issue', label: '🔴 לתקן קודם' },
+        { severity: 'notice', label: '🟡 לשפר' },
+        { severity: 'good', label: '🟢 תקין ורעיונות' }
+    ];
+
     function wireAdvisorModal() {
         els.btnAdvisor.addEventListener('click', function () {
             const findings = A.analyzeRoom();
             findings.sort(function (a, b) { return SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]; });
-            els.advisorList.innerHTML = findings.map(function (f, i) {
-                return '<li data-severity="' + f.severity + '" data-index="' + i + '"><span class="rd-advisor-icon">' + SEVERITY_ICON[f.severity] + '</span><span>' + escapeHtml(f.text) + '</span></li>';
-            }).join('');
-            els.advisorList.querySelectorAll('li').forEach(function (li, i) {
+            let html = '';
+            PRIORITY_GROUPS.forEach(function (group) {
+                const inGroup = findings.filter(function (f) { return f.severity === group.severity; });
+                if (!inGroup.length) return;
+                html += '<li class="rd-advisor-group-title">' + group.label + '</li>';
+                inGroup.forEach(function (f) {
+                    html += '<li data-severity="' + f.severity + '"><span class="rd-advisor-icon">' + SEVERITY_ICON[f.severity] + '</span><span>' + escapeHtml(f.text) + '</span></li>';
+                });
+            });
+            els.advisorList.innerHTML = html;
+            els.advisorList.querySelectorAll('li[data-severity]').forEach(function (li, i) {
                 li.addEventListener('click', function () {
                     const f = findings[i];
                     if (f.itemId) {

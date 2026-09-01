@@ -364,6 +364,11 @@ details.rd-panel .rd-panel-body { padding-top: 2px; animation: rd-panel-in .15s 
 .rd-advisor-list li[data-severity="notice"] { background: var(--rd-notice-bg); color: var(--rd-notice); }
 .rd-advisor-list li[data-severity="good"] { background: var(--rd-good-bg); color: var(--rd-good); }
 .rd-advisor-list li .rd-advisor-icon { flex: none; }
+.rd-advisor-list li.rd-advisor-group-title {
+    background: none; border: none; cursor: default; padding: 4px 2px 0;
+    font-size: 12px; font-weight: 700; color: var(--rd-text-dim);
+}
+.rd-advisor-list li.rd-advisor-group-title:first-child { padding-top: 0; }
 
 /* ---------- Toast ---------- */
 .rd-toast {
