@@ -13,6 +13,7 @@ RD.Furniture = (function () {
     let scene, camera, renderer, controls, domEl;
     let itemGroup;
     const liveObjects = {}; // id -> THREE.Group
+    const guideLines = {}; // 'x'|'z' -> THREE.Line, drawn while dragging near an alignment
 
     let dragging = null; // { id, footprint }
 
@@ -214,6 +215,37 @@ RD.Furniture = (function () {
         tintObject(obj, overlapping ? 0xb23a3a : 0x2a5a8a);
     }
 
+    // ---- Smart alignment guides (drawn while dragging near a snap) ----
+    function ensureGuideLine(axis) {
+        if (guideLines[axis]) return guideLines[axis];
+        const mat = new THREE.LineDashedMaterial({ color: 0xb5713f, dashSize: 0.12, gapSize: 0.08, transparent: true, opacity: 0.9 });
+        const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+        const line = new THREE.Line(geo, mat);
+        line.visible = false;
+        line.renderOrder = 5;
+        scene.add(line);
+        guideLines[axis] = line;
+        return line;
+    }
+
+    function showGuides(guides, room) {
+        const bounds = RD.Room.getBounds(room);
+        hideGuides();
+        guides.forEach(function (g) {
+            const line = ensureGuideLine(g.axis);
+            const pts = g.axis === 'x'
+                ? [new THREE.Vector3(g.at, 0.02, bounds.minZ), new THREE.Vector3(g.at, 0.02, bounds.maxZ)]
+                : [new THREE.Vector3(bounds.minX, 0.02, g.at), new THREE.Vector3(bounds.maxX, 0.02, g.at)];
+            line.geometry.setFromPoints(pts);
+            line.computeLineDistances();
+            line.visible = true;
+        });
+    }
+
+    function hideGuides() {
+        Object.keys(guideLines).forEach(function (k) { guideLines[k].visible = false; });
+    }
+
     // ---- Pointer interaction: select + drag-to-move on the canvas ----
     function wirePointerEvents() {
         domEl.addEventListener('pointerdown', onPointerDown);
@@ -237,6 +269,8 @@ RD.Furniture = (function () {
         while (root.parent && root.parent !== itemGroup) root = root.parent;
         const id = root.userData.itemId;
         S.select(id);
+        const item = S.getItem(id);
+        if (item && item.locked) return; // selectable (to reach the unlock control) but not draggable
         dragging = { id: id, footprint: root.userData.footprint || { w: 0.4, d: 0.4 }, moved: false };
         S.beginDrag(id);
         controls.enabled = false;
@@ -251,9 +285,21 @@ RD.Furniture = (function () {
         const item = S.getItem(dragging.id);
         if (!item) return;
         const settings = S.get().settings;
-        let x = settings.snapEnabled ? I.snap(pt.x, settings.snapSize) : pt.x;
-        let z = settings.snapEnabled ? I.snap(pt.z, settings.snapSize) : pt.z;
-        const bounds = RD.Room.getBounds(S.get().room);
+        const room = S.get().room;
+        let x = pt.x, z = pt.z;
+
+        const align = settings.snapEnabled
+            ? RD.Snapping.findSnap(dragging.id, x, z, dragging.footprint, item.rotationY || 0, room)
+            : null;
+        if (align && align.guides.length) {
+            x = align.x; z = align.z;
+            showGuides(align.guides, room);
+        } else {
+            if (settings.snapEnabled) { x = I.snap(x, settings.snapSize); z = I.snap(z, settings.snapSize); }
+            hideGuides();
+        }
+
+        const bounds = RD.Room.getBounds(room);
         const clamped = I.clampToBounds(x, z, bounds, dragging.footprint, item.rotationY || 0);
         S.dragItemTo(dragging.id, clamped.x, clamped.z);
         dragging.moved = true;
@@ -261,6 +307,7 @@ RD.Furniture = (function () {
     }
 
     function onPointerUp() {
+        hideGuides();
         if (!dragging) return;
         const id = dragging.id;
         const moved = dragging.moved;
@@ -316,6 +363,8 @@ RD.Furniture = (function () {
     // Runs the placement advisor for an existing item (catalog or custom)
     // and, if a spot was found, moves/resizes it there in one undo step.
     function placeAtBestSpot(id) {
+        const item = S.getItem(id);
+        if (item && item.locked) return { fits: false, reasons: ['הפריט נעול — שחררו אותו כדי להזיז אותו.'] };
         const result = RD.Advisor.findBestSpot(id);
         if (!result) return null;
         if (result.fits) {
@@ -360,6 +409,8 @@ RD.Furniture = (function () {
     function deleteSelected() {
         const id = S.get().selectedId;
         if (!id) return;
+        const item = S.getItem(id);
+        if (item && item.locked) { if (RD.UI) RD.UI.showToast('הפריט נעול — שחררו אותו כדי למחוק'); return; }
         S.deleteItem(id);
     }
 
@@ -373,10 +424,18 @@ RD.Furniture = (function () {
         const id = S.get().selectedId;
         if (!id) return;
         const item = S.getItem(id);
+        if (item.locked) return;
         const bounds = RD.Room.getBounds(S.get().room);
         const footprint = getFootprint(item);
         const clamped = I.clampToBounds(item.position.x + dx, item.position.z + dz, bounds, footprint, item.rotationY || 0);
         S.updateItem(id, { position: { x: clamped.x, y: item.position.y || 0, z: clamped.z } });
+    }
+
+    function toggleLockSelected() {
+        const id = S.get().selectedId;
+        if (!id) return;
+        const item = S.getItem(id);
+        S.updateItem(id, { locked: !item.locked });
     }
 
     // Small pop-in tween when an item is added, so it doesn't just snap
@@ -408,6 +467,7 @@ RD.Furniture = (function () {
         rescaleSelected: rescaleSelected,
         deleteSelected: deleteSelected,
         duplicateSelected: duplicateSelected,
-        nudgeSelected: nudgeSelected
+        nudgeSelected: nudgeSelected,
+        toggleLockSelected: toggleLockSelected
     };
 })();

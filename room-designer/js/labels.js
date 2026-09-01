@@ -26,7 +26,7 @@ RD.Labels = (function () {
     }
 
     function labelText(item) {
-        const label = RD.Furniture.getLabel(item);
+        const label = (item.locked ? '🔒 ' : '') + RD.Furniture.getLabel(item);
         const fp = RD.Furniture.getFootprint(item);
         const s = item.scale || 1;
         const wCm = Math.round(fp.w * s * 100), dCm = Math.round(fp.d * s * 100);

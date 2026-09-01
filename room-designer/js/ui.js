@@ -60,6 +60,7 @@ RD.UI = (function () {
             propFindSpot: $('prop-find-spot'),
             propCheck: $('prop-check'),
             propDuplicate: $('prop-duplicate'),
+            propLock: $('prop-lock'),
             propDelete: $('prop-delete'),
 
             statusDims: $('status-room-dims'),
@@ -207,7 +208,10 @@ RD.UI = (function () {
         const item = S.getItem(id);
         if (!item) { els.propsPanel.hidden = true; return; }
         els.propsPanel.hidden = false;
-        els.propsTitle.textContent = F.getLabel(item);
+        els.propsTitle.textContent = (item.locked ? '🔒 ' : '') + F.getLabel(item);
+        els.propLock.textContent = item.locked ? '🔒' : '🔓';
+        els.propLock.title = item.locked ? 'שחרור מיקום' : 'נעילת מיקום — מונע הזזה בטעות';
+        els.propLock.setAttribute('aria-pressed', item.locked ? 'true' : 'false');
         els.propColor.value = item.color;
         els.propScale.value = item.scale;
         els.propScaleOut.textContent = Math.round(item.scale * 100) + '%';
@@ -295,6 +299,7 @@ RD.UI = (function () {
         els.propRotateLeft.addEventListener('click', function () { F.rotateSelected(-15); });
         els.propRotateRight.addEventListener('click', function () { F.rotateSelected(15); });
         els.propDuplicate.addEventListener('click', function () { F.duplicateSelected(); });
+        els.propLock.addEventListener('click', function () { F.toggleLockSelected(); });
         els.propDelete.addEventListener('click', function () { F.deleteSelected(); });
 
         function wireDim(el, axis) {
