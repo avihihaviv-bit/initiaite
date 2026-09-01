@@ -10,6 +10,7 @@ import { ActivityCard } from '@/components/dashboard/ActivityCard';
 import { MealRecommendations } from '@/components/dashboard/MealRecommendations';
 import { DailyAIInsight } from '@/components/dashboard/DailyAIInsight';
 import { WeeklyCheckInCard } from '@/components/dashboard/WeeklyCheckInCard';
+import { DailyTargetsCard } from '@/components/dashboard/DailyTargetsCard';
 import { NaturalnessMixCard } from '@/components/dashboard/NaturalnessMixCard';
 import { MealSection } from '@/components/diary/MealSection';
 import { Button } from '@/components/ui/Button';
@@ -55,6 +56,8 @@ export function DashboardPage() {
       </header>
 
       <WeeklyCheckInCard />
+
+      <DailyTargetsCard targets={targets} />
 
       {/* Calorie summary */}
       <div className="flex flex-col items-center rounded-xl2 bg-surface p-6 shadow-card">
