@@ -10,6 +10,7 @@ export interface AssistantContext {
   targets: MacroTargets;
   last7Days: DayStat[]; // includes today, oldest first
   streakDays: number;
+  isMinor: boolean;
 }
 
 export type AssistantCard =
@@ -84,6 +85,30 @@ export function answerAssistant(rawInput: string, ctx: AssistantContext): Assist
       return { text: "I couldn't find a restaurant that fits well right now — try browsing the Restaurants tab directly." };
     }
     return { text: `Based on what you have left today, here's what fits best:`, card: { type: 'restaurant_matches', matches } };
+  }
+
+  // 4.5 Goal intent: bulk/gain muscle, cut/fat loss, recomposition — teens
+  // get supportive, non-extreme guidance instead of a hard numeric target.
+  if (/\b(bulk|gain (weight|muscle)|build muscle|get bigger)\b/.test(q)) {
+    return {
+      text: ctx.isMinor
+        ? "Let's focus on supporting muscle growth with enough food, protein, carbohydrates, recovery, and strength training — rather than trying to gain weight as fast as possible. Your plan already reflects gentle, growth-safe numbers."
+        : "Got it — building muscle works best with a modest calorie surplus, enough protein, progressive strength training, and consistent recovery. Your current plan is already set up for that; check your macros on the Dashboard.",
+    };
+  }
+  if (/\b(cut|lose fat|fat loss|shred|get lean|get shredded)\b/.test(q)) {
+    return {
+      text: ctx.isMinor
+        ? "Let's focus on healthy habits and adequate nutrition while you're still growing — enough energy, nutrient-dense food, activity, and sleep — rather than aggressive calorie restriction. Your plan already uses gentle, growth-safe numbers."
+        : "For fat loss, a moderate calorie deficit combined with enough protein and regular activity tends to work best long-term — your current plan already reflects a sustainable pace rather than an extreme one.",
+    };
+  }
+  if (/\brecomp(osition)?\b/.test(q)) {
+    return {
+      text: ctx.isMinor
+        ? "Recomposition at your age is mostly about consistent strength training, enough protein, balanced meals, and good recovery — not chasing a specific number on the scale."
+        : "Recomposition (building muscle while losing fat) relies on strength training, enough protein, and staying close to maintenance calories — it's a slow, steady process rather than a quick transformation.",
+    };
   }
 
   // 5. What should I eat / cook / hungry / meal-type words

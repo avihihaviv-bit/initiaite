@@ -12,8 +12,9 @@ export function useAssistantContext(): AssistantContext {
   const diary = useDiaryForDate(todayISO());
   const last7Days = useLastNDaysStats(7);
   const entries = useAppStore((s) => s.diaryEntries);
+  const profile = useAppStore((s) => s.profile);
 
   const streakDays = useMemo(() => computeStreak(entries), [entries]);
 
-  return { totals: diary.totals, targets, last7Days, streakDays };
+  return { totals: diary.totals, targets, last7Days, streakDays, isMinor: profile?.isMinor ?? false };
 }

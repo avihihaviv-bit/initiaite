@@ -43,6 +43,9 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
             transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
             className={`relative z-10 max-h-[90vh] w-full ${SIZES[size]} overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-white p-5 shadow-floating`}
           >
             {title && (

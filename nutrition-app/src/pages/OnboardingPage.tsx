@@ -108,7 +108,7 @@ export function OnboardingPage() {
       activityLevel: form.activityLevel as ActivityLevel,
       trainingDaysPerWeek: form.trainingDaysPerWeek,
       trainingTypes: form.trainingTypes,
-      goal: isMinor ? 'maintain' : (form.goal as Goal),
+      goal: form.goal as Goal,
       goalPace: isMinor ? undefined : form.goalPace,
       isMinor,
       createdAt: now,
@@ -274,8 +274,8 @@ function PersonalStep({
           <div className="flex gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
             <ShieldAlert size={18} className="mt-0.5 shrink-0" />
             <span>
-              Since you&apos;re under 18, we&apos;ll keep your plan focused on healthy maintenance and recommend involving a
-              parent, dietitian, or doctor for any weight-related goals.
+              Since you&apos;re under 18, we&apos;ll use gentler, growth-safe numbers for whatever goal you choose, and
+              recommend involving a parent, dietitian, or doctor for any weight-related goals.
             </span>
           </div>
         )}
@@ -373,25 +373,24 @@ function GoalStep({
       {isMinor && (
         <div className="mt-4 flex gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <ShieldAlert size={18} className="mt-0.5 shrink-0" />
-          <span>For users under 18, we only offer a healthy-maintenance plan. Talk to a parent or doctor before dieting.</span>
+          <span>
+            Every goal below is available to you. Since you&apos;re under 18, we&apos;ll use gentler, growth-safe numbers
+            regardless of which one you pick — and we&apos;d still recommend looping in a parent, dietitian, or doctor.
+          </span>
         </div>
       )}
 
       <div className="mt-4 space-y-2.5">
-        {GOAL_OPTIONS.map((opt) => {
-          const disabled = isMinor && opt.value !== 'maintain';
-          return (
-            <div key={opt.value} className={disabled ? 'pointer-events-none opacity-40' : ''}>
-              <OptionCard
-                selected={form.goal === opt.value || (isMinor && opt.value === 'maintain')}
-                onClick={() => update('goal', opt.value)}
-                title={opt.title}
-                description={opt.description}
-                icon={opt.icon}
-              />
-            </div>
-          );
-        })}
+        {GOAL_OPTIONS.map((opt) => (
+          <OptionCard
+            key={opt.value}
+            selected={form.goal === opt.value}
+            onClick={() => update('goal', opt.value)}
+            title={opt.title}
+            description={opt.description}
+            icon={opt.icon}
+          />
+        ))}
       </div>
 
       {!isMinor && (form.goal === 'lose' || form.goal === 'gain') && (
@@ -432,8 +431,8 @@ function ReviewStep({
         <div className="mt-4 flex gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <ShieldAlert size={18} className="mt-0.5 shrink-0" />
           <span>
-            We&apos;ve set your plan to healthy maintenance calories. Please involve a parent, dietitian, or doctor before
-            pursuing any weight change goal.
+            Since you&apos;re under 18, these numbers use gentler, growth-safe adjustments rather than a full adult target.
+            Please involve a parent, dietitian, or doctor for any weight-related goal.
           </span>
         </div>
       )}

@@ -43,13 +43,29 @@ export function calculateTDEE(profile: Pick<UserProfile, 'sex' | 'weightKg' | 'h
   return Math.round(bmr * ACTIVITY_MULTIPLIERS[profile.activityLevel]);
 }
 
-/** Safe, bounded calorie adjustments — never allows a dangerous deficit/surplus. */
+/** Safe, bounded calorie adjustments for adults — never a dangerous deficit/surplus. */
 const GOAL_ADJUSTMENT: Record<Goal, Record<GoalPace, number>> = {
   maintain: { moderate: 0, fast: 0 },
   lose: { moderate: -0.15, fast: -0.22 }, // capped well inside safe range
   gain: { moderate: 0.1, fast: 0.18 },
   recomposition: { moderate: -0.05, fast: -0.05 },
   performance: { moderate: 0.05, fast: 0.08 },
+};
+
+/**
+ * Teen (under-18) adjustments — deliberately much gentler than the adult
+ * table, and there is no "fast" pace option at all for minors (the app
+ * never offers an aggressive setting to a growing body). Every goal stays
+ * selectable — see calculateCalorieTarget — but the resulting swing from
+ * TDEE is small on purpose, because growth and development need a
+ * consistent energy supply regardless of which goal was picked.
+ */
+const TEEN_GOAL_ADJUSTMENT: Record<Goal, number> = {
+  maintain: 0,
+  lose: -0.1,
+  gain: 0.1,
+  recomposition: -0.03,
+  performance: 0.05,
 };
 
 /**
@@ -67,62 +83,64 @@ export interface CalorieTargetResult {
   bmr: number;
   targetCalories: number;
   wasCapped: boolean;
+  /** True for any user under 18 — the UI should show the teen-guardrail message, not necessarily "goal was overridden". */
   minorGuardrail: boolean;
 }
 
 /**
- * Computes the daily calorie target with hard safety guardrails:
- *  - deficits/surpluses are capped to a moderate, sustainable range
- *  - target is never allowed below the sex-specific safe floor
- *  - minors are always treated as "maintain" — the app never prescribes a
- *    weight-loss/aggressive target for a user under 18. The UI must show a
- *    message recommending involving a parent/dietitian/doctor instead.
+ * Computes the daily calorie target with safety guardrails:
+ *  - adults: deficits/surpluses are capped to a moderate, sustainable range,
+ *    never below the sex-specific safe floor, never above 1.25x TDEE
+ *  - under 18: EVERY goal (maintain/lose/gain/recomposition/performance)
+ *    stays selectable — the app never locks a goal behind an age check —
+ *    but the math always uses the much gentler TEEN_GOAL_ADJUSTMENT table,
+ *    a higher effective floor (never under 90% of TDEE), and a lower
+ *    ceiling (never over 1.15x TDEE). The UI must still show a message
+ *    recommending involving a parent/dietitian/doctor for any
+ *    weight-related goal — this is informational, not a block.
  */
 export function calculateCalorieTarget(profile: UserProfile): CalorieTargetResult {
   const bmr = calculateBMR(profile);
   const tdee = calculateTDEE(profile);
 
-  if (profile.isMinor) {
-    return { tdee, bmr, targetCalories: tdee, wasCapped: false, minorGuardrail: true };
-  }
-
-  const pace = profile.goalPace ?? 'moderate';
-  const pct = GOAL_ADJUSTMENT[profile.goal][pace];
+  const pct = profile.isMinor ? TEEN_GOAL_ADJUSTMENT[profile.goal] : GOAL_ADJUSTMENT[profile.goal][profile.goalPace ?? 'moderate'];
   let target = Math.round(tdee * (1 + pct));
 
-  const floor = SAFE_CALORIE_FLOOR[profile.sex];
   let wasCapped = false;
+  const floor = profile.isMinor ? Math.max(SAFE_CALORIE_FLOOR[profile.sex], Math.round(tdee * 0.9)) : SAFE_CALORIE_FLOOR[profile.sex];
   if (target < floor) {
     target = floor;
     wasCapped = true;
   }
-  // Also never allow the target to exceed a sane surplus above TDEE.
-  const ceiling = Math.round(tdee * 1.25);
+  const ceiling = Math.round(tdee * (profile.isMinor ? 1.15 : 1.25));
   if (target > ceiling) {
     target = ceiling;
     wasCapped = true;
   }
 
-  return { tdee, bmr, targetCalories: target, wasCapped, minorGuardrail: false };
+  return { tdee, bmr, targetCalories: target, wasCapped, minorGuardrail: profile.isMinor };
 }
 
 /**
  * Macro split. Protein is anchored to bodyweight (supports muscle
  * maintenance/growth regardless of goal), fat gets a healthy minimum
- * percentage of calories, and carbs fill the remainder.
+ * percentage of calories, and carbs fill the remainder — never a flat
+ * weight-only formula.
+ *
+ * If `customProteinTargetG` is provided (a user-entered override), it's
+ * used directly instead of the computed value — carbs/fat are still
+ * derived around whatever protein figure is actually in effect, so the
+ * three macros always reconcile back to targetCalories. Validate a custom
+ * target against `recommendedProteinRange` before accepting it — this
+ * function does not judge the input itself, it just uses it.
  */
 export function calculateMacroTargets(profile: UserProfile, targetCalories: number): MacroTargets {
-  const proteinPerKg =
-    profile.goal === 'recomposition' || profile.goal === 'gain'
-      ? 2.0
-      : profile.goal === 'performance'
-        ? 1.8
-        : 1.6;
-
-  const proteinG = Math.round(profile.weightKg * proteinPerKg);
+  const proteinPerKg = recommendedProteinPerKg(profile);
+  const computedProteinG = Math.round(profile.weightKg * proteinPerKg);
+  const proteinG = profile.customProteinTargetG ?? computedProteinG;
   const proteinCals = proteinG * 4;
 
-  const fatPct = 0.28; // ~28% of calories from fat — healthy minimum
+  const fatPct = profile.isMinor ? 0.3 : 0.28; // healthy minimum share of calories; teens get a slightly higher floor
   const fatCals = targetCalories * fatPct;
   const fatG = Math.round(fatCals / 9);
 
@@ -132,10 +150,63 @@ export function calculateMacroTargets(profile: UserProfile, targetCalories: numb
   return { calories: targetCalories, proteinG, carbsG, fatG };
 }
 
+/**
+ * Grams of protein per kg bodyweight, by goal — lower, general-guidance
+ * ranges for under-18 users (adolescent protein needs are less
+ * well-established than adult sports-nutrition ranges, so these are
+ * intentionally conservative estimates, not clinical DRI figures).
+ */
+function recommendedProteinPerKg(profile: Pick<UserProfile, 'goal' | 'isMinor'>): number {
+  if (profile.isMinor) {
+    if (profile.goal === 'recomposition' || profile.goal === 'gain') return 1.6;
+    if (profile.goal === 'performance') return 1.5;
+    return 1.3;
+  }
+  if (profile.goal === 'recomposition' || profile.goal === 'gain') return 2.0;
+  if (profile.goal === 'performance') return 1.8;
+  return 1.6;
+}
+
+export interface ProteinRange {
+  minG: number;
+  maxG: number;
+}
+
+/** The recommended protein range (±15% around the computed factor) used to validate a manual override. */
+export function recommendedProteinRange(profile: Pick<UserProfile, 'goal' | 'isMinor' | 'weightKg'>): ProteinRange {
+  const perKg = recommendedProteinPerKg(profile);
+  const mid = profile.weightKg * perKg;
+  return { minG: Math.round(mid * 0.85), maxG: Math.round(mid * 1.15) };
+}
+
 export function calculateFullTargets(profile: UserProfile): { calorieResult: CalorieTargetResult; macros: MacroTargets } {
   const calorieResult = calculateCalorieTarget(profile);
   const macros = calculateMacroTargets(profile, calorieResult.targetCalories);
   return { calorieResult, macros };
+}
+
+// ---------------------------------------------------------------------------
+// HYDRATION
+//
+// A simple, transparent estimate: ~33ml per kg bodyweight (a commonly cited
+// general guideline), with a modest bump for higher activity levels and
+// training days. This is explicitly an estimate, never shown as a medical
+// number — see components/dashboard/WaterTracker.tsx.
+// ---------------------------------------------------------------------------
+
+export function calculateHydrationTargetMl(profile: Pick<UserProfile, 'weightKg' | 'activityLevel' | 'trainingDaysPerWeek'>): number {
+  const base = profile.weightKg * 33;
+  const activityBumpPct: Record<ActivityLevel, number> = {
+    sedentary: 0,
+    light: 0.05,
+    moderate: 0.1,
+    high: 0.15,
+    very_high: 0.2,
+  };
+  const trainingBump = profile.trainingDaysPerWeek >= 3 ? 0.05 : 0;
+  const total = base * (1 + activityBumpPct[profile.activityLevel] + trainingBump);
+  // Round to the nearest 50ml for a clean display number.
+  return Math.round(total / 50) * 50;
 }
 
 // ---------------------------------------------------------------------------

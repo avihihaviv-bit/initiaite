@@ -44,6 +44,8 @@ export interface UserProfile {
   goal: Goal;
   goalPace?: GoalPace;
   isMinor: boolean;
+  /** Manual protein override in grams/day — replaces the computed target when set. */
+  customProteinTargetG?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -155,6 +157,42 @@ export interface DiaryEntry {
 export interface WeightLogEntry {
   date: string; // YYYY-MM-DD
   weightKg: number;
+}
+
+// ---------------------------------------------------------------------------
+// Body measurements & progress photos — private, on-device only.
+// ---------------------------------------------------------------------------
+
+export type MeasurementType =
+  | 'waist'
+  | 'abdomen'
+  | 'chest'
+  | 'shoulders'
+  | 'rightArm'
+  | 'leftArm'
+  | 'rightThigh'
+  | 'leftThigh'
+  | 'hips'
+  | 'neck'
+  | 'calf';
+
+export interface MeasurementEntry {
+  id: string;
+  type: MeasurementType;
+  /** Always stored in centimeters — display converts via the units preference. */
+  valueCm: number;
+  date: string; // YYYY-MM-DD
+  loggedAt: string; // ISO timestamp
+}
+
+export type PhotoCategory = 'front' | 'side' | 'back';
+
+export interface ProgressPhoto {
+  id: string;
+  category: PhotoCategory;
+  dataUrl: string;
+  date: string; // YYYY-MM-DD
+  loggedAt: string; // ISO timestamp
 }
 
 export interface ScannedFoodCandidate {

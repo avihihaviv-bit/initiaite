@@ -15,6 +15,7 @@ const RestaurantDetailPage = lazy(() => import('@/pages/RestaurantDetailPage').t
 const StatisticsPage = lazy(() => import('@/pages/StatisticsPage').then((m) => ({ default: m.StatisticsPage })));
 const FavoritesPage = lazy(() => import('@/pages/FavoritesPage').then((m) => ({ default: m.FavoritesPage })));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const MeasurementsPage = lazy(() => import('@/pages/MeasurementsPage').then((m) => ({ default: m.MeasurementsPage })));
 
 export default function App() {
   const onboardingComplete = useAppStore((s) => s.onboardingComplete);
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/stats" element={<StatisticsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/measurements" element={<MeasurementsPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

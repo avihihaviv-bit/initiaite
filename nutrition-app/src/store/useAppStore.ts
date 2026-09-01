@@ -2,7 +2,18 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateId } from '@/utils/id';
 import { todayISO } from '@/utils/date';
-import type { DiaryEntry, FavoriteItem, FoodRef, RecentItem, UserProfile, WeightLogEntry } from '@/types';
+import type {
+  DiaryEntry,
+  FavoriteItem,
+  FoodRef,
+  MeasurementEntry,
+  MeasurementType,
+  PhotoCategory,
+  ProgressPhoto,
+  RecentItem,
+  UserProfile,
+  WeightLogEntry,
+} from '@/types';
 
 interface AppState {
   profile: UserProfile | null;
@@ -14,6 +25,8 @@ interface AppState {
   trackWeight: boolean;
   units: 'metric' | 'imperial';
   waterLog: Record<string, number>; // date -> ml
+  measurements: MeasurementEntry[];
+  progressPhotos: ProgressPhoto[];
 
   setProfile: (profile: UserProfile) => void;
   updateProfile: (partial: Partial<UserProfile>) => void;
@@ -35,6 +48,14 @@ interface AppState {
 
   addWater: (ml: number, date: string) => void;
   resetAllData: () => void;
+
+  addMeasurement: (type: MeasurementType, valueCm: number, date?: string) => void;
+  deleteMeasurement: (id: string) => void;
+  deleteMeasurementHistory: (type: MeasurementType) => void;
+
+  addProgressPhoto: (category: PhotoCategory, dataUrl: string, date?: string) => void;
+  deleteProgressPhoto: (id: string) => void;
+  deleteAllProgressPhotos: () => void;
 }
 
 const MAX_RECENT_ITEMS = 20;
@@ -55,6 +76,8 @@ export const useAppStore = create<AppState>()(
       trackWeight: false,
       units: 'metric',
       waterLog: {},
+      measurements: [],
+      progressPhotos: [],
 
       setProfile: (profile) => set({ profile }),
 
@@ -127,6 +150,33 @@ export const useAppStore = create<AppState>()(
           waterLog: { ...state.waterLog, [date]: Math.max(0, (state.waterLog[date] ?? 0) + ml) },
         })),
 
+      addMeasurement: (type, valueCm, date = todayISO()) =>
+        set((state) => ({
+          measurements: [
+            ...state.measurements,
+            { id: generateId('meas'), type, valueCm, date, loggedAt: new Date().toISOString() },
+          ].sort((a, b) => a.date.localeCompare(b.date)),
+        })),
+
+      deleteMeasurement: (id) =>
+        set((state) => ({ measurements: state.measurements.filter((m) => m.id !== id) })),
+
+      deleteMeasurementHistory: (type) =>
+        set((state) => ({ measurements: state.measurements.filter((m) => m.type !== type) })),
+
+      addProgressPhoto: (category, dataUrl, date = todayISO()) =>
+        set((state) => ({
+          progressPhotos: [
+            ...state.progressPhotos,
+            { id: generateId('photo'), category, dataUrl, date, loggedAt: new Date().toISOString() },
+          ],
+        })),
+
+      deleteProgressPhoto: (id) =>
+        set((state) => ({ progressPhotos: state.progressPhotos.filter((p) => p.id !== id) })),
+
+      deleteAllProgressPhotos: () => set({ progressPhotos: [] }),
+
       resetAllData: () =>
         set({
           profile: null,
@@ -137,6 +187,8 @@ export const useAppStore = create<AppState>()(
           weightLog: [],
           trackWeight: false,
           waterLog: {},
+          measurements: [],
+          progressPhotos: [],
         }),
     }),
     {

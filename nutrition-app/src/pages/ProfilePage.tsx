@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Info, LogOut, ShieldAlert, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { healthService } from '@/services/HealthService';
@@ -12,6 +12,8 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { computeAchievements } from '@/utils/achievements';
 import { kgToLb, lbToKg, cmToFtIn, ftInToCm } from '@/utils/units';
 import { todayISO } from '@/utils/date';
+import { calculateFullTargets, recommendedProteinRange } from '@/utils/nutritionCalculator';
+import { ProteinRangeWarningModal } from '@/components/profile/ProteinRangeWarningModal';
 import type { ActivityLevel, Goal, TrainingType, UserProfile } from '@/types';
 
 const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
@@ -61,6 +63,9 @@ export function ProfilePage() {
   const [todayWeight, setTodayWeight] = useState(weightLog.find((w) => w.date === todayISO())?.weightKg ?? profile.weightKg);
   const [healthModalOpen, setHealthModalOpen] = useState(false);
   const healthConnected = healthService.getAuthStatus() === 'connected';
+  const [useCustomProtein, setUseCustomProtein] = useState(profile.customProteinTargetG != null);
+  const [proteinWarningOpen, setProteinWarningOpen] = useState(false);
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
 
   function update<K extends keyof UserProfile>(key: K, value: UserProfile[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -73,15 +78,62 @@ export function ProfilePage() {
     }));
   }
 
-  function save() {
-    updateProfile(form);
+  const proteinRange = recommendedProteinRange(form);
+
+  function attemptSave() {
+    if (useCustomProtein && form.customProteinTargetG != null) {
+      const { customProteinTargetG } = form;
+      if (customProteinTargetG > proteinRange.maxG || customProteinTargetG < proteinRange.minG * 0.5) {
+        setProteinWarningOpen(true);
+        return;
+      }
+    }
+    commitSave(form);
+  }
+
+  function commitSave(nextForm: UserProfile) {
+    const before = calculateFullTargets(profile);
+    const after = calculateFullTargets(nextForm);
+    updateProfile(nextForm);
+
+    const calDelta = after.macros.calories - before.macros.calories;
+    const proteinDelta = after.macros.proteinG - before.macros.proteinG;
+    if (calDelta !== 0 || proteinDelta !== 0) {
+      const parts: string[] = [];
+      if (calDelta !== 0) parts.push(`Calories: ${before.macros.calories} → ${after.macros.calories} (${calDelta > 0 ? '+' : ''}${calDelta})`);
+      if (proteinDelta !== 0) parts.push(`Protein: ${before.macros.proteinG}g → ${after.macros.proteinG}g (${proteinDelta > 0 ? '+' : ''}${proteinDelta}g)`);
+      setSaveNotice(parts.join(' · '));
+    } else {
+      setSaveNotice('Saved — no change to your daily targets.');
+    }
   }
 
   function handleClearData() {
-    if (window.confirm('This permanently deletes your profile, diary history, favorites, and weight log from this device. Continue?')) {
+    if (window.confirm('This permanently deletes your profile, diary history, measurements, photos, and favorites from this device. Continue?')) {
       resetAllData();
       navigate('/');
     }
+  }
+
+  function handleExportData() {
+    const state = useAppStore.getState();
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      profile: state.profile,
+      diaryEntries: state.diaryEntries,
+      favorites: state.favorites,
+      weightLog: state.weightLog,
+      measurements: state.measurements,
+      progressPhotos: state.progressPhotos,
+      waterLog: state.waterLog,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nutrition-ai-export-${todayISO()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   const achievements = computeAchievements(diaryEntries, targets.proteinG);
@@ -123,7 +175,10 @@ export function ProfilePage() {
       {minorGuardrail && (
         <div className="flex gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <ShieldAlert size={18} className="mt-0.5 shrink-0" />
-          <span>Your plan is set to healthy maintenance. Please involve a parent, dietitian, or doctor for any weight-related goals.</span>
+          <span>
+            Since you&apos;re under 18, your numbers use gentler, growth-safe adjustments for whichever goal you choose.
+            Please involve a parent, dietitian, or doctor for any weight-related goals.
+          </span>
         </div>
       )}
 
@@ -236,24 +291,75 @@ export function ProfilePage() {
         </Field>
 
         <Field label="Goal">
-          <select
-            value={form.goal}
-            onChange={(e) => update('goal', e.target.value as Goal)}
-            disabled={form.isMinor}
-            className="input disabled:opacity-60"
-          >
+          <select value={form.goal} onChange={(e) => update('goal', e.target.value as Goal)} className="input">
             {Object.entries(GOAL_LABELS).map(([value, label]) => (
-              <option key={value} value={value} disabled={form.isMinor && value !== 'maintain'}>
+              <option key={value} value={value}>
                 {label}
               </option>
             ))}
           </select>
+          {form.isMinor && <p className="mt-1.5 text-xs text-muted">Available for every goal — numbers stay growth-safe.</p>}
         </Field>
 
-        <Button fullWidth onClick={save}>
+        <Field label="Protein target">
+          <div className="flex gap-2">
+            <Chip
+              selected={!useCustomProtein}
+              onClick={() => {
+                setUseCustomProtein(false);
+                update('customProteinTargetG', undefined);
+              }}
+            >
+              Use recommended
+            </Chip>
+            <Chip
+              selected={useCustomProtein}
+              onClick={() => {
+                setUseCustomProtein(true);
+                if (form.customProteinTargetG == null) update('customProteinTargetG', Math.round((proteinRange.minG + proteinRange.maxG) / 2));
+              }}
+            >
+              Set custom target
+            </Chip>
+          </div>
+          {useCustomProtein ? (
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="number"
+                value={form.customProteinTargetG ?? ''}
+                onChange={(e) => update('customProteinTargetG', Number(e.target.value) || 0)}
+                className="input w-28"
+              />
+              <span className="text-sm text-muted">g / day</span>
+            </div>
+          ) : null}
+          <p className="mt-1.5 text-xs text-muted">Estimated range for you: {proteinRange.minG}–{proteinRange.maxG}g/day</p>
+        </Field>
+
+        <Button fullWidth onClick={attemptSave}>
           Save changes
         </Button>
+
+        {saveNotice && <p className="text-center text-xs font-medium text-primary-700">{saveNotice}</p>}
       </section>
+
+      <ProteinRangeWarningModal
+        open={proteinWarningOpen}
+        targetG={form.customProteinTargetG ?? 0}
+        range={proteinRange}
+        onClose={() => setProteinWarningOpen(false)}
+        onUseRecommended={() => {
+          setUseCustomProtein(false);
+          const next = { ...form, customProteinTargetG: undefined };
+          setForm(next);
+          setProteinWarningOpen(false);
+          commitSave(next);
+        }}
+        onKeepTarget={() => {
+          setProteinWarningOpen(false);
+          commitSave(form);
+        }}
+      />
 
       {/* Weight tracking */}
       <section className="space-y-3 rounded-xl2 bg-white p-4 shadow-card">
@@ -272,6 +378,9 @@ export function ProfilePage() {
             Save today&apos;s weight
           </Button>
         )}
+        <Link to="/measurements" className="block text-xs font-semibold text-primary-600 hover:underline">
+          📏 Track body measurements & progress photos →
+        </Link>
       </section>
 
       {/* Apple Health */}
@@ -316,12 +425,18 @@ export function ProfilePage() {
       <section className="space-y-3 rounded-xl2 bg-white p-4 shadow-card">
         <h2 className="text-sm font-bold text-ink">Privacy</h2>
         <p className="text-xs text-muted">
-          All your data — profile, diary, favorites, and photos you scan — is stored only on this device. Nothing is uploaded to a server
-          in this demo. Health/activity data is never sent anywhere and isn&apos;t collected at all in this web version.
+          All your data — profile, diary, body measurements, progress photos, and favorites — is stored only on this device.
+          Nothing is uploaded to a server in this demo. Health/activity data is never sent anywhere and isn&apos;t collected at
+          all in this web version.
         </p>
-        <Button variant="danger" icon={<Trash2 size={16} />} onClick={handleClearData}>
-          Clear all my data
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleExportData}>
+            Export data
+          </Button>
+          <Button variant="danger" icon={<Trash2 size={16} />} onClick={handleClearData}>
+            Clear all my data
+          </Button>
+        </div>
       </section>
 
       <HealthConnectModal open={healthModalOpen} onClose={() => setHealthModalOpen(false)} />
