@@ -25,6 +25,8 @@ interface AppState {
   recentItems: RecentItem[];
   weightLog: WeightLogEntry[];
   trackWeight: boolean;
+  lastCheckInAt: string | null;
+  checkInSnoozedUntil: string | null;
   units: 'metric' | 'imperial';
   waterLog: Record<string, number>; // date -> ml
   measurements: MeasurementEntry[];
@@ -39,6 +41,8 @@ interface AppState {
   addDiaryEntry: (entry: Omit<DiaryEntry, 'id' | 'loggedAt'>) => void;
   updateDiaryEntry: (id: string, partial: Partial<DiaryEntry>) => void;
   removeDiaryEntry: (id: string) => void;
+  clearDiaryHistory: () => void;
+  clearWeightHistory: () => void;
 
   toggleFavorite: (ref: FoodRef) => void;
   isFavorite: (ref: FoodRef) => boolean;
@@ -48,6 +52,8 @@ interface AppState {
   addWeightLog: (weightKg: number, date?: string) => void;
   setTrackWeight: (track: boolean) => void;
   setUnits: (units: 'metric' | 'imperial') => void;
+  recordCheckIn: (date?: string) => void;
+  snoozeCheckIn: (untilDate: string) => void;
 
   addWater: (ml: number, date: string) => void;
   resetAllData: () => void;
@@ -60,7 +66,7 @@ interface AppState {
   deleteProgressPhoto: (id: string) => void;
   deleteAllProgressPhotos: () => void;
 
-  saveMealPlan: (plan: { name: string; days: MealPlanDay[] }) => string;
+  saveMealPlan: (plan: { name: string; days: MealPlanDay[]; origin: 'user' | 'ai' }) => string;
   updateMealPlan: (id: string, partial: Partial<Pick<SavedMealPlan, 'name' | 'days'>>) => void;
   deleteMealPlan: (id: string) => void;
 }
@@ -81,6 +87,8 @@ export const useAppStore = create<AppState>()(
       recentItems: [],
       weightLog: [],
       trackWeight: false,
+      lastCheckInAt: null,
+      checkInSnoozedUntil: null,
       units: 'metric',
       waterLog: {},
       measurements: [],
@@ -115,6 +123,9 @@ export const useAppStore = create<AppState>()(
 
       removeDiaryEntry: (id) =>
         set((state) => ({ diaryEntries: state.diaryEntries.filter((e) => e.id !== id) })),
+
+      clearDiaryHistory: () => set({ diaryEntries: [] }),
+      clearWeightHistory: () => set({ weightLog: [] }),
 
       toggleFavorite: (ref) =>
         set((state) => {
@@ -153,6 +164,9 @@ export const useAppStore = create<AppState>()(
       setTrackWeight: (track) => set({ trackWeight: track }),
       setUnits: (units) => set({ units }),
 
+      recordCheckIn: (date = todayISO()) => set({ lastCheckInAt: date, checkInSnoozedUntil: null }),
+      snoozeCheckIn: (untilDate) => set({ checkInSnoozedUntil: untilDate }),
+
       addWater: (ml, date) =>
         set((state) => ({
           waterLog: { ...state.waterLog, [date]: Math.max(0, (state.waterLog[date] ?? 0) + ml) },
@@ -188,7 +202,10 @@ export const useAppStore = create<AppState>()(
       saveMealPlan: (plan) => {
         const id = generateId('plan');
         set((state) => ({
-          savedMealPlans: [...state.savedMealPlans, { id, name: plan.name, days: plan.days, createdAt: new Date().toISOString() }],
+          savedMealPlans: [
+            ...state.savedMealPlans,
+            { id, name: plan.name, days: plan.days, origin: plan.origin, createdAt: new Date().toISOString() },
+          ],
         }));
         return id;
       },
@@ -210,6 +227,8 @@ export const useAppStore = create<AppState>()(
           recentItems: [],
           weightLog: [],
           trackWeight: false,
+          lastCheckInAt: null,
+          checkInSnoozedUntil: null,
           waterLog: {},
           measurements: [],
           progressPhotos: [],

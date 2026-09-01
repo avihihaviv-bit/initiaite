@@ -29,7 +29,7 @@ export function HealthConnectModal({ open, onClose }: HealthConnectModalProps) {
       {!attempted ? (
         <>
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-2xl">🍎</div>
-          <p className="text-sm text-ink">
+          <p className="text-sm text-fg">
             Allow the app to use your activity data to improve your nutrition recommendations.
           </p>
           <div className="mt-4 space-y-1.5">
@@ -54,7 +54,7 @@ export function HealthConnectModal({ open, onClose }: HealthConnectModalProps) {
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
             <Smartphone size={22} />
           </div>
-          <p className="text-sm font-semibold text-ink">Apple Health isn&apos;t available here</p>
+          <p className="text-sm font-semibold text-fg">Apple Health isn&apos;t available here</p>
           <p className="mt-1.5 flex items-start gap-1.5 text-xs text-muted">
             <Info size={13} className="mt-0.5 shrink-0" />
             HealthKit can only be read from a native iOS app — a website has no way to access it, so this web version can&apos;t

@@ -29,7 +29,7 @@ export function StatisticsPage() {
   return (
     <div className="space-y-4 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Statistics</h1>
+        <h1 className="text-2xl font-bold text-fg">Statistics</h1>
         <p className="mt-1 text-sm text-muted">Your trends over the last 7 days.</p>
       </header>
 
@@ -79,8 +79,8 @@ export function StatisticsPage() {
         />
       )}
 
-      <div className="rounded-xl2 bg-white p-4 shadow-card">
-        <h3 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-ink">
+      <div className="rounded-xl2 bg-surface p-4 shadow-card">
+        <h3 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-fg">
           <Footprints size={15} className="text-muted" />
           Activity
         </h3>

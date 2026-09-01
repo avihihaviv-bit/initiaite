@@ -15,9 +15,9 @@ export function NaturalnessMixCard({ entries }: { entries: DiaryEntry[] }) {
   const color = naturalnessColor(score);
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-ink">🌿 Today&apos;s Food Quality Mix</h3>
+        <h3 className="text-sm font-bold text-fg">🌿 Today&apos;s Food Quality Mix</h3>
         <span className="text-sm font-bold tabular-nums" style={{ color }}>
           {score}/100
         </span>

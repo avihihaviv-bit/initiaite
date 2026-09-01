@@ -36,7 +36,7 @@ export function AddFoodHubPage() {
   return (
     <div className="space-y-7 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Add Food</h1>
+        <h1 className="text-2xl font-bold text-fg">Add Food</h1>
         <p className="mt-1 text-sm text-muted">
           {meal ? `Adding to ${meal}` : 'Choose how you want to log food'}
           {!isToday(date) && ` · ${date}`}
@@ -68,7 +68,7 @@ export function AddFoodHubPage() {
       </div>
 
       <section>
-        <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-ink">
+        <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-fg">
           <Heart size={15} className="text-red-400" /> Favorites
         </h2>
         {resolvedFavorites.length > 0 ? (
@@ -87,7 +87,7 @@ export function AddFoodHubPage() {
       </section>
 
       <section>
-        <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-ink">
+        <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-fg">
           <Clock3 size={15} className="text-muted" /> Recently Added
         </h2>
         {resolvedRecent.length > 0 ? (
@@ -117,7 +117,7 @@ function AddOptionCard({ to, icon, emoji, title, description }: { to: string; ic
   return (
     <Link
       to={to}
-      className="group flex items-center gap-3 rounded-xl2 bg-white p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated active:scale-[0.98] sm:flex-col sm:items-start sm:gap-2 sm:p-5"
+      className="group flex items-center gap-3 rounded-xl2 bg-surface p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated active:scale-[0.98] sm:flex-col sm:items-start sm:gap-2 sm:p-5"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-2xl text-primary-600 sm:h-14 sm:w-14">
         <span className="sm:hidden">{icon}</span>
@@ -125,8 +125,8 @@ function AddOptionCard({ to, icon, emoji, title, description }: { to: string; ic
       </div>
       <div className="flex-1 sm:mt-1">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-ink">{title}</p>
-          <ChevronRight size={16} className="text-gray-300 transition group-hover:translate-x-0.5 sm:hidden" />
+          <p className="font-bold text-fg">{title}</p>
+          <ChevronRight size={16} className="text-faint transition group-hover:translate-x-0.5 sm:hidden" />
         </div>
         <p className="mt-0.5 text-xs text-muted">{description}</p>
       </div>

@@ -61,13 +61,13 @@ export function CalculationDebugView() {
         <Row label="Protein × 4" value={`${macros.proteinG} × 4 = ${macros.proteinG * 4} kcal`} />
         <Row label="Carbs × 4" value={`${macros.carbsG} × 4 = ${macros.carbsG * 4} kcal`} />
         <Row label="Fat × 9" value={`${macros.fatG} × 9 = ${macros.fatG * 9} kcal`} />
-        <div className="mt-1 flex items-center justify-between border-t border-gray-100 pt-1.5">
+        <div className="mt-1 flex items-center justify-between border-t border-subtle pt-1.5">
           <span className="text-muted">= Calculated calories</span>
-          <span className="font-bold text-ink">{reconstructedCalories} kcal</span>
+          <span className="font-bold text-fg">{reconstructedCalories} kcal</span>
         </div>
         <div className="mt-1 flex items-center justify-between">
           <span className="text-muted">vs. calorie target</span>
-          <span className="font-bold text-ink">{macros.calories} kcal</span>
+          <span className="font-bold text-fg">{macros.calories} kcal</span>
         </div>
         <div className={`mt-2 rounded-lg px-3 py-2 ${validationOk ? 'bg-primary-50 text-primary-700' : 'bg-amber-50 text-amber-700'}`}>
           {validationOk ? '✓ Reconciled' : '⚠ Difference'}: {calorieDifference} kcal
@@ -79,8 +79,8 @@ export function CalculationDebugView() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
-      <p className="mb-2 text-sm font-sans font-bold text-ink">{title}</p>
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
+      <p className="mb-2 text-sm font-sans font-bold text-fg">{title}</p>
       <div className="space-y-1.5">{children}</div>
     </div>
   );
@@ -91,9 +91,9 @@ function Row({ label, value, formula }: { label: string; value: string; formula?
     <div>
       <div className="flex items-center justify-between">
         <span className="text-muted">{label}</span>
-        <span className="font-bold text-ink">{value}</span>
+        <span className="font-bold text-fg">{value}</span>
       </div>
-      {formula && <p className="text-[10px] text-gray-400">{formula}</p>}
+      {formula && <p className="text-[10px] text-faint">{formula}</p>}
     </div>
   );
 }

@@ -82,11 +82,11 @@ export function MeasurementDetailModal({ type, onClose }: MeasurementDetailModal
       {ranged.length >= 2 ? (
         <>
           {trend && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-sm">
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-surface-alt px-3 py-2 text-sm">
               {trend.direction === 'up' && <TrendingUp size={16} className="text-amber-600" />}
               {trend.direction === 'down' && <TrendingDown size={16} className="text-primary-600" />}
               {trend.direction === 'stable' && <Minus size={16} className="text-muted" />}
-              <span className="text-ink">
+              <span className="text-fg">
                 {trend.direction === 'stable'
                   ? 'Roughly stable over this period'
                   : `${trend.direction === 'up' ? 'Increased' : 'Decreased'} by ${Math.abs(trend.deltaAbs)}${unitLabel} (${Math.abs(trend.deltaPct)}%)`}
@@ -115,14 +115,14 @@ export function MeasurementDetailModal({ type, onClose }: MeasurementDetailModal
 
       <div className="mt-4 max-h-48 space-y-1.5 overflow-y-auto">
         {[...entries].reverse().map((e) => (
-          <div key={e.id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm">
+          <div key={e.id} className="flex items-center justify-between rounded-lg bg-surface-alt px-3 py-2 text-sm">
             <span className="text-muted">{e.date}</span>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-ink tabular-nums">
+              <span className="font-semibold text-fg tabular-nums">
                 {toDisplay(e.valueCm)}
                 {unitLabel}
               </span>
-              <button onClick={() => deleteMeasurement(e.id)} aria-label="Delete entry" className="text-gray-300 hover:text-red-500">
+              <button onClick={() => deleteMeasurement(e.id)} aria-label="Delete entry" className="text-faint hover:text-red-500">
                 <Trash2 size={14} />
               </button>
             </div>

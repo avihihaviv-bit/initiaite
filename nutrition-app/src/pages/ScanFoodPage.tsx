@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useRef, useState } from 'react';
-import { Camera, ImagePlus, RotateCcw, ScanLine } from 'lucide-react';
+import { Camera, ImagePlus, NotebookPen, RotateCcw, ScanLine, X } from 'lucide-react';
 import { foodRecognitionService } from '@/services/FoodRecognitionService';
 import { useAppStore } from '@/store/useAppStore';
 import { useAddContext } from '@/hooks/useAddContext';
@@ -11,9 +11,10 @@ import { Chip } from '@/components/ui/Chip';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { ScanAnimation } from '@/components/food/ScanAnimation';
-import { calculateNutrition } from '@/utils/nutritionCalculator';
+import { AddDetailsPanel } from '@/components/food/AddDetailsPanel';
+import { calculateNutrition, sumNutrition } from '@/utils/nutritionCalculator';
 import { findFoodById } from '@/data/foods';
-import type { MealType, ScanResult, ScannedFoodCandidate } from '@/types';
+import type { HiddenIngredientEntry, MealType, ScanResult, ScannedFoodCandidate } from '@/types';
 
 type ScanStage = 'capture' | 'analyzing' | 'review' | 'error';
 
@@ -37,6 +38,7 @@ export function ScanFoodPage() {
   const [scan, setScan] = useState<ScanResult | null>(null);
   const [candidates, setCandidates] = useState<ScannedFoodCandidate[]>([]);
   const [mealType, setMealType] = useState<MealType>(mealFromUrl ?? suggestMealType());
+  const [detailsOpenFor, setDetailsOpenFor] = useState<string | null>(null);
 
   function handleFile(file: File | undefined) {
     if (!file) return;
@@ -65,13 +67,28 @@ export function ScanFoodPage() {
     }
   }
 
+  function recomputeCandidate(c: ScannedFoodCandidate, grams: number, addedDetails: HiddenIngredientEntry[]): ScannedFoodCandidate {
+    const food = findFoodById(c.foodId);
+    const base = food ? calculateNutrition(food.per100g, grams) : c.nutrition;
+    const nutrition = addedDetails.length > 0 ? sumNutrition([base, ...addedDetails.map((d) => d.nutrition)]) : base;
+    return { ...c, estimatedGrams: grams, addedDetails, nutrition };
+  }
+
   function updateCandidateGrams(id: string, grams: number) {
+    setCandidates((prev) => prev.map((c) => (c.id === id ? recomputeCandidate(c, grams, c.addedDetails ?? []) : c)));
+  }
+
+  function addHiddenIngredient(id: string, entry: HiddenIngredientEntry) {
     setCandidates((prev) =>
-      prev.map((c) => {
-        if (c.id !== id) return c;
-        const food = findFoodById(c.foodId);
-        return food ? { ...c, estimatedGrams: grams, nutrition: calculateNutrition(food.per100g, grams) } : c;
-      }),
+      prev.map((c) => (c.id === id ? recomputeCandidate(c, c.estimatedGrams, [...(c.addedDetails ?? []), entry]) : c)),
+    );
+  }
+
+  function removeHiddenIngredient(id: string, entryId: string) {
+    setCandidates((prev) =>
+      prev.map((c) =>
+        c.id === id ? recomputeCandidate(c, c.estimatedGrams, (c.addedDetails ?? []).filter((d) => d.id !== entryId)) : c,
+      ),
     );
   }
 
@@ -95,7 +112,7 @@ export function ScanFoodPage() {
         foodName: c.name,
         foodImageEmoji: findFoodById(c.foodId)?.imageEmoji,
         quantityGrams: c.estimatedGrams,
-        servingLabel: `${c.estimatedGrams}g (estimated)`,
+        servingLabel: `${c.estimatedGrams}g (${c.addedDetails && c.addedDetails.length > 0 ? 'updated estimate' : 'estimated'})`,
         nutrition: c.nutrition,
         dataQuality: 'ai_estimate',
         source: 'scan',
@@ -110,17 +127,17 @@ export function ScanFoodPage() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Scan Food</h1>
+        <h1 className="text-2xl font-bold text-fg">Scan Food</h1>
         <p className="mt-1 text-sm text-muted">Take a photo and let AI estimate the nutrition.</p>
       </header>
 
       {stage === 'capture' && (
-        <div className="flex flex-col items-center gap-5 rounded-xl2 bg-white p-8 text-center shadow-card">
+        <div className="flex flex-col items-center gap-5 rounded-xl2 bg-surface p-8 text-center shadow-card">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-50 text-primary-600">
             <ScanLine size={34} />
           </div>
           <div>
-            <p className="font-semibold text-ink">Photograph your meal</p>
+            <p className="font-semibold text-fg">Photograph your meal</p>
             <p className="mt-1 max-w-xs text-sm text-muted">Center the food in frame with good lighting for the best estimate.</p>
           </div>
           <div className="flex w-full flex-col gap-2.5 sm:flex-row">
@@ -144,8 +161,8 @@ export function ScanFoodPage() {
       )}
 
       {stage === 'analyzing' && imageDataUrl && (
-        <div className="overflow-hidden rounded-xl2 bg-white shadow-card">
-          <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+        <div className="overflow-hidden rounded-xl2 bg-surface shadow-card">
+          <div className="relative aspect-square w-full overflow-hidden bg-surface-alt2">
             <img src={imageDataUrl} alt="Captured food" className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-black/35" />
             <ScanAnimation />
@@ -169,15 +186,20 @@ export function ScanFoodPage() {
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-xl bg-orange-50 px-4 py-3 text-sm text-orange-800">
-            <span>⚠️ AI estimate — review and adjust before adding.</span>
-            <button onClick={retake} className="flex items-center gap-1 font-semibold underline underline-offset-2">
-              <RotateCcw size={13} /> Retake
-            </button>
+          <div className="rounded-xl bg-orange-50 px-4 py-3 text-sm text-orange-800">
+            <div className="flex items-center justify-between">
+              <span>⚠️ AI estimate — review and adjust before adding.</span>
+              <button onClick={retake} className="flex items-center gap-1 font-semibold underline underline-offset-2">
+                <RotateCcw size={13} /> Retake
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-orange-700">
+              The AI can&apos;t reliably see things like oil, butter, sauces or dressings in a photo — use &quot;Add details&quot; below for anything mixed in that isn&apos;t visible.
+            </p>
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-semibold text-ink">Meal</p>
+            <p className="mb-2 text-sm font-semibold text-fg">Meal</p>
             <div className="flex flex-wrap gap-2">
               {(['breakfast', 'lunch', 'dinner', 'snacks'] as MealType[]).map((mt) => (
                 <Chip key={mt} selected={mealType === mt} onClick={() => setMealType(mt)}>
@@ -190,11 +212,13 @@ export function ScanFoodPage() {
 
           <div className="space-y-3">
             {candidates.map((c) => (
-              <div key={c.id} className="rounded-xl2 bg-white p-4 shadow-card">
+              <div key={c.id} className="rounded-xl2 bg-surface p-4 shadow-card">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-semibold text-ink">{c.name}</p>
-                    <p className="text-xs text-muted">Estimated: ~{Math.round(c.nutrition.calories)} kcal</p>
+                    <p className="font-semibold text-fg">{c.name}</p>
+                    <p className="text-xs text-muted">
+                      {c.addedDetails && c.addedDetails.length > 0 ? 'Updated estimate' : 'Estimated'}: ~{Math.round(c.nutrition.calories)} kcal
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${CONFIDENCE_LABEL[c.confidence].className}`}>
@@ -206,7 +230,20 @@ export function ScanFoodPage() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-center justify-center rounded-xl bg-gray-50 py-3">
+                {c.addedDetails && c.addedDetails.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {c.addedDetails.map((d) => (
+                      <span key={d.id} className="flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700">
+                        {d.emoji} {d.label}
+                        <button onClick={() => removeHiddenIngredient(c.id, d.id)} aria-label={`Remove ${d.label}`}>
+                          <X size={11} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-3 flex items-center justify-center rounded-xl bg-surface-alt py-3">
                   <QuantityStepper value={c.estimatedGrams} onChange={(g) => updateCandidateGrams(c.id, g)} />
                 </div>
 
@@ -226,6 +263,20 @@ export function ScanFoodPage() {
                   <div className="mt-2 flex justify-center">
                     <NaturalnessBadge score={findFoodById(c.foodId)!.naturalness.score} />
                   </div>
+                )}
+
+                {detailsOpenFor === c.id ? (
+                  <AddDetailsPanel
+                    onAdd={(entry) => addHiddenIngredient(c.id, entry)}
+                    onClose={() => setDetailsOpenFor(null)}
+                  />
+                ) : (
+                  <button
+                    onClick={() => setDetailsOpenFor(c.id)}
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-default py-2 text-xs font-semibold text-muted transition hover:border-primary-300 hover:text-primary-700"
+                  >
+                    <NotebookPen size={13} /> Add details (oil, sauce, cheese…)
+                  </button>
                 )}
               </div>
             ))}

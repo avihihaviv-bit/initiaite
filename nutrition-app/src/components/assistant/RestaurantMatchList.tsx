@@ -8,9 +8,9 @@ export function RestaurantMatchList({ matches }: { matches: RestaurantMatch[] })
   return (
     <div className="space-y-2">
       {matches.map((m, i) => (
-        <div key={m.restaurant.id} className="rounded-xl bg-gray-50 p-2.5">
+        <div key={m.restaurant.id} className="rounded-xl bg-surface-alt p-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-ink">
+            <span className="text-xs font-semibold text-fg">
               {RANK_EMOJI[i] ?? '🍽️'} {m.restaurant.name}
             </span>
             <span className="text-[10px] font-bold text-primary-600">{m.matchScore}% match</span>

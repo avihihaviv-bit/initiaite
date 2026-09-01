@@ -15,9 +15,9 @@ export function ActivityCard() {
   const connected = healthService.getAuthStatus() === 'connected';
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-1.5 text-sm font-bold text-ink">
+        <h3 className="flex items-center gap-1.5 text-sm font-bold text-fg">
           <Footprints size={15} className="text-muted" />
           Activity
         </h3>
@@ -31,15 +31,15 @@ export function ActivityCard() {
       {connected && activity ? (
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
           <div>
-            <p className="text-base font-bold tabular-nums text-ink">{activity.steps.toLocaleString()}</p>
+            <p className="text-base font-bold tabular-nums text-fg">{activity.steps.toLocaleString()}</p>
             <p className="text-[11px] text-muted">👟 Steps</p>
           </div>
           <div>
-            <p className="text-base font-bold tabular-nums text-ink">{activity.activeCalories}</p>
+            <p className="text-base font-bold tabular-nums text-fg">{activity.activeCalories}</p>
             <p className="text-[11px] text-muted">🔥 Active kcal</p>
           </div>
           <div>
-            <p className="text-base font-bold tabular-nums text-ink">{activity.exerciseMinutes}m</p>
+            <p className="text-base font-bold tabular-nums text-fg">{activity.exerciseMinutes}m</p>
             <p className="text-[11px] text-muted">🏃 Exercise</p>
           </div>
         </div>

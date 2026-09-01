@@ -12,14 +12,14 @@ export function DiaryEntryRow({ entry }: { entry: DiaryEntry }) {
     <>
       <button
         onClick={() => setEditing(true)}
-        className="flex w-full items-center gap-3 rounded-xl2 bg-white p-3 text-left shadow-card transition hover:shadow-elevated active:scale-[0.99]"
+        className="flex w-full items-center gap-3 rounded-xl2 bg-surface p-3 text-left shadow-card transition hover:shadow-elevated active:scale-[0.99]"
       >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-50 text-xl">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-alt text-xl">
           {entry.foodImageEmoji ?? '🍽️'}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="truncate text-sm font-semibold text-ink">{entry.foodName}</p>
+            <p className="truncate text-sm font-semibold text-fg">{entry.foodName}</p>
             {entry.aiConfidence && (
               <span className="shrink-0 rounded-full bg-orange-50 px-1.5 py-0.5 text-[10px] font-medium text-orange-600">
                 AI
@@ -37,8 +37,8 @@ export function DiaryEntryRow({ entry }: { entry: DiaryEntry }) {
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="text-sm font-bold tabular-nums text-ink">{Math.round(entry.nutrition.calories)}</span>
-          <Pencil size={13} className="text-gray-300" />
+          <span className="text-sm font-bold tabular-nums text-fg">{Math.round(entry.nutrition.calories)}</span>
+          <Pencil size={13} className="text-faint" />
         </div>
       </button>
 

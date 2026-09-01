@@ -31,11 +31,11 @@ export function FavoritesPage() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Favorites</h1>
+        <h1 className="text-2xl font-bold text-fg">Favorites</h1>
         <p className="mt-1 text-sm text-muted">One-tap logging for the foods you eat often.</p>
       </header>
 
-      <div className="flex gap-2 rounded-xl bg-gray-100 p-1">
+      <div className="flex gap-2 rounded-xl bg-surface-alt2 p-1">
         <TabButton active={tab === 'favorites'} onClick={() => setTab('favorites')} icon={<Heart size={14} />} label="Favorites" />
         <TabButton active={tab === 'recent'} onClick={() => setTab('recent')} icon={<Clock3 size={14} />} label="Recent" />
       </div>
@@ -69,7 +69,7 @@ function TabButton({ active, onClick, icon, label }: { active: boolean; onClick:
     <button
       onClick={onClick}
       className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-semibold transition ${
-        active ? 'bg-white text-ink shadow-card' : 'text-muted'
+        active ? 'bg-surface text-fg shadow-card' : 'text-muted'
       }`}
     >
       {icon}

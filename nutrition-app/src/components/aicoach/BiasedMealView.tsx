@@ -44,7 +44,7 @@ export function BiasedMealView({ bias }: { bias: MealBias }) {
 
   if (options.length === 0) {
     return (
-      <p className="rounded-xl2 bg-white p-6 text-center text-sm text-muted shadow-card">
+      <p className="rounded-xl2 bg-surface p-6 text-center text-sm text-muted shadow-card">
         Nothing fits well right now — you may already be close to today's targets.
       </p>
     );

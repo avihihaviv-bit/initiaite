@@ -40,21 +40,21 @@ export function DiaryPage() {
   return (
     <div className="space-y-6 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Diary</h1>
+        <h1 className="text-2xl font-bold text-fg">Diary</h1>
       </header>
 
-      <div className="flex items-center justify-between rounded-xl2 bg-white p-2 shadow-card">
+      <div className="flex items-center justify-between rounded-xl2 bg-surface p-2 shadow-card">
         <button
           onClick={() => goTo(addDays(date, -1))}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-gray-100 active:scale-90"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-surface-alt2 active:scale-90"
           aria-label="Previous day"
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-sm font-bold text-ink">{formatDayLabel(date)}</span>
+        <span className="text-sm font-bold text-fg">{formatDayLabel(date)}</span>
         <button
           onClick={() => goTo(addDays(date, 1))}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-gray-100 active:scale-90"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-surface-alt2 active:scale-90"
           aria-label="Next day"
         >
           <ChevronRight size={18} />
@@ -67,7 +67,7 @@ export function DiaryPage() {
         </button>
       )}
 
-      <div className="grid grid-cols-4 gap-2 rounded-xl2 bg-white p-4 shadow-card text-center">
+      <div className="grid grid-cols-4 gap-2 rounded-xl2 bg-surface p-4 shadow-card text-center">
         <SummaryStat label="Calories" value={formatKcal(diary.totals.calories)} sub={`/ ${formatKcal(targets.calories)}`} />
         <SummaryStat label="Protein" value={`${Math.round(diary.totals.proteinG)}g`} sub={`/ ${targets.proteinG}g`} />
         <SummaryStat label="Carbs" value={`${Math.round(diary.totals.carbsG)}g`} sub={`/ ${targets.carbsG}g`} />
@@ -83,7 +83,7 @@ export function DiaryPage() {
               {canRepeat && (
                 <button
                   onClick={() => repeatYesterday(mt)}
-                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-primary-600 shadow-card transition hover:bg-primary-50"
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-surface px-3 py-2 text-xs font-semibold text-primary-600 shadow-card transition hover:bg-primary-50"
                 >
                   <Repeat size={13} />
                   Repeat yesterday&apos;s {mt} ({yesterday.byMeal[mt].length} item{yesterday.byMeal[mt].length > 1 ? 's' : ''})
@@ -100,9 +100,9 @@ export function DiaryPage() {
 function SummaryStat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div>
-      <p className="text-sm font-bold tabular-nums text-ink">{value}</p>
+      <p className="text-sm font-bold tabular-nums text-fg">{value}</p>
       <p className="text-[10px] text-muted">{sub}</p>
-      <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">{label}</p>
+      <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-faint">{label}</p>
     </div>
   );
 }

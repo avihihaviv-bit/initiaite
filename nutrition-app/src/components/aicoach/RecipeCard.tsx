@@ -48,8 +48,8 @@ export function RecipeCard({ recipe, onRegenerate }: { recipe: Recipe; onRegener
   const totalMinutes = recipe.prepMinutes + recipe.cookMinutes;
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card animate-fade-in">
-      <p className="text-lg font-bold text-ink">🍽️ {recipe.name}</p>
+    <div className="rounded-xl2 bg-surface p-4 shadow-card animate-fade-in">
+      <p className="text-lg font-bold text-fg">🍽️ {recipe.name}</p>
 
       <div className="mt-3 grid grid-cols-4 gap-2 text-center">
         <NutrientStat emoji="🔥" value={`${Math.round(recipe.nutrition.calories)}`} label="kcal" />
@@ -62,7 +62,7 @@ export function RecipeCard({ recipe, onRegenerate }: { recipe: Recipe; onRegener
         <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted">🛒 Ingredients</p>
         <ul className="space-y-1">
           {recipe.ingredients.map((ing, i) => (
-            <li key={i} className="text-sm text-ink">
+            <li key={i} className="text-sm text-fg">
               • {ing.label}
             </li>
           ))}
@@ -73,7 +73,7 @@ export function RecipeCard({ recipe, onRegenerate }: { recipe: Recipe; onRegener
         <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted">👨‍🍳 Instructions</p>
         <ol className="space-y-1.5">
           {recipe.instructions.map((step, i) => (
-            <li key={i} className="flex gap-2 text-sm text-ink">
+            <li key={i} className="flex gap-2 text-sm text-fg">
               <span className="font-bold text-primary-500">{i + 1}.</span>
               <span>{step}</span>
             </li>
@@ -81,17 +81,17 @@ export function RecipeCard({ recipe, onRegenerate }: { recipe: Recipe; onRegener
         </ol>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-gray-50 p-3 text-center text-xs">
+      <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-surface-alt p-3 text-center text-xs">
         <div>
-          <p className="font-bold text-ink">{recipe.prepMinutes} min</p>
+          <p className="font-bold text-fg">{recipe.prepMinutes} min</p>
           <p className="text-muted">Prep</p>
         </div>
         <div>
-          <p className="font-bold text-ink">{recipe.cookMinutes} min</p>
+          <p className="font-bold text-fg">{recipe.cookMinutes} min</p>
           <p className="text-muted">Cooking</p>
         </div>
         <div>
-          <p className="font-bold text-ink">{totalMinutes} min</p>
+          <p className="font-bold text-fg">{totalMinutes} min</p>
           <p className="text-muted">Total</p>
         </div>
       </div>
@@ -106,7 +106,7 @@ export function RecipeCard({ recipe, onRegenerate }: { recipe: Recipe; onRegener
           <button
             key={a.modifier}
             onClick={() => onRegenerate(a.modifier)}
-            className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-ink transition hover:border-primary-300 hover:text-primary-700"
+            className="rounded-full border border-default bg-surface px-3 py-1.5 text-xs font-medium text-fg transition hover:border-primary-300 hover:text-primary-700"
           >
             {a.label}
           </button>
@@ -130,7 +130,7 @@ function NutrientStat({ emoji, value, label }: { emoji: string; value: string; l
   return (
     <div>
       <p className="text-base">{emoji}</p>
-      <p className="text-sm font-bold tabular-nums text-ink">{value}</p>
+      <p className="text-sm font-bold tabular-nums text-fg">{value}</p>
       <p className="text-[10px] text-muted">{label}</p>
     </div>
   );

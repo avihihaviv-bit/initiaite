@@ -40,9 +40,9 @@ export function MealRecList({ recs, onAdded }: { recs: RecommendedMeal[]; onAdde
   return (
     <div className="space-y-2">
       {recs.map((rec, i) => (
-        <div key={rec.id} className="rounded-xl bg-gray-50 p-2.5">
+        <div key={rec.id} className="rounded-xl bg-surface-alt p-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-ink">
+            <span className="text-xs font-semibold text-fg">
               {RANK_EMOJI[i] ?? rec.emoji} {rec.name}
             </span>
             <span className="text-[10px] font-bold text-primary-600">{rec.matchScore}% match</span>

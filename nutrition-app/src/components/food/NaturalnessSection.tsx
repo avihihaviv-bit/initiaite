@@ -10,9 +10,9 @@ export function NaturalnessSection({ naturalness }: { naturalness: NaturalnessIn
   const color = naturalnessColor(naturalness.score);
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-ink">🌿 Estimated Naturalness</span>
+        <span className="text-sm font-semibold text-fg">🌿 Estimated Naturalness</span>
         <span className="text-sm font-bold tabular-nums" style={{ color }}>
           {naturalness.score}/100
         </span>
@@ -26,7 +26,7 @@ export function NaturalnessSection({ naturalness }: { naturalness: NaturalnessIn
         </span>
         <button
           onClick={() => setExpanded((e) => !e)}
-          className="flex items-center gap-1 text-xs font-medium text-muted hover:text-ink"
+          className="flex items-center gap-1 text-xs font-medium text-muted hover:text-fg"
         >
           <Sparkles size={12} />
           Why?
@@ -35,14 +35,14 @@ export function NaturalnessSection({ naturalness }: { naturalness: NaturalnessIn
       </div>
 
       {expanded && (
-        <div className="mt-3 space-y-1.5 border-t border-gray-100 pt-3">
+        <div className="mt-3 space-y-1.5 border-t border-subtle pt-3">
           {naturalness.reasons.map((reason, i) => (
             <p key={i} className="flex items-start gap-1.5 text-xs text-muted">
-              <span className="mt-0.5 text-gray-300">•</span>
+              <span className="mt-0.5 text-faint">•</span>
               {reason}
             </p>
           ))}
-          <p className="pt-1 text-[11px] italic text-gray-400">
+          <p className="pt-1 text-[11px] italic text-faint">
             Based mainly on how close this food is to its original form and how much processing it went through — not a
             health rating, and not a real ingredient-label analysis in this demo.
           </p>

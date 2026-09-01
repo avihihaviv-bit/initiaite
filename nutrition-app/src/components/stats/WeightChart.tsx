@@ -13,9 +13,9 @@ export function WeightChart({ data }: { data: WeightLogEntry[] }) {
   const pad = Math.max(1, (max - min) * 0.2);
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <div className="mb-1 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-ink">Weight</h3>
+        <h3 className="text-sm font-bold text-fg">Weight</h3>
         <span className="text-xs text-muted">{data.length} entries</span>
       </div>
       <ResponsiveContainer width="100%" height={160}>

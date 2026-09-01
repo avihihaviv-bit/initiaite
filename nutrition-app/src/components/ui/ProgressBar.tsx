@@ -8,7 +8,7 @@ interface ProgressBarProps {
   className?: string;
 }
 
-export function ProgressBar({ value, max, color = '#10B981', trackClassName = 'bg-gray-100', className = '' }: ProgressBarProps) {
+export function ProgressBar({ value, max, color = '#10B981', trackClassName = 'bg-surface-alt2', className = '' }: ProgressBarProps) {
   const pct = max > 0 ? clamp(Math.round((value / max) * 100), 0, 100) : 0;
   const isOver = value > max;
 

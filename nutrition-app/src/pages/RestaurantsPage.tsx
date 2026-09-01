@@ -52,7 +52,7 @@ export function RestaurantsPage() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Restaurants</h1>
+        <h1 className="text-2xl font-bold text-fg">Restaurants</h1>
         <p className="mt-1 text-sm text-muted">Search by restaurant, city, or cuisine.</p>
       </header>
 
@@ -67,7 +67,7 @@ export function RestaurantsPage() {
       )}
 
       <div className="relative">
-        <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
         <input
           type="text"
           value={query}
@@ -105,11 +105,11 @@ export function RestaurantsPage() {
             <Link
               key={r.id}
               to={`/add/restaurants/${r.id}?${queryString}`}
-              className="flex items-center gap-3 rounded-xl2 bg-white p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated active:scale-[0.98]"
+              className="flex items-center gap-3 rounded-xl2 bg-surface p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated active:scale-[0.98]"
             >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-2xl">{r.imageEmoji}</div>
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface-alt text-2xl">{r.imageEmoji}</div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-ink">{r.name}</p>
+                <p className="truncate font-semibold text-fg">{r.name}</p>
                 <p className="truncate text-xs text-muted">
                   {r.cuisine.join(' · ')} · {r.city}
                 </p>

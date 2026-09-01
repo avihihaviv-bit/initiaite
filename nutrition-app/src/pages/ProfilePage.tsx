@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Info, LogOut, ShieldAlert, Trash2 } from 'lucide-react';
+import { Info, LogOut, Settings, ShieldAlert, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useLocaleStore } from '@/store/useLocaleStore';
 import { healthService } from '@/services/HealthService';
@@ -147,9 +147,18 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-6 pb-6">
-      <header>
-        <h1 className="text-2xl font-bold text-ink">Profile</h1>
-        <p className="mt-1 text-sm text-muted">Manage your details, goals, and preferences.</p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-fg">Profile</h1>
+          <p className="mt-1 text-sm text-muted">Manage your details, goals, and preferences.</p>
+        </div>
+        <button
+          onClick={() => navigate('/settings')}
+          aria-label="Settings"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-alt2 text-fg transition hover:bg-surface-alt3"
+        >
+          <Settings size={18} />
+        </button>
       </header>
 
       {/* Plan summary */}
@@ -199,15 +208,15 @@ export function ProfilePage() {
 
       {/* Achievements */}
       <section>
-        <h2 className="mb-2.5 text-sm font-bold text-ink">Achievements</h2>
+        <h2 className="mb-2.5 text-sm font-bold text-fg">Achievements</h2>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {achievements.map((a) => (
             <div
               key={a.label}
-              className={`rounded-xl2 p-3 text-center shadow-card ${a.achieved ? 'bg-primary-50' : 'bg-white opacity-70'}`}
+              className={`rounded-xl2 p-3 text-center shadow-card ${a.achieved ? 'bg-primary-50' : 'bg-surface opacity-70'}`}
             >
               <p className="text-xl">{a.emoji}</p>
-              <p className="mt-1 text-base font-bold tabular-nums text-ink">{a.value}</p>
+              <p className="mt-1 text-base font-bold tabular-nums text-fg">{a.value}</p>
               <p className="text-[11px] text-muted">{a.label}</p>
             </div>
           ))}
@@ -215,8 +224,8 @@ export function ProfilePage() {
       </section>
 
       {/* Today totals quick glance */}
-      <section className="rounded-xl2 bg-white p-4 shadow-card">
-        <h2 className="mb-2 text-sm font-bold text-ink">Today so far</h2>
+      <section className="rounded-xl2 bg-surface p-4 shadow-card">
+        <h2 className="mb-2 text-sm font-bold text-fg">Today so far</h2>
         <p className="text-sm text-muted">
           {Math.round(todayDiary.totals.calories)} kcal · {Math.round(todayDiary.totals.proteinG)}g protein ·{' '}
           {todayDiary.entries.length} item{todayDiary.entries.length === 1 ? '' : 's'} logged
@@ -224,8 +233,8 @@ export function ProfilePage() {
       </section>
 
       {/* Personal details */}
-      <section className="space-y-4 rounded-xl2 bg-white p-4 shadow-card">
-        <h2 className="text-sm font-bold text-ink">Personal details</h2>
+      <section className="space-y-4 rounded-xl2 bg-surface p-4 shadow-card">
+        <h2 className="text-sm font-bold text-fg">Personal details</h2>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Age">
@@ -377,13 +386,13 @@ export function ProfilePage() {
       />
 
       {/* Weight tracking */}
-      <section className="space-y-3 rounded-xl2 bg-white p-4 shadow-card">
+      <section className="space-y-3 rounded-xl2 bg-surface p-4 shadow-card">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-ink">Weight tracking</h2>
+          <h2 className="text-sm font-bold text-fg">Weight tracking</h2>
           <ToggleSwitch checked={trackWeight} onChange={setTrackWeight} />
         </div>
         {trackWeight && (
-          <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
+          <div className="flex items-center justify-between rounded-xl bg-surface-alt px-3 py-2">
             <span className="text-sm text-muted">Log today&apos;s weight</span>
             <QuantityStepper value={todayWeight} onChange={setTodayWeight} step={0.5} min={20} max={400} suffix="kg" />
           </div>
@@ -399,9 +408,9 @@ export function ProfilePage() {
       </section>
 
       {/* Apple Health */}
-      <section className="space-y-2 rounded-xl2 bg-white p-4 shadow-card">
+      <section className="space-y-2 rounded-xl2 bg-surface p-4 shadow-card">
         <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-1.5 text-sm font-bold text-ink">
+          <h2 className="flex items-center gap-1.5 text-sm font-bold text-fg">
             <span>🍎</span> Apple Health
           </h2>
           <span className={`text-xs font-semibold ${healthConnected ? 'text-primary-600' : 'text-muted'}`}>
@@ -424,8 +433,8 @@ export function ProfilePage() {
       </section>
 
       {/* Settings */}
-      <section className="space-y-3 rounded-xl2 bg-white p-4 shadow-card">
-        <h2 className="text-sm font-bold text-ink">Units</h2>
+      <section className="space-y-3 rounded-xl2 bg-surface p-4 shadow-card">
+        <h2 className="text-sm font-bold text-fg">Units</h2>
         <div className="flex gap-2">
           <Chip selected={units === 'metric'} onClick={() => setUnits('metric')}>
             kg / cm
@@ -434,7 +443,7 @@ export function ProfilePage() {
             lb / ft-in
           </Chip>
         </div>
-        <h2 className="pt-2 text-sm font-bold text-ink">Language</h2>
+        <h2 className="pt-2 text-sm font-bold text-fg">Language</h2>
         <p className="text-xs text-muted">
           The AI Coach area and chat fully understand and reply in Hebrew. Other screens stay in English for now.
         </p>
@@ -449,8 +458,8 @@ export function ProfilePage() {
       </section>
 
       {/* Privacy */}
-      <section className="space-y-3 rounded-xl2 bg-white p-4 shadow-card">
-        <h2 className="text-sm font-bold text-ink">Privacy</h2>
+      <section className="space-y-3 rounded-xl2 bg-surface p-4 shadow-card">
+        <h2 className="text-sm font-bold text-fg">Privacy</h2>
         <p className="text-xs text-muted">
           All your data — profile, diary, body measurements, progress photos, and favorites — is stored only on this device.
           Nothing is uploaded to a server in this demo. Health/activity data is never sent anywhere and isn&apos;t collected at
@@ -470,7 +479,7 @@ export function ProfilePage() {
 
       <button
         onClick={handleClearData}
-        className="flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium text-gray-400 hover:text-red-500"
+        className="flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium text-faint hover:text-red-500"
       >
         <LogOut size={13} /> Reset & start over
       </button>
@@ -481,7 +490,7 @@ export function ProfilePage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-ink">{label}</span>
+      <span className="mb-1.5 block text-sm font-semibold text-fg">{label}</span>
       {children}
     </label>
   );
@@ -491,11 +500,11 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
   return (
     <button
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 rounded-full transition ${checked ? 'bg-primary-500' : 'bg-gray-200'}`}
+      className={`relative h-6 w-11 rounded-full transition ${checked ? 'bg-primary-500' : 'bg-surface-alt3'}`}
       aria-pressed={checked}
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`}
+        className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`}
       />
     </button>
   );

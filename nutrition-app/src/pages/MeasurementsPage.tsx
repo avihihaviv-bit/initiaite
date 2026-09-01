@@ -33,18 +33,18 @@ export function MeasurementsPage() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">📏 Body Measurements</h1>
+        <h1 className="text-2xl font-bold text-fg">📏 Body Measurements</h1>
         <p className="mt-1 text-sm text-muted">Tracked privately, on this device only.</p>
       </header>
 
       {/* Weight */}
-      <div className="rounded-xl2 bg-white p-4 shadow-card">
+      <div className="rounded-xl2 bg-surface p-4 shadow-card">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-50 text-lg">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-alt text-lg">
             <Scale size={18} />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-ink">Weight</p>
+            <p className="text-sm font-semibold text-fg">Weight</p>
             <p className="text-xs text-muted">{sortedWeights.length > 0 ? `${sortedWeights.length} entries` : 'No entries yet'}</p>
           </div>
           {weightTrend && (
@@ -53,7 +53,7 @@ export function MeasurementsPage() {
             </span>
           )}
         </div>
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2.5">
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-surface-alt px-3 py-2.5">
           <QuantityStepper value={weightInput} onChange={setWeightInput} step={units === 'imperial' ? 1 : 0.5} min={20} suffix={weightUnitLabel} />
           <Button size="sm" onClick={logWeight}>
             Log
@@ -63,7 +63,7 @@ export function MeasurementsPage() {
 
       {/* Other measurements */}
       <div>
-        <h2 className="mb-2.5 text-sm font-bold text-ink">Measurements</h2>
+        <h2 className="mb-2.5 text-sm font-bold text-fg">Measurements</h2>
         <div className="space-y-2">
           {MEASUREMENT_ORDER.map((type) => (
             <MeasurementRow key={type} type={type} onClick={() => setActiveType(type)} />

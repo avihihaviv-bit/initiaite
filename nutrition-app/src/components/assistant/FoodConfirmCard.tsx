@@ -52,7 +52,7 @@ export function FoodConfirmCard({ mentions, onConfirmed }: { mentions: ParsedFoo
   }
 
   if (items.length === 0) {
-    return <p className="rounded-xl bg-gray-50 p-3 text-xs text-muted">Nothing left to add.</p>;
+    return <p className="rounded-xl bg-surface-alt p-3 text-xs text-muted">Nothing left to add.</p>;
   }
 
   if (confirmed) {
@@ -64,13 +64,13 @@ export function FoodConfirmCard({ mentions, onConfirmed }: { mentions: ParsedFoo
   }
 
   return (
-    <div className="space-y-2.5 rounded-xl2 bg-gray-50 p-3">
+    <div className="space-y-2.5 rounded-xl2 bg-surface-alt p-3">
       {items.map((item, i) => {
         const nutrition = calculateNutrition(item.food.per100g, item.grams);
         return (
-          <div key={`${item.food.id}-${i}`} className="rounded-xl bg-white p-2.5 shadow-card">
+          <div key={`${item.food.id}-${i}`} className="rounded-xl bg-surface p-2.5 shadow-card">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <div className="flex items-center gap-2 text-sm font-semibold text-fg">
                 <span>{item.food.imageEmoji}</span>
                 {item.food.name}
               </div>

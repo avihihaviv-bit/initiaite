@@ -100,18 +100,18 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
     <Modal open={open} onClose={onClose} size="md">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-2xl">{resolved.emoji}</div>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface-alt text-2xl">{resolved.emoji}</div>
           <div>
-            <h2 className="text-lg font-bold leading-tight text-ink">{resolved.name}</h2>
+            <h2 className="text-lg font-bold leading-tight text-fg">{resolved.name}</h2>
             {resolved.subtitle && <p className="text-xs text-muted">{resolved.subtitle}</p>}
           </div>
         </div>
         <button
           onClick={() => toggleFavorite({ refId: resolved.id, refType: resolved.refType })}
           aria-label="Toggle favorite"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-gray-100 active:scale-90"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-surface-alt2 active:scale-90"
         >
-          <Heart size={20} className={favorite ? 'fill-red-500 text-red-500' : 'text-gray-300'} />
+          <Heart size={20} className={favorite ? 'fill-red-500 text-red-500' : 'text-faint'} />
         </button>
       </div>
 
@@ -126,7 +126,7 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
 
       {/* Meal selector */}
       <div className="mt-5">
-        <p className="mb-2 text-sm font-semibold text-ink">Meal</p>
+        <p className="mb-2 text-sm font-semibold text-fg">Meal</p>
         <div className="flex flex-wrap gap-2">
           {MEAL_ORDER.map((mt) => (
             <Chip key={mt} selected={mealType === mt} onClick={() => setMealType(mt)}>
@@ -139,7 +139,7 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
 
       {/* Serving options */}
       <div className="mt-5">
-        <p className="mb-2 text-sm font-semibold text-ink">Serving</p>
+        <p className="mb-2 text-sm font-semibold text-fg">Serving</p>
         <div className="flex flex-wrap gap-2">
           {resolved.servingOptions.map((opt) => (
             <Chip key={opt.label} selected={grams === opt.grams} onClick={() => setGrams(opt.grams)}>
@@ -153,23 +153,23 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
       </div>
 
       {/* Custom portion stepper */}
-      <div className="mt-4 flex items-center justify-center rounded-xl2 bg-gray-50 py-4">
+      <div className="mt-4 flex items-center justify-center rounded-xl2 bg-surface-alt py-4">
         <QuantityStepper value={grams} onChange={setGrams} step={10} min={5} />
       </div>
 
       {/* Nutrition breakdown */}
-      <div className="mt-5 rounded-xl2 bg-white shadow-card">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-          <span className="text-sm font-semibold text-ink">Calories</span>
-          <span className="text-lg font-bold tabular-nums text-ink">{Math.round(nutrition.calories)}</span>
+      <div className="mt-5 rounded-xl2 bg-surface shadow-card">
+        <div className="flex items-center justify-between border-b border-subtle px-4 py-3">
+          <span className="text-sm font-semibold text-fg">Calories</span>
+          <span className="text-lg font-bold tabular-nums text-fg">{Math.round(nutrition.calories)}</span>
         </div>
-        <div className="grid grid-cols-3 divide-x divide-gray-100">
+        <div className="grid grid-cols-3 divide-x divide-subtle">
           <MacroCell label="Protein" value={nutrition.proteinG} color="text-protein" />
           <MacroCell label="Carbs" value={nutrition.carbsG} color="text-carbs" />
           <MacroCell label="Fat" value={nutrition.fatG} color="text-fat" />
         </div>
         {(nutrition.fiberG !== undefined || nutrition.sugarG !== undefined || nutrition.sodiumMg !== undefined) && (
-          <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100 text-xs text-muted">
+          <div className="grid grid-cols-3 divide-x divide-subtle border-t border-subtle text-xs text-muted">
             {nutrition.fiberG !== undefined && <SmallCell label="Fiber" value={`${formatGrams(nutrition.fiberG)}`} />}
             {nutrition.sugarG !== undefined && <SmallCell label="Sugar" value={`${formatGrams(nutrition.sugarG)}`} />}
             {nutrition.sodiumMg !== undefined && <SmallCell label="Sodium" value={`${Math.round(nutrition.sodiumMg)}mg`} />}
@@ -213,7 +213,7 @@ function MacroCell({ label, value, color }: { label: string; value: number; colo
 function SmallCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="px-3 py-2 text-center">
-      <p className="font-semibold text-ink">{value}</p>
+      <p className="font-semibold text-fg">{value}</p>
       <p>{label}</p>
     </div>
   );

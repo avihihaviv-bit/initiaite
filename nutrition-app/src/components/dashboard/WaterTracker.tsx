@@ -26,13 +26,13 @@ export function WaterTracker() {
   }
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-1.5 text-sm font-bold text-ink">
+        <h3 className="flex items-center gap-1.5 text-sm font-bold text-fg">
           <Droplet size={15} className="text-blue-400" />
           Water
         </h3>
-        <span className="text-sm font-semibold tabular-nums text-ink">
+        <span className="text-sm font-semibold tabular-nums text-fg">
           {(current / 1000).toFixed(1)}L <span className="text-xs font-normal text-muted">/ {(goal / 1000).toFixed(1)}L</span>
         </span>
       </div>
@@ -66,7 +66,7 @@ export function WaterTracker() {
         {current > 0 && (
           <button
             onClick={() => addWater(-current, date)}
-            className="shrink-0 rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-muted transition hover:bg-gray-100 active:scale-95"
+            className="shrink-0 rounded-lg bg-surface-alt px-3 py-2 text-xs font-semibold text-muted transition hover:bg-surface-alt2 active:scale-95"
           >
             Reset
           </button>

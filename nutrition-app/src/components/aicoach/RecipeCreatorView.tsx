@@ -87,8 +87,8 @@ export function RecipeCreatorView() {
 
   return (
     <div className="space-y-5 pb-4">
-      <div className="rounded-xl2 bg-white p-4 shadow-card">
-        <p className="mb-3 text-sm font-bold text-ink">What do you want?</p>
+      <div className="rounded-xl2 bg-surface p-4 shadow-card">
+        <p className="mb-3 text-sm font-bold text-fg">What do you want?</p>
 
         <FormRow label="🍽️ Meal type">
           <div className="flex flex-wrap gap-2">
@@ -201,7 +201,7 @@ function clamp(n: number, min: number, max: number): number {
 function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <p className="mb-1.5 text-xs font-semibold text-ink">{label}</p>
+      <p className="mb-1.5 text-xs font-semibold text-fg">{label}</p>
       {children}
     </div>
   );

@@ -9,12 +9,12 @@ import { AlertTriangle } from 'lucide-react';
  */
 export function CompleteProfilePrompt() {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl2 bg-white p-6 text-center shadow-card">
+    <div className="flex flex-col items-center gap-3 rounded-xl2 bg-surface p-6 text-center shadow-card">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-amber-600">
         <AlertTriangle size={22} />
       </div>
       <div>
-        <p className="font-semibold text-ink">To calculate your targets accurately, a few details are missing.</p>
+        <p className="font-semibold text-fg">To calculate your targets accurately, a few details are missing.</p>
         <p className="mt-1 text-sm text-muted">We never guess your calorie or macro targets — they're always computed from your real profile.</p>
       </div>
       <Link

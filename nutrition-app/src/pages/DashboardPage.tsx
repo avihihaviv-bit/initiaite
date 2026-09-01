@@ -9,6 +9,7 @@ import { WaterTracker } from '@/components/dashboard/WaterTracker';
 import { ActivityCard } from '@/components/dashboard/ActivityCard';
 import { MealRecommendations } from '@/components/dashboard/MealRecommendations';
 import { DailyAIInsight } from '@/components/dashboard/DailyAIInsight';
+import { WeeklyCheckInCard } from '@/components/dashboard/WeeklyCheckInCard';
 import { NaturalnessMixCard } from '@/components/dashboard/NaturalnessMixCard';
 import { MealSection } from '@/components/diary/MealSection';
 import { Button } from '@/components/ui/Button';
@@ -33,13 +34,13 @@ export function DashboardPage() {
           <p className="text-sm text-muted">
             {greeting()} 👋 · {todayLabel}
           </p>
-          <h1 className="text-2xl font-bold text-ink">Today</h1>
+          <h1 className="text-2xl font-bold text-fg">Today</h1>
         </div>
         <div className="flex items-center gap-2">
           <Link
             to="/stats"
             aria-label="Statistics"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-muted shadow-card transition hover:text-ink"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface text-muted shadow-card transition hover:text-fg"
           >
             <TrendingUp size={17} />
           </Link>
@@ -53,15 +54,17 @@ export function DashboardPage() {
         </div>
       </header>
 
+      <WeeklyCheckInCard />
+
       {/* Calorie summary */}
-      <div className="flex flex-col items-center rounded-xl2 bg-white p-6 shadow-card">
+      <div className="flex flex-col items-center rounded-xl2 bg-surface p-6 shadow-card">
         <div className="mb-4 flex w-full items-center justify-between text-sm">
           <div className="text-center">
-            <p className="font-bold tabular-nums text-ink">{formatKcal(diary.totals.calories)}</p>
+            <p className="font-bold tabular-nums text-fg">{formatKcal(diary.totals.calories)}</p>
             <p className="text-xs text-muted">🔥 consumed</p>
           </div>
           <div className="text-center">
-            <p className="font-bold tabular-nums text-ink">{formatKcal(targets.calories)}</p>
+            <p className="font-bold tabular-nums text-fg">{formatKcal(targets.calories)}</p>
             <p className="text-xs text-muted">🎯 goal</p>
           </div>
         </div>
@@ -91,7 +94,7 @@ export function DashboardPage() {
 
       {/* Macros */}
       <div>
-        <h2 className="mb-2.5 text-sm font-bold text-ink">Macros</h2>
+        <h2 className="mb-2.5 text-sm font-bold text-fg">Macros</h2>
         <div className="grid grid-cols-3 gap-2.5">
           <MacroCard emoji="🥩" label="Protein" consumed={diary.totals.proteinG} goal={targets.proteinG} color="#F97316" />
           <MacroCard emoji="🍚" label="Carbs" consumed={diary.totals.carbsG} goal={targets.carbsG} color="#3B82F6" />

@@ -19,20 +19,20 @@ export function OptionCard({ selected, onClick, title, description, icon, compac
       } ${
         selected
           ? 'border-primary-500 bg-primary-50 shadow-card'
-          : 'border-transparent bg-white shadow-card hover:border-gray-200'
+          : 'border-transparent bg-surface shadow-card hover:border-default'
       }`}
     >
       {icon && <div className="text-2xl leading-none">{icon}</div>}
       <div className="flex-1">
-        <p className={`font-semibold ${selected ? 'text-primary-800' : 'text-ink'}`}>{title}</p>
+        <p className={`font-semibold ${selected ? 'text-primary-800' : 'text-fg'}`}>{title}</p>
         {description && <p className="mt-0.5 text-xs text-muted">{description}</p>}
       </div>
       <div
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-          selected ? 'border-primary-500 bg-primary-500' : 'border-gray-300'
+          selected ? 'border-primary-500 bg-primary-500' : 'border-strong'
         }`}
       >
-        {selected && <div className="h-2 w-2 rounded-full bg-white" />}
+        {selected && <div className="h-2 w-2 rounded-full bg-surface" />}
       </div>
     </button>
   );

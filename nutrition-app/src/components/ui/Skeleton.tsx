@@ -1,10 +1,10 @@
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-gray-200/70 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-surface-alt3/70 ${className}`} />;
 }
 
 export function FoodRowSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-xl2 bg-white p-3 shadow-card">
+    <div className="flex items-center gap-3 rounded-xl2 bg-surface p-3 shadow-card">
       <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-3.5 w-2/3" />

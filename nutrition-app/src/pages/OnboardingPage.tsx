@@ -134,12 +134,12 @@ export function OnboardingPage() {
           <div className="mb-6 flex items-center gap-3">
             <button
               onClick={() => setStep((s) => s - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink shadow-card transition active:scale-90"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-fg shadow-card transition active:scale-90"
               aria-label="Back"
             >
               <ChevronLeft size={18} />
             </button>
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-alt3">
               <motion.div
                 className="h-full rounded-full bg-primary-500"
                 animate={{ width: `${(step / (STEPS.length - 1)) * 100}%` }}
@@ -174,7 +174,7 @@ export function OnboardingPage() {
         </AnimatePresence>
       </div>
 
-      <div className="sticky bottom-0 border-t border-gray-100 bg-white/95 px-5 py-4 backdrop-blur-md">
+      <div className="sticky bottom-0 border-t border-subtle bg-surface/95 px-5 py-4 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-lg gap-3">
           {step < STEPS.length - 1 ? (
             <Button fullWidth size="lg" disabled={!canProceed} onClick={() => setStep((s) => s + 1)}>
@@ -195,7 +195,7 @@ function WelcomeStep() {
   return (
     <div className="flex flex-col items-center py-10 text-center">
       <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary-500 text-4xl shadow-elevated">🥗</div>
-      <h1 className="text-2xl font-bold text-ink">Welcome to Nutrition AI</h1>
+      <h1 className="text-2xl font-bold text-fg">Welcome to Nutrition AI</h1>
       <p className="mt-3 max-w-sm text-muted">
         Let&apos;s set up your profile so we can estimate how many calories and macros you need each day. It only takes a minute.
       </p>
@@ -210,9 +210,9 @@ function WelcomeStep() {
 
 function FeatureRow({ emoji, text }: { emoji: string; text: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-card">
+    <div className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card">
       <span className="text-xl">{emoji}</span>
-      <span className="text-sm font-medium text-ink">{text}</span>
+      <span className="text-sm font-medium text-fg">{text}</span>
     </div>
   );
 }
@@ -228,7 +228,7 @@ function PersonalStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-ink">A few details about you</h2>
+      <h2 className="text-xl font-bold text-fg">A few details about you</h2>
       <p className="mt-1 text-sm text-muted">We use this to estimate your energy needs.</p>
 
       <div className="mt-6 space-y-4">
@@ -300,7 +300,7 @@ function ActivityStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-ink">How active are you?</h2>
+      <h2 className="text-xl font-bold text-fg">How active are you?</h2>
       <p className="mt-1 text-sm text-muted">Outside of dedicated workouts — think about your daily routine.</p>
       <div className="mt-6 space-y-2.5">
         {ACTIVITY_OPTIONS.map((opt) => (
@@ -329,11 +329,11 @@ function TrainingStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-ink">Tell us about your training</h2>
+      <h2 className="text-xl font-bold text-fg">Tell us about your training</h2>
       <p className="mt-1 text-sm text-muted">This helps fine-tune your protein and energy needs.</p>
 
       <div className="mt-6">
-        <p className="mb-2 text-sm font-semibold text-ink">Workouts per week: {form.trainingDaysPerWeek}</p>
+        <p className="mb-2 text-sm font-semibold text-fg">Workouts per week: {form.trainingDaysPerWeek}</p>
         <input
           type="range"
           min={0}
@@ -349,7 +349,7 @@ function TrainingStep({
       </div>
 
       <div className="mt-6">
-        <p className="mb-2 text-sm font-semibold text-ink">Type of training</p>
+        <p className="mb-2 text-sm font-semibold text-fg">Type of training</p>
         <div className="flex flex-wrap gap-2">
           {TRAINING_TYPES.map((t) => (
             <Chip key={t.value} selected={form.trainingTypes.includes(t.value)} onClick={() => toggleTrainingType(t.value)}>
@@ -374,7 +374,7 @@ function GoalStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-ink">What&apos;s your goal?</h2>
+      <h2 className="text-xl font-bold text-fg">What&apos;s your goal?</h2>
       <p className="mt-1 text-sm text-muted">We&apos;ll never suggest an extreme or unsafe target.</p>
 
       {isMinor && (
@@ -402,7 +402,7 @@ function GoalStep({
 
       {!isMinor && (form.goal === 'lose' || form.goal === 'gain') && (
         <div className="mt-5">
-          <p className="mb-2 text-sm font-semibold text-ink">Pace</p>
+          <p className="mb-2 text-sm font-semibold text-fg">Pace</p>
           <div className="grid grid-cols-2 gap-2.5">
             <Chip selected={form.goalPace === 'moderate'} onClick={() => update('goalPace', 'moderate')}>
               Moderate
@@ -433,7 +433,7 @@ function ReviewStep({
 }) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-ink">Your daily plan</h2>
+      <h2 className="text-xl font-bold text-fg">Your daily plan</h2>
       <p className="mt-1 text-sm text-muted">An estimate based on the Harris-Benedict formula — everyone&apos;s metabolism varies.</p>
 
       {calorieResult.minorGuardrail && (
@@ -479,11 +479,11 @@ function ReviewStep({
 
 function MacroPreview({ label, emoji, value, range }: { label: string; emoji: string; value: number; range?: string }) {
   return (
-    <div className="rounded-xl bg-white p-3 text-center shadow-card">
+    <div className="rounded-xl bg-surface p-3 text-center shadow-card">
       <p className="text-lg">{emoji}</p>
-      <p className="mt-1 text-base font-bold tabular-nums text-ink">{value}g</p>
+      <p className="mt-1 text-base font-bold tabular-nums text-fg">{value}g</p>
       <p className="text-xs text-muted">{label}</p>
-      {range && <p className="mt-0.5 text-[10px] text-gray-400">{range}</p>}
+      {range && <p className="mt-0.5 text-[10px] text-faint">{range}</p>}
     </div>
   );
 }
@@ -491,7 +491,7 @@ function MacroPreview({ label, emoji, value, range }: { label: string; emoji: st
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-semibold text-ink">{label}</span>
+      <span className="mb-1.5 block text-sm font-semibold text-fg">{label}</span>
       {children}
     </label>
   );

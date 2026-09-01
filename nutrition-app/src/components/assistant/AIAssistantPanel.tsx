@@ -78,17 +78,17 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
             transition={{ type: 'spring', stiffness: 340, damping: 34 }}
             role="dialog"
             aria-label="AI Assistant"
-            className="fixed inset-x-0 bottom-0 z-50 flex h-[88vh] flex-col rounded-t-3xl bg-white shadow-floating lg:inset-y-0 lg:right-0 lg:left-auto lg:bottom-auto lg:h-full lg:w-[400px] lg:rounded-l-3xl lg:rounded-t-none"
+            className="fixed inset-x-0 bottom-0 z-50 flex h-[88vh] flex-col rounded-t-3xl bg-surface shadow-floating lg:inset-y-0 lg:right-0 lg:left-auto lg:bottom-auto lg:h-full lg:w-[400px] lg:rounded-l-3xl lg:rounded-t-none"
           >
-            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-              <h2 className="flex items-center gap-2 text-base font-bold text-ink">
+            <div className="flex items-center justify-between border-b border-subtle px-5 py-4">
+              <h2 className="flex items-center gap-2 text-base font-bold text-fg">
                 <Sparkles size={18} className="text-primary-500" />
                 AI Assistant
               </h2>
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-gray-100"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-surface-alt2"
               >
                 <X size={18} />
               </button>
@@ -99,7 +99,7 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
                 <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div
                     className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm shadow-card ${
-                      m.role === 'user' ? 'bg-primary-500 text-white' : 'bg-gray-50 text-ink'
+                      m.role === 'user' ? 'bg-primary-500 text-white' : 'bg-surface-alt text-fg'
                     }`}
                   >
                     <p>{m.text}</p>
@@ -128,7 +128,7 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
                 <button
                   key={qa}
                   onClick={() => send(qa)}
-                  className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-ink transition hover:border-primary-300 hover:text-primary-700"
+                  className="rounded-full border border-default bg-surface px-3 py-1.5 text-xs font-medium text-fg transition hover:border-primary-300 hover:text-primary-700"
                 >
                   {qa}
                 </button>
@@ -140,7 +140,7 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
                 e.preventDefault();
                 send(input);
               }}
-              className="flex items-center gap-2 border-t border-gray-100 p-3"
+              className="flex items-center gap-2 border-t border-subtle p-3"
             >
               {speech.supported && (
                 <button
@@ -148,7 +148,7 @@ export function AIAssistantPanel({ open, onClose }: { open: boolean; onClose: ()
                   onClick={() => (speech.listening ? speech.stop() : speech.start())}
                   aria-label={speech.listening ? 'Stop listening' : 'Voice input'}
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition active:scale-90 ${
-                    speech.listening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-ink hover:bg-gray-200'
+                    speech.listening ? 'bg-red-500 text-white animate-pulse' : 'bg-surface-alt2 text-fg hover:bg-surface-alt3'
                   }`}
                 >
                   <Mic size={17} />
@@ -181,7 +181,7 @@ export function renderCard(card: AssistantCard, openCoach: (view: 'eat' | 'analy
       return (
         <button
           onClick={() => openCoach(card.view)}
-          className="flex w-full items-center justify-between gap-2 rounded-xl bg-white p-3 text-left text-sm font-semibold text-primary-700 shadow-card transition hover:bg-primary-50"
+          className="flex w-full items-center justify-between gap-2 rounded-xl bg-surface p-3 text-left text-sm font-semibold text-primary-700 shadow-card transition hover:bg-primary-50"
         >
           {card.label}
           <ArrowRight size={15} />
@@ -196,7 +196,7 @@ export function renderCard(card: AssistantCard, openCoach: (view: 'eat' | 'analy
     case 'daily_summary':
       if (card.summary.lines.length === 0) return null;
       return (
-        <div className="space-y-1 rounded-xl bg-white p-2.5 shadow-card">
+        <div className="space-y-1 rounded-xl bg-surface p-2.5 shadow-card">
           {card.summary.lines.map((line, i) => (
             <p key={i} className="flex items-start gap-1.5 text-[11px] text-muted">
               {i === 0 &&
@@ -212,7 +212,7 @@ export function renderCard(card: AssistantCard, openCoach: (view: 'eat' | 'analy
       );
     case 'stats_insights':
       return (
-        <ul className="space-y-1 rounded-xl bg-white p-2.5 shadow-card">
+        <ul className="space-y-1 rounded-xl bg-surface p-2.5 shadow-card">
           {card.insights.map((ins, i) => (
             <li key={i} className="text-[11px] text-muted">
               • {ins.text}

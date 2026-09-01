@@ -53,10 +53,10 @@ export function WhatToEatView() {
 
   if (!asked) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-xl2 bg-white p-8 text-center shadow-card">
+      <div className="flex flex-col items-center gap-4 rounded-xl2 bg-surface p-8 text-center shadow-card">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-2xl">🍽️</div>
         <div>
-          <p className="font-semibold text-ink">Not sure what to eat next?</p>
+          <p className="font-semibold text-fg">Not sure what to eat next?</p>
           <p className="mt-1 max-w-xs text-sm text-muted">
             Based on what you've eaten today, what's left, the time of day, and your {MEAL_LABELS[mealType].label.toLowerCase()}.
           </p>
@@ -70,7 +70,7 @@ export function WhatToEatView() {
 
   if (!result || (!result.best && result.options.length === 0)) {
     return (
-      <p className="rounded-xl2 bg-white p-6 text-center text-sm text-muted shadow-card">
+      <p className="rounded-xl2 bg-surface p-6 text-center text-sm text-muted shadow-card">
         You're close to today's targets — a light option or some water might be all you need right now.
       </p>
     );
@@ -80,14 +80,14 @@ export function WhatToEatView() {
     <div className="space-y-4 pb-4">
       {result.best && (
         <div>
-          <p className="mb-2 text-sm font-bold text-ink">🥇 Best Match</p>
+          <p className="mb-2 text-sm font-bold text-fg">🥇 Best Match</p>
           <OptionCard option={result.best} onAdd={addOption} added={addedId === result.best.id} highlight />
         </div>
       )}
 
       {result.options.length > 0 && (
         <div>
-          <p className="mb-2 text-sm font-bold text-ink">More options</p>
+          <p className="mb-2 text-sm font-bold text-fg">More options</p>
           <div className="space-y-3">
             {result.options.map((opt) => (
               <div key={opt.id}>
@@ -114,9 +114,9 @@ export function OptionCard({
   highlight?: boolean;
 }) {
   return (
-    <div className={`rounded-xl2 p-4 shadow-card ${highlight ? 'bg-ink text-white' : 'bg-white'}`}>
+    <div className={`rounded-xl2 p-4 shadow-card ${highlight ? 'bg-ink text-white' : 'bg-surface'}`}>
       <div className="flex items-center justify-between gap-2">
-        <p className={`flex items-center gap-1.5 text-sm font-bold ${highlight ? 'text-white' : 'text-ink'}`}>
+        <p className={`flex items-center gap-1.5 text-sm font-bold ${highlight ? 'text-white' : 'text-fg'}`}>
           <span>{option.emoji}</span>
           {option.name}
         </p>
@@ -148,7 +148,7 @@ export function OptionCard({
           added
             ? 'bg-primary-500 text-white'
             : highlight
-              ? 'bg-white text-ink hover:bg-white/90'
+              ? 'bg-surface text-fg hover:bg-surface-alt2'
               : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
         }`}
       >

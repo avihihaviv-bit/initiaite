@@ -10,9 +10,9 @@ export function NaturalnessChart({ data }: { data: DayStat[] }) {
   }));
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <div className="mb-1 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-ink">🌿 Naturalness Trend</h3>
+        <h3 className="text-sm font-bold text-fg">🌿 Naturalness Trend</h3>
         <span className="text-xs text-muted">Last 7 days</span>
       </div>
       <ResponsiveContainer width="100%" height={160}>

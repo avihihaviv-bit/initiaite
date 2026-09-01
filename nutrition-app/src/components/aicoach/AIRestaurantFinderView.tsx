@@ -97,8 +97,8 @@ export function AIRestaurantFinderView() {
 
   return (
     <div className="space-y-5 pb-4">
-      <div className="rounded-xl2 bg-white p-4 shadow-card">
-        <p className="mb-3 text-sm font-bold text-ink">📍 Where?</p>
+      <div className="rounded-xl2 bg-surface p-4 shadow-card">
+        <p className="mb-3 text-sm font-bold text-fg">📍 Where?</p>
         <div className="flex flex-wrap gap-2">
           <Chip selected={locationMode === 'any'} onClick={() => setLocationMode('any')}>
             Anywhere
@@ -129,7 +129,7 @@ export function AIRestaurantFinderView() {
           </p>
         )}
 
-        <p className="mb-2 mt-4 text-sm font-bold text-ink">🍽️ What cuisine?</p>
+        <p className="mb-2 mt-4 text-sm font-bold text-fg">🍽️ What cuisine?</p>
         <div className="flex flex-wrap gap-2">
           {cuisines.map((c) => (
             <Chip key={c} selected={cuisine === c} onClick={() => setCuisine(c)}>
@@ -138,7 +138,7 @@ export function AIRestaurantFinderView() {
           ))}
         </div>
 
-        <p className="mb-2 mt-4 text-sm font-bold text-ink">🎯 What's your priority?</p>
+        <p className="mb-2 mt-4 text-sm font-bold text-fg">🎯 What's your priority?</p>
         <div className="flex flex-wrap gap-2">
           {PRIORITIES.map((p) => (
             <Chip key={p.value} selected={priority === p.value && !highProteinLowCalMode} onClick={() => { setPriority(p.value); setHighProteinLowCalMode(false); }}>
@@ -150,12 +150,12 @@ export function AIRestaurantFinderView() {
         <button
           onClick={() => setHighProteinLowCalMode((v) => !v)}
           className={`mt-4 flex w-full items-center justify-between rounded-xl border-2 px-4 py-3 text-left text-sm font-semibold transition ${
-            highProteinLowCalMode ? 'border-primary-500 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-ink'
+            highProteinLowCalMode ? 'border-primary-500 bg-primary-50 text-primary-800' : 'border-default bg-surface text-fg'
           }`}
         >
           🥩 High Protein / 🔥 Lower Calories mode
-          <span className={`h-5 w-9 rounded-full transition ${highProteinLowCalMode ? 'bg-primary-500' : 'bg-gray-200'}`}>
-            <span className={`block h-4 w-4 translate-y-0.5 rounded-full bg-white transition ${highProteinLowCalMode ? 'translate-x-4' : 'translate-x-0.5'}`} />
+          <span className={`h-5 w-9 rounded-full transition ${highProteinLowCalMode ? 'bg-primary-500' : 'bg-surface-alt3'}`}>
+            <span className={`block h-4 w-4 translate-y-0.5 rounded-full bg-surface transition ${highProteinLowCalMode ? 'translate-x-4' : 'translate-x-0.5'}`} />
           </span>
         </button>
 
@@ -165,7 +165,7 @@ export function AIRestaurantFinderView() {
       </div>
 
       {searched && results.length === 0 && (
-        <p className="rounded-xl2 bg-white p-6 text-center text-sm text-muted shadow-card">
+        <p className="rounded-xl2 bg-surface p-6 text-center text-sm text-muted shadow-card">
           No matches for those filters — try a different cuisine or location.
         </p>
       )}
@@ -188,25 +188,25 @@ function ResultCard({ rank, result, remaining }: { rank: number; result: RankedR
   const proteinRange = approxRange(totals.proteinG);
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
       <p className="text-xs font-bold text-primary-600">{RANK_LABELS[rank] ?? `#${rank + 1} MATCH`}</p>
       <div className="mt-1 flex items-start justify-between gap-2">
         <div>
-          <p className="flex items-center gap-1.5 text-base font-bold text-ink">
+          <p className="flex items-center gap-1.5 text-base font-bold text-fg">
             <span>{restaurant.imageEmoji}</span>
             {restaurant.name}
           </p>
           {distanceKm != null && (
             <p className="text-xs text-muted">
-              📍 ~{distanceKm}km from you <span className="text-gray-400">(approximate distance to {restaurant.city})</span>
+              📍 ~{distanceKm}km from you <span className="text-faint">(approximate distance to {restaurant.city})</span>
             </p>
           )}
         </div>
         <span className="shrink-0 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700">⭐ {breakdown.score}% Match</span>
       </div>
 
-      <div className="mt-3 rounded-xl bg-gray-50 p-3">
-        <p className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+      <div className="mt-3 rounded-xl bg-surface-alt p-3">
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-fg">
           <span>{dish.imageEmoji}</span>
           {dish.name}
         </p>
@@ -226,7 +226,7 @@ function ResultCard({ rank, result, remaining }: { rank: number; result: RankedR
 
       {reasons.length > 0 && (
         <div className="mt-3">
-          <p className="text-xs font-semibold text-ink">Why this fits you:</p>
+          <p className="text-xs font-semibold text-fg">Why this fits you:</p>
           <ul className="mt-1 space-y-0.5">
             {reasons.map((r) => (
               <li key={r} className="text-xs text-muted">
@@ -240,7 +240,7 @@ function ResultCard({ rank, result, remaining }: { rank: number; result: RankedR
       <div className="mt-3 flex gap-2">
         <Link
           to={`/add/restaurants/${restaurant.id}`}
-          className="flex-1 rounded-lg bg-gray-50 py-2 text-center text-xs font-semibold text-ink transition hover:bg-gray-100"
+          className="flex-1 rounded-lg bg-surface-alt py-2 text-center text-xs font-semibold text-fg transition hover:bg-surface-alt2"
         >
           View Restaurant
         </Link>

@@ -5,7 +5,7 @@ import { useUIStore } from '@/store/useUIStore';
 export function BottomNav() {
   const openAssistant = useUIStore((s) => s.openAssistant);
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-gray-100 bg-white/95 backdrop-blur-md lg:hidden">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-subtle bg-surface/95 backdrop-blur-md lg:hidden">
       <NavLink to="/" end className={({ isActive }) => navClass(isActive)}>
         <Home size={22} />
         <span>Home</span>

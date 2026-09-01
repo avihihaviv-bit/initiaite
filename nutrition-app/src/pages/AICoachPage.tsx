@@ -49,22 +49,22 @@ export function AICoachPage() {
       <div dir={rtl ? 'rtl' : 'ltr'} className="space-y-5 pb-6">
         <div className="flex items-start justify-between gap-3">
           <header>
-            <h1 className="flex items-center gap-2 text-2xl font-bold text-ink">
+            <h1 className="flex items-center gap-2 text-2xl font-bold text-fg">
               <Sparkles className="text-primary-500" size={24} />
               {t('title')}
             </h1>
             <p className="mt-1 text-sm text-muted">{t('subtitle')}</p>
           </header>
-          <div className="flex shrink-0 gap-1 rounded-lg bg-gray-100 p-0.5">
+          <div className="flex shrink-0 gap-1 rounded-lg bg-surface-alt2 p-0.5">
             <button
               onClick={() => setLanguage('en')}
-              className={`rounded-md px-2 py-1 text-xs font-semibold transition ${language === 'en' ? 'bg-white text-ink shadow-sm' : 'text-muted'}`}
+              className={`rounded-md px-2 py-1 text-xs font-semibold transition ${language === 'en' ? 'bg-surface text-fg shadow-sm' : 'text-muted'}`}
             >
               EN
             </button>
             <button
               onClick={() => setLanguage('he')}
-              className={`rounded-md px-2 py-1 text-xs font-semibold transition ${language === 'he' ? 'bg-white text-ink shadow-sm' : 'text-muted'}`}
+              className={`rounded-md px-2 py-1 text-xs font-semibold transition ${language === 'he' ? 'bg-surface text-fg shadow-sm' : 'text-muted'}`}
             >
               עברית
             </button>
@@ -74,7 +74,7 @@ export function AICoachPage() {
         <LiveMacroStrip t={t} />
 
         <div>
-          <p className="mb-2.5 text-sm font-bold text-ink">⚡ {t('quickActions')}</p>
+          <p className="mb-2.5 text-sm font-bold text-fg">⚡ {t('quickActions')}</p>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
             <QuickButton emoji="🍽️" label={t('whatToEat')} onClick={() => setView('eat')} />
             <QuickButton emoji="📊" label={t('howDidIEat')} onClick={() => setView('analyze')} />
@@ -93,7 +93,7 @@ export function AICoachPage() {
 
         <button
           onClick={() => setView('debug')}
-          className="block w-full text-center text-[11px] text-gray-300 hover:text-gray-400"
+          className="block w-full text-center text-[11px] text-faint hover:text-faint"
         >
           🔍 {t('debugLink')}
         </button>
@@ -107,11 +107,11 @@ export function AICoachPage() {
         <button
           onClick={() => setView('hub')}
           aria-label="Back to AI Coach"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink shadow-card transition active:scale-90"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-fg shadow-card transition active:scale-90"
         >
           <ChevronLeft size={18} className={rtl ? 'rotate-180' : ''} />
         </button>
-        <h1 className="text-xl font-bold text-ink">{VIEW_TITLES[view]}</h1>
+        <h1 className="text-xl font-bold text-fg">{VIEW_TITLES[view]}</h1>
       </div>
 
       {view === 'eat' && <WhatToEatView />}
@@ -123,7 +123,7 @@ export function AICoachPage() {
       {view === 'debug' && <CalculationDebugView />}
       {view === 'plan' && (
         <div>
-          <div className="mb-4 flex gap-2 rounded-xl bg-gray-100 p-1">
+          <div className="mb-4 flex gap-2 rounded-xl bg-surface-alt2 p-1">
             <ModeTab active={planMode === 'build'} onClick={() => setPlanMode('build')} label="Build a Plan" />
             <ModeTab active={planMode === 'analyze'} onClick={() => setPlanMode('analyze')} label="Analyze a Plan" />
           </div>
@@ -148,9 +148,9 @@ function LiveMacroStrip({ t }: { t: ReturnType<typeof useCoachT> }) {
 
 function MacroPill({ emoji, value, label }: { emoji: string; value: number; label: string }) {
   return (
-    <div className="rounded-xl2 bg-white p-3 text-center shadow-card">
+    <div className="rounded-xl2 bg-surface p-3 text-center shadow-card">
       <p className="text-base leading-none">{emoji}</p>
-      <p className="mt-1 text-lg font-bold tabular-nums text-ink" dir="ltr">
+      <p className="mt-1 text-lg font-bold tabular-nums text-fg" dir="ltr">
         {value.toLocaleString()}
       </p>
       <p className="text-[10px] text-muted">{label}</p>
@@ -162,10 +162,10 @@ function QuickButton({ emoji, label, onClick }: { emoji: string; label: string; 
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-1.5 rounded-xl2 bg-white p-3.5 text-center shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated active:scale-95"
+      className="flex flex-col items-center gap-1.5 rounded-xl2 bg-surface p-3.5 text-center shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated active:scale-95"
     >
       <span className="text-xl">{emoji}</span>
-      <span className="text-xs font-semibold leading-tight text-ink">{label}</span>
+      <span className="text-xs font-semibold leading-tight text-fg">{label}</span>
     </button>
   );
 }
@@ -210,15 +210,15 @@ function EmbeddedAskAI({ t }: { t: ReturnType<typeof useCoachT> }) {
   }
 
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
-      <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-ink">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
+      <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-fg">
         <Sparkles size={14} className="text-primary-500" />
         💬 {t('askAi')}
       </p>
 
       {response && (
         <div className="mb-3 space-y-2">
-          <p className="rounded-xl bg-gray-50 p-3 text-sm text-ink">{response.text}</p>
+          <p className="rounded-xl bg-surface-alt p-3 text-sm text-fg">{response.text}</p>
           {response.card && renderCard(response.card, () => {})}
         </div>
       )}
@@ -236,7 +236,7 @@ function EmbeddedAskAI({ t }: { t: ReturnType<typeof useCoachT> }) {
             onClick={() => (speech.listening ? speech.stop() : speech.start())}
             aria-label="Voice input"
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition active:scale-90 ${
-              speech.listening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-ink hover:bg-gray-200'
+              speech.listening ? 'bg-red-500 text-white animate-pulse' : 'bg-surface-alt2 text-fg hover:bg-surface-alt3'
             }`}
           >
             <Mic size={17} />
@@ -265,7 +265,7 @@ function ModeTab({ active, onClick, label }: { active: boolean; onClick: () => v
   return (
     <button
       onClick={onClick}
-      className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${active ? 'bg-white text-ink shadow-card' : 'text-muted'}`}
+      className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${active ? 'bg-surface text-fg shadow-card' : 'text-muted'}`}
     >
       {label}
     </button>

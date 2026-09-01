@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { useLocaleStore, isRTL } from '@/store/useLocaleStore';
+import { useApplyTheme } from '@/hooks/useApplyTheme';
 import { AppShell } from '@/components/layout/AppShell';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -18,10 +19,12 @@ const FavoritesPage = lazy(() => import('@/pages/FavoritesPage').then((m) => ({ 
 const ProfilePage = lazy(() => import('@/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
 const MeasurementsPage = lazy(() => import('@/pages/MeasurementsPage').then((m) => ({ default: m.MeasurementsPage })));
 const AICoachPage = lazy(() => import('@/pages/AICoachPage').then((m) => ({ default: m.AICoachPage })));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 
 export default function App() {
   const onboardingComplete = useAppStore((s) => s.onboardingComplete);
   const language = useLocaleStore((s) => s.language);
+  useApplyTheme();
 
   useEffect(() => {
     document.documentElement.dir = isRTL(language) ? 'rtl' : 'ltr';
@@ -52,6 +55,7 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/measurements" element={<MeasurementsPage />} />
           <Route path="/coach" element={<AICoachPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

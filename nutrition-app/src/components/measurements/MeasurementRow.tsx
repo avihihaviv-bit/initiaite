@@ -21,11 +21,11 @@ export function MeasurementRow({ type, onClick }: { type: MeasurementType; onCli
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl2 bg-white p-3.5 text-left shadow-card transition hover:shadow-elevated active:scale-[0.99]"
+      className="flex w-full items-center gap-3 rounded-xl2 bg-surface p-3.5 text-left shadow-card transition hover:shadow-elevated active:scale-[0.99]"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-50 text-lg">{emoji}</div>
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-alt text-lg">{emoji}</div>
       <div className="flex-1">
-        <p className="text-sm font-semibold text-ink">{label}</p>
+        <p className="text-sm font-semibold text-fg">{label}</p>
         <p className="text-xs text-muted">{sorted.length > 0 ? `${sorted.length} entries` : 'No entries yet'}</p>
       </div>
       {display !== null && (
@@ -33,13 +33,13 @@ export function MeasurementRow({ type, onClick }: { type: MeasurementType; onCli
           {trend?.direction === 'up' && <TrendingUp size={14} className="text-amber-600" />}
           {trend?.direction === 'down' && <TrendingDown size={14} className="text-primary-600" />}
           {trend?.direction === 'stable' && <Minus size={14} className="text-muted" />}
-          <span className="text-sm font-bold tabular-nums text-ink">
+          <span className="text-sm font-bold tabular-nums text-fg">
             {display}
             {unitLabel}
           </span>
         </div>
       )}
-      <ChevronRight size={16} className="shrink-0 text-gray-300" />
+      <ChevronRight size={16} className="shrink-0 text-faint" />
     </button>
   );
 }

@@ -5,10 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#F7F8FA',
-        surface: '#FFFFFF',
+        bg: 'rgb(var(--c-bg) / <alpha-value>)',
+        surface: 'rgb(var(--c-surface) / <alpha-value>)',
+        'surface-alt': 'rgb(var(--c-surface-alt) / <alpha-value>)',
+        'surface-alt2': 'rgb(var(--c-surface-alt2) / <alpha-value>)',
+        'surface-alt3': 'rgb(var(--c-surface-alt3) / <alpha-value>)',
         ink: '#14181F',
-        muted: '#6B7280',
+        fg: 'rgb(var(--c-fg) / <alpha-value>)',
+        muted: 'rgb(var(--c-muted) / <alpha-value>)',
+        faint: 'rgb(var(--c-faint) / <alpha-value>)',
+        subtle: 'rgb(var(--c-border-subtle) / <alpha-value>)',
+        default: 'rgb(var(--c-border-default) / <alpha-value>)',
+        strong: 'rgb(var(--c-border-strong) / <alpha-value>)',
         primary: {
           50: '#ECFDF5',
           100: '#D1FAE5',

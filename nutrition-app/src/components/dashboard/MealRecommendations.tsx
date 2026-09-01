@@ -63,19 +63,19 @@ export function MealRecommendations({ totals, targets, date }: MealRecommendatio
   return (
     <section>
       <div className="mb-2.5">
-        <h2 className="text-sm font-bold text-ink">What should I eat?</h2>
+        <h2 className="text-sm font-bold text-fg">What should I eat?</h2>
         <p className="text-xs text-muted">
           Based on ~{Math.round(remaining.calories)} kcal and {Math.round(remaining.proteinG)}g protein remaining today.
         </p>
       </div>
       <div className="space-y-2.5">
         {recommendations.map((rec, i) => (
-          <div key={rec.id} className="rounded-xl2 bg-white p-3.5 shadow-card">
+          <div key={rec.id} className="rounded-xl2 bg-surface p-3.5 shadow-card">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2.5">
                 <span className="text-xl leading-none">{RANK_EMOJI[i] ?? rec.emoji}</span>
                 <div>
-                  <p className="text-sm font-semibold text-ink">{rec.name}</p>
+                  <p className="text-sm font-semibold text-fg">{rec.name}</p>
                   <p className="text-xs text-muted">
                     {Math.round(rec.totals.calories)} kcal · {Math.round(rec.totals.proteinG)}g protein
                     {rec.naturalness !== null && ` · 🌿 ${rec.naturalness}% natural`}

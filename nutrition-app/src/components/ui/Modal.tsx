@@ -46,15 +46,15 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className={`relative z-10 max-h-[90vh] w-full ${SIZES[size]} overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-white p-5 shadow-floating`}
+            className={`relative z-10 max-h-[90vh] w-full ${SIZES[size]} overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-surface p-5 shadow-floating`}
           >
             {title && (
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-ink">{title}</h2>
+                <h2 className="text-lg font-bold text-fg">{title}</h2>
                 <button
                   onClick={onClose}
                   aria-label="Close"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-gray-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-surface-alt2"
                 >
                   <X size={18} />
                 </button>

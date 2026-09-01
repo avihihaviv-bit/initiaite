@@ -43,7 +43,7 @@ export function ProgressRing({ consumed, goal, size = 220, strokeWidth = 16, lab
       <div className="absolute flex flex-col items-center justify-center text-center">
         <AnimatedNumber
           value={Math.abs(remaining)}
-          className="text-4xl font-bold tabular-nums tracking-tight text-ink"
+          className="text-4xl font-bold tabular-nums tracking-tight text-fg"
         />
         <span className="mt-1 text-sm font-medium text-muted">{isOver ? 'kcal over' : label}</span>
       </div>

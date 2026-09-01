@@ -47,10 +47,10 @@ export function DailyAnalysisView() {
 
   if (!ranAnalysis) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-xl2 bg-white p-8 text-center shadow-card">
+      <div className="flex flex-col items-center gap-4 rounded-xl2 bg-surface p-8 text-center shadow-card">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-2xl">📊</div>
         <div>
-          <p className="font-semibold text-ink">See how your day is shaping up</p>
+          <p className="font-semibold text-fg">See how your day is shaping up</p>
           <p className="mt-1 max-w-xs text-sm text-muted">
             A grounded, judgment-free look at today's calories, protein, carbs, and fat against your own targets.
           </p>
@@ -74,7 +74,7 @@ export function DailyAnalysisView() {
         {analysis.hasEnoughData && <span className="text-lg font-bold tabular-nums">{analysis.overallScore}/10</span>}
       </div>
 
-      <p className="text-sm text-ink">{analysis.balanceText}</p>
+      <p className="text-sm text-fg">{analysis.balanceText}</p>
 
       <AnalysisRow emoji="🔥" title="Calories" text={analysis.caloriesText} />
       <AnalysisRow emoji="🥩" title="Protein" text={analysis.proteinText}>
@@ -86,10 +86,10 @@ export function DailyAnalysisView() {
                 <button
                   key={s.foodId}
                   onClick={() => addSuggestion(s.foodId)}
-                  className="rounded-xl bg-gray-50 p-2.5 text-left transition hover:bg-gray-100 active:scale-95"
+                  className="rounded-xl bg-surface-alt p-2.5 text-left transition hover:bg-surface-alt2 active:scale-95"
                 >
                   <p className="text-lg leading-none">{s.emoji ?? '🍽️'}</p>
-                  <p className="mt-1 truncate text-xs font-semibold text-ink">{s.name}</p>
+                  <p className="mt-1 truncate text-xs font-semibold text-fg">{s.name}</p>
                   <p className="text-[10px] text-muted">
                     {s.calories} kcal · {s.proteinG}g protein
                   </p>
@@ -132,8 +132,8 @@ function AnalysisRow({
 }) {
   if (!text) return null;
   return (
-    <div className="rounded-xl2 bg-white p-4 shadow-card">
-      <p className="flex items-center gap-1.5 text-sm font-bold text-ink">
+    <div className="rounded-xl2 bg-surface p-4 shadow-card">
+      <p className="flex items-center gap-1.5 text-sm font-bold text-fg">
         <span>{emoji}</span>
         {title}
       </p>

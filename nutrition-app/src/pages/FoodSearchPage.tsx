@@ -104,12 +104,12 @@ export function FoodSearchPage() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <h1 className="text-2xl font-bold text-ink">Search Food</h1>
+        <h1 className="text-2xl font-bold text-fg">Search Food</h1>
         <p className="mt-1 text-sm text-muted">{meal ? `Adding to ${meal} · ${date}` : `Adding for ${date}`}</p>
       </header>
 
       <div className="relative">
-        <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
         <input
           autoFocus
           type="text"

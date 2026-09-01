@@ -18,7 +18,7 @@ export function QuantityStepper({ value, onChange, step = 10, min = 0, max = 500
         type="button"
         aria-label="Decrease"
         onClick={() => onChange(clampVal(value - step))}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-ink transition active:scale-90 hover:bg-gray-200"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-alt2 text-fg transition active:scale-90 hover:bg-surface-alt3"
       >
         <Minus size={18} />
       </button>
@@ -27,7 +27,7 @@ export function QuantityStepper({ value, onChange, step = 10, min = 0, max = 500
           type="number"
           value={value}
           onChange={(e) => onChange(clampVal(Number(e.target.value) || 0))}
-          className="w-16 bg-transparent text-center text-xl font-semibold tabular-nums text-ink outline-none"
+          className="w-16 bg-transparent text-center text-xl font-semibold tabular-nums text-fg outline-none"
         />
         <span className="text-sm text-muted">{suffix}</span>
       </div>
