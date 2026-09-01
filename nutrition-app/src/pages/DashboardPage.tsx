@@ -9,6 +9,7 @@ import { WaterTracker } from '@/components/dashboard/WaterTracker';
 import { ActivityCard } from '@/components/dashboard/ActivityCard';
 import { MealRecommendations } from '@/components/dashboard/MealRecommendations';
 import { DailyAIInsight } from '@/components/dashboard/DailyAIInsight';
+import { NaturalnessMixCard } from '@/components/dashboard/NaturalnessMixCard';
 import { MealSection } from '@/components/diary/MealSection';
 import { Button } from '@/components/ui/Button';
 import { useTargets } from '@/hooks/useTargets';
@@ -97,6 +98,8 @@ export function DashboardPage() {
           <MacroCard emoji="🥑" label="Fat" consumed={diary.totals.fatG} goal={targets.fatG} color="#F59E0B" />
         </div>
       </div>
+
+      <NaturalnessMixCard entries={diary.entries} />
 
       <ActivityCard />
 

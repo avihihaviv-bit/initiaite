@@ -16,7 +16,8 @@ export function RestaurantMatchList({ matches }: { matches: RestaurantMatch[] })
             <span className="text-[10px] font-bold text-primary-600">{m.matchScore}% match</span>
           </div>
           <p className="mt-0.5 text-[11px] text-muted">
-            Try: {m.bestDish.name} · ~{Math.round((m.bestDish.per100g.calories * m.bestDish.defaultServing.grams) / 100)} kcal
+            Try: {m.bestDish.name} · ~{Math.round((m.bestDish.per100g.calories * m.bestDish.defaultServing.grams) / 100)} kcal · 🌿{' '}
+            {m.bestDish.naturalness.score}% natural
           </p>
           {m.reasons.length > 0 && (
             <ul className="mt-1 space-y-0.5">

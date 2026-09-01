@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import { DataQualityBadge } from '@/components/ui/DataQualityBadge';
+import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { FoodDetailModal } from '@/components/food/FoodDetailModal';
 import type { DiaryEntry } from '@/types';
 
@@ -32,6 +33,7 @@ export function DiaryEntryRow({ entry }: { entry: DiaryEntry }) {
               P{Math.round(entry.nutrition.proteinG)} C{Math.round(entry.nutrition.carbsG)} F{Math.round(entry.nutrition.fatG)}
             </span>
             <DataQualityBadge quality={entry.dataQuality} compact />
+            {entry.naturalness && <NaturalnessBadge score={entry.naturalness.score} compact />}
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">

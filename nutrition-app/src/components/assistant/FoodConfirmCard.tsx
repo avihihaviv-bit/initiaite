@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
+import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { calculateNutrition } from '@/utils/nutritionCalculator';
@@ -42,6 +43,7 @@ export function FoodConfirmCard({ mentions, onConfirmed }: { mentions: ParsedFoo
         nutrition,
         dataQuality: item.food.dataQuality,
         source: 'restaurantId' in item.food ? 'restaurant' : 'search',
+        naturalness: item.food.naturalness,
       });
       touchRecent({ refId: item.food.id, refType: 'restaurantId' in item.food ? 'dish' : 'food' });
     }
@@ -78,7 +80,10 @@ export function FoodConfirmCard({ mentions, onConfirmed }: { mentions: ParsedFoo
             </div>
             <div className="mt-2 flex items-center justify-between">
               <QuantityStepper value={item.grams} onChange={(g) => updateGrams(i, g)} step={10} min={5} />
-              <span className="text-xs font-semibold text-muted">{Math.round(nutrition.calories)} kcal</span>
+              <div className="flex items-center gap-1.5">
+                <NaturalnessBadge score={item.food.naturalness.score} compact />
+                <span className="text-xs font-semibold text-muted">{Math.round(nutrition.calories)} kcal</span>
+              </div>
             </div>
           </div>
         );

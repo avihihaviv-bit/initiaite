@@ -30,6 +30,7 @@ export function MealRecList({ recs, onAdded }: { recs: RecommendedMeal[]; onAdde
         },
         dataQuality: food.dataQuality,
         source: 'search',
+        naturalness: food.naturalness,
       });
       touchRecent({ refId: food.id, refType: 'food' });
     }
@@ -48,6 +49,7 @@ export function MealRecList({ recs, onAdded }: { recs: RecommendedMeal[]; onAdde
           </div>
           <p className="mt-0.5 text-[11px] text-muted">
             {Math.round(rec.totals.calories)} kcal · {Math.round(rec.totals.proteinG)}g protein
+            {rec.naturalness !== null && ` · 🌿 ${rec.naturalness}% natural`}
           </p>
           <p className="mt-0.5 text-[11px] text-muted">{rec.reason}</p>
           <button

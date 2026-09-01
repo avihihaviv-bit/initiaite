@@ -1,4 +1,5 @@
 import { DataQualityBadge } from '@/components/ui/DataQualityBadge';
+import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { nutritionService } from '@/services/NutritionService';
 import type { ResolvedFood } from '@/utils/resolveFoodRef';
 
@@ -22,6 +23,7 @@ export function FoodRow({ food, onClick }: FoodRowProps) {
           {food.subtitle && <span className="truncate">{food.subtitle}</span>}
           <span>{food.defaultServing.label}</span>
           <DataQualityBadge quality={food.dataQuality} compact />
+          <NaturalnessBadge score={food.naturalness.score} compact />
         </div>
       </div>
       <span className="shrink-0 text-sm font-bold tabular-nums text-ink">{Math.round(nutrition.calories)} kcal</span>

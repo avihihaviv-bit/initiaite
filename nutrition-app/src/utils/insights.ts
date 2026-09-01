@@ -102,3 +102,20 @@ export function generateStatsInsights(last7: DayStat[], proteinTarget: number): 
 
   return insights.slice(0, 3);
 }
+
+/**
+ * A grounded, neutral observation about naturalness this week — only
+ * returned when the data actually supports the specific claim (a real
+ * average, a real threshold crossed). Never asserts something the numbers
+ * don't back up, and never frames a low score as bad.
+ */
+export function generateNaturalnessInsight(last7: DayStat[]): string | null {
+  const tracked = last7.filter((d) => d.hasEntries && d.naturalness !== null);
+  if (tracked.length < 2) return null;
+
+  const avg = Math.round(tracked.reduce((s, d) => s + (d.naturalness ?? 0), 0) / tracked.length);
+
+  if (avg >= 70) return `This week, most of your meals were based on minimally processed foods (avg. ${avg}/100).`;
+  if (avg >= 45) return `This week included a mix of whole and processed foods (avg. ${avg}/100).`;
+  return `This week leaned toward more processed foods (avg. ${avg}/100) — just information, not a target to hit.`;
+}

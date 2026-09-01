@@ -75,6 +75,17 @@ export interface ServingOption {
 }
 
 /** A food item as it exists in a nutrition database (per 100g/ml baseline). */
+/**
+ * A measure of how close a food is to its whole/unprocessed form — NOT a
+ * health or "good/bad" judgment. Score 1-100, see utils/naturalness.ts for
+ * the tier bands. `reasons` are short, factual bullets explaining the score
+ * (e.g. "Single-ingredient food", "Added sweeteners").
+ */
+export interface NaturalnessInfo {
+  score: number;
+  reasons: string[];
+}
+
 export interface FoodItem {
   id: string;
   name: string;
@@ -88,6 +99,7 @@ export interface FoodItem {
   defaultServing: ServingOption;
   dataQuality: DataQuality;
   source: string; // e.g. "USDA FoodData Central", "AI Vision Estimate"
+  naturalness: NaturalnessInfo;
 }
 
 export interface RestaurantDish {
@@ -103,6 +115,7 @@ export interface RestaurantDish {
   defaultServing: ServingOption;
   dataQuality: DataQuality;
   nutritionReliable: boolean;
+  naturalness: NaturalnessInfo;
 }
 
 export interface Restaurant {
@@ -135,6 +148,8 @@ export interface DiaryEntry {
   loggedAt: string; // ISO timestamp
   aiConfidence?: 'low' | 'medium' | 'high';
   notes?: string;
+  /** Optional: absent on entries logged before this field existed. */
+  naturalness?: NaturalnessInfo;
 }
 
 export interface WeightLogEntry {

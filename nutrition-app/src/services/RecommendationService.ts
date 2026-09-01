@@ -1,5 +1,6 @@
 import { findFoodById } from '@/data/foods';
 import { calculateNutrition, sumNutrition } from '@/utils/nutritionCalculator';
+import { weightedNaturalness } from '@/utils/naturalness';
 import type { MacroTargets, NutritionFacts } from '@/types';
 
 /**
@@ -22,6 +23,7 @@ export interface RecommendedMeal {
   totals: NutritionFacts;
   matchScore: number; // 0-100
   reason: string;
+  naturalness: number | null; // weighted 1-100, null if unavailable
 }
 
 interface MealTemplate {
@@ -90,6 +92,9 @@ class LocalRecommendationService implements RecommendationServiceInterface {
     const scored = MEAL_TEMPLATES.map((template) => {
       const totals = computeTotals(template.items);
       const matchScore = scoreAgainst(totals, remaining);
+      const naturalness = weightedNaturalness(
+        template.items.map((i) => ({ naturalness: findFoodById(i.foodId)?.naturalness, grams: i.grams })),
+      );
       return {
         id: template.id,
         name: template.name,
@@ -98,6 +103,7 @@ class LocalRecommendationService implements RecommendationServiceInterface {
         totals,
         matchScore,
         reason: reasonFor(totals, remaining, matchScore),
+        naturalness,
       };
     });
 

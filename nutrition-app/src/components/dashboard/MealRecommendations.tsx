@@ -54,6 +54,7 @@ export function MealRecommendations({ totals, targets, date }: MealRecommendatio
         },
         dataQuality: food.dataQuality,
         source: 'search',
+        naturalness: food.naturalness,
       });
       touchRecent({ refId: food.id, refType: 'food' });
     }
@@ -77,6 +78,7 @@ export function MealRecommendations({ totals, targets, date }: MealRecommendatio
                   <p className="text-sm font-semibold text-ink">{rec.name}</p>
                   <p className="text-xs text-muted">
                     {Math.round(rec.totals.calories)} kcal · {Math.round(rec.totals.proteinG)}g protein
+                    {rec.naturalness !== null && ` · 🌿 ${rec.naturalness}% natural`}
                   </p>
                 </div>
               </div>

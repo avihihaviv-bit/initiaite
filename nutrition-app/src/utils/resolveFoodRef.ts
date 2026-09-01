@@ -1,6 +1,6 @@
 import { findFoodById } from '@/data/foods';
 import { findDishById, findRestaurantById } from '@/data/restaurants';
-import type { DataQuality, FoodRef, NutritionFacts, ServingOption } from '@/types';
+import type { DataQuality, FoodRef, NaturalnessInfo, NutritionFacts, ServingOption } from '@/types';
 
 export interface ResolvedFood {
   id: string;
@@ -11,6 +11,7 @@ export interface ResolvedFood {
   servingOptions: ServingOption[];
   defaultServing: ServingOption;
   dataQuality: DataQuality;
+  naturalness: NaturalnessInfo;
   subtitle?: string; // e.g. restaurant name for dishes
 }
 
@@ -27,6 +28,7 @@ export function resolveFoodRef(ref: FoodRef): ResolvedFood | undefined {
       servingOptions: food.servingOptions,
       defaultServing: food.defaultServing,
       dataQuality: food.dataQuality,
+      naturalness: food.naturalness,
     };
   }
   const dish = findDishById(ref.refId);
@@ -41,6 +43,7 @@ export function resolveFoodRef(ref: FoodRef): ResolvedFood | undefined {
     servingOptions: dish.servingOptions,
     defaultServing: dish.defaultServing,
     dataQuality: dish.dataQuality,
+    naturalness: dish.naturalness,
     subtitle: restaurant?.name,
   };
 }

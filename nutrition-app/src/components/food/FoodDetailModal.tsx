@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { DataQualityBadge } from '@/components/ui/DataQualityBadge';
+import { NaturalnessSection } from '@/components/food/NaturalnessSection';
 import { useAppStore } from '@/store/useAppStore';
 import { nutritionService } from '@/services/NutritionService';
 import { resolveFoodRef } from '@/utils/resolveFoodRef';
@@ -70,6 +71,7 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
       nutrition,
       dataQuality: resolved.dataQuality,
       source: addSource,
+      naturalness: resolved.naturalness,
     });
     touchRecent({ refId: resolved.id, refType: resolved.refType });
     onAdded?.();
@@ -83,6 +85,7 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
       quantityGrams: grams,
       servingLabel: matchingOptionGrams(grams)?.label ?? formatGrams(grams),
       nutrition,
+      naturalness: resolved.naturalness,
     });
     onClose();
   }
@@ -172,6 +175,10 @@ export function FoodDetailModal({ open, onClose, addRef, addDate, addSource = 's
             {nutrition.sodiumMg !== undefined && <SmallCell label="Sodium" value={`${Math.round(nutrition.sodiumMg)}mg`} />}
           </div>
         )}
+      </div>
+
+      <div className="mt-3">
+        <NaturalnessSection naturalness={resolved.naturalness} />
       </div>
 
       <div className="mt-5 flex gap-2.5">

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Footprints, Scale, Sparkles } from 'lucide-react';
 import { CaloriesChart } from '@/components/stats/CaloriesChart';
 import { ProteinChart } from '@/components/stats/ProteinChart';
+import { NaturalnessChart } from '@/components/stats/NaturalnessChart';
 import { WeightChart } from '@/components/stats/WeightChart';
 import { ConsistencyCard } from '@/components/stats/ConsistencyCard';
 import { WeeklyGrid } from '@/components/stats/WeeklyGrid';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { useLastNDaysStats } from '@/hooks/useHistoryStats';
 import { useTargets } from '@/hooks/useTargets';
 import { useAppStore } from '@/store/useAppStore';
-import { generateStatsInsights } from '@/utils/insights';
+import { generateStatsInsights, generateNaturalnessInsight } from '@/utils/insights';
 
 export function StatisticsPage() {
   const stats = useLastNDaysStats(7);
@@ -23,6 +24,7 @@ export function StatisticsPage() {
 
   const hasAnyData = stats.some((d) => d.hasEntries);
   const insights = generateStatsInsights(stats, targets.proteinG);
+  const naturalnessInsight = generateNaturalnessInsight(stats);
 
   return (
     <div className="space-y-4 pb-6">
@@ -46,10 +48,12 @@ export function StatisticsPage() {
                   {ins.text}
                 </li>
               ))}
+              {naturalnessInsight && <li className="text-xs text-white/70">{naturalnessInsight}</li>}
             </ul>
           </div>
           <CaloriesChart data={stats} goal={targets.calories} />
           <ProteinChart data={stats} goal={targets.proteinG} />
+          <NaturalnessChart data={stats} />
           <ConsistencyCard data={stats} goal={targets.calories} />
         </>
       ) : (

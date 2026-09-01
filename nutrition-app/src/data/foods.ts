@@ -1,4 +1,4 @@
-import type { FoodItem, ServingOption } from '@/types';
+import type { FoodItem, NaturalnessInfo, ServingOption } from '@/types';
 
 const serving = (label: string, unit: ServingOption['unit'], grams: number): ServingOption => ({
   label,
@@ -8,11 +8,17 @@ const serving = (label: string, unit: ServingOption['unit'], grams: number): Ser
 
 const gramOption = (g: number): ServingOption => serving(`${g}g`, 'g', g);
 
+const nat = (score: number, reasons: string[]): NaturalnessInfo => ({ score, reasons });
+
 /**
  * Curated demo food database. Values approximate USDA FoodData Central
  * averages per 100g/100ml. In a production build this module is replaced by
  * a real FoodSearchService implementation (see services/FoodSearchService.ts)
  * backed by a live nutrition API — nothing else in the app needs to change.
+ *
+ * `naturalness` scores are editorial estimates of how close each food is to
+ * its whole/unprocessed form (see utils/naturalness.ts) — not a health
+ * judgment, and not derived from a real ingredient database.
  */
 export const FOODS: FoodItem[] = [
   {
@@ -26,6 +32,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 serving (150g)', 'serving', 150),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(90, ['Single-ingredient food', 'Cooked without additives', 'Close to its natural form']),
   },
   {
     id: 'white-rice',
@@ -38,6 +45,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (158g)', 'serving', 158),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(82, ['Single ingredient', 'Milled/refined from the whole grain', 'Cooked simply, no additives']),
   },
   {
     id: 'pasta',
@@ -50,6 +58,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 serving (200g)', 'serving', 200),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(68, ['Made from refined wheat flour', 'Simple ingredient list', 'More processed than a whole grain']),
   },
   {
     id: 'mixed-salad',
@@ -62,6 +71,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 bowl (150g)', 'serving', 150),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(97, ['Fresh vegetables', 'No processing beyond washing and cutting', 'Close to its natural form']),
   },
   {
     id: 'banana',
@@ -74,6 +84,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 medium (118g)', 'piece', 118),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(98, ['Single whole fruit', 'No processing', 'Eaten in its natural form']),
   },
   {
     id: 'apple',
@@ -86,6 +97,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 medium (182g)', 'piece', 182),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(98, ['Single whole fruit', 'No processing', 'Eaten in its natural form']),
   },
   {
     id: 'eggs',
@@ -98,6 +110,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('2 large eggs (100g)', 'serving', 100),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(96, ['Single-ingredient food', 'Minimally processed (boiled)', 'Close to its natural form']),
   },
   {
     id: 'oatmeal',
@@ -110,6 +123,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 bowl (240g)', 'serving', 240),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(90, ['Whole-grain oats', 'Minimal processing (rolled, cooked)', 'No added ingredients']),
   },
   {
     id: 'salmon',
@@ -122,6 +136,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 fillet (150g)', 'serving', 150),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(92, ['Single-ingredient food', 'Cooked without additives', 'Close to its natural form']),
   },
   {
     id: 'broccoli',
@@ -134,6 +149,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (156g)', 'serving', 156),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(98, ['Whole vegetable', 'Minimal processing (steamed)', 'No added ingredients']),
   },
   {
     id: 'sweet-potato',
@@ -146,6 +162,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 medium (130g)', 'piece', 130),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(96, ['Whole root vegetable', 'Cooked simply, no additives', 'Close to its natural form']),
   },
   {
     id: 'greek-yogurt',
@@ -158,6 +175,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (245g)', 'serving', 245),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(78, ['Simple ingredient list (milk and cultures)', 'Fermented, minimally processed', 'No added sugar in the plain variety']),
   },
   {
     id: 'protein-powder',
@@ -170,6 +188,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 scoop (30g)', 'serving', 30),
     dataQuality: 'verified',
     source: 'Manufacturer label',
+    naturalness: nat(15, ['Highly processed, formulated product', 'Protein isolated from its whole-food source', 'Typically contains added flavors and sweeteners']),
   },
   {
     id: 'whole-wheat-bread',
@@ -182,6 +201,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('2 slices (64g)', 'serving', 64),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(55, ['Made from several ingredients', 'Flour is processed from whole wheat', 'Baked product with yeast/leavening']),
   },
   {
     id: 'cottage-cheese',
@@ -194,6 +214,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 container (250g)', 'serving', 250),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(72, ['Simple ingredient list', 'Fermented dairy product', 'Moderate processing to separate curds']),
   },
   {
     id: 'milk',
@@ -206,6 +227,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (244ml)', 'ml', 244),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(88, ['Single ingredient', 'Pasteurized only', 'Close to its natural form']),
   },
   {
     id: 'avocado',
@@ -218,6 +240,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1/2 avocado (100g)', 'serving', 100),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(98, ['Single whole fruit', 'No processing', 'Eaten in its natural form']),
   },
   {
     id: 'almonds',
@@ -230,6 +253,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 handful (28g)', 'serving', 28),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(92, ['Whole nut', 'Minimal processing (roasting only)', 'No added ingredients']),
   },
   {
     id: 'hummus',
@@ -242,6 +266,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('100g', 'g', 100),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(62, ['Made from a few recognizable ingredients (chickpeas, tahini, oil)', 'Blended preparation, not eaten in whole form']),
   },
   {
     id: 'tofu',
@@ -254,6 +279,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 serving (150g)', 'serving', 150),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(58, ['Processed from soybeans', 'Simple ingredient list (soy and a coagulant)', 'Requires industrial processing to form curd']),
   },
   {
     id: 'lentils',
@@ -266,6 +292,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (198g)', 'serving', 198),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(96, ['Whole legume', 'Cooked simply, no additives', 'Close to its natural form']),
   },
   {
     id: 'quinoa',
@@ -278,6 +305,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (185g)', 'serving', 185),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(94, ['Whole grain', 'Minimal processing (rinsed, cooked)', 'No added ingredients']),
   },
   {
     id: 'orange',
@@ -290,6 +318,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 medium (131g)', 'piece', 131),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(98, ['Single whole fruit', 'No processing', 'Eaten in its natural form']),
   },
   {
     id: 'ground-beef',
@@ -302,6 +331,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 serving (150g)', 'serving', 150),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(85, ['Single-ingredient food', 'Cooked without additives', 'Mechanically ground from whole cuts']),
   },
   {
     id: 'peanut-butter',
@@ -314,6 +344,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('2 tbsp (32g)', 'serving', 32),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(50, ['Made mainly from peanuts', 'Often contains added oils, salt, or sugar', 'Ground and processed into a spread']),
   },
   {
     id: 'pita',
@@ -326,6 +357,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 pita (60g)', 'piece', 60),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(52, ['Made from refined flour', 'Several ingredients (flour, yeast, salt)', 'Baked, processed product']),
   },
   {
     id: 'olive-oil',
@@ -338,6 +370,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 tbsp (14g)', 'serving', 14),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(68, ['Extracted from a single source (olives)', 'Mechanically pressed, minimal chemical processing', 'A concentrated extract, not a whole food']),
   },
   {
     id: 'chocolate',
@@ -350,6 +383,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('4 squares (28g)', 'serving', 28),
     dataQuality: 'verified',
     source: 'USDA FoodData Central',
+    naturalness: nat(38, ['Contains added sugar', 'Multi-step processing (roasting, grinding, conching)', 'Formulated product with several ingredients']),
   },
   {
     id: 'protein-yogurt',
@@ -362,6 +396,7 @@ export const FOODS: FoodItem[] = [
     defaultServing: serving('1 cup (200g)', 'serving', 200),
     dataQuality: 'verified',
     source: 'Manufacturer label',
+    naturalness: nat(42, ['Formulated with added protein', 'Typically contains sweeteners or flavorings', 'More processed than plain yogurt']),
   },
 ];
 

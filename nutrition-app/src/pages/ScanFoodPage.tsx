@@ -9,6 +9,7 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { ScanAnimation } from '@/components/food/ScanAnimation';
 import { calculateNutrition } from '@/utils/nutritionCalculator';
 import { findFoodById } from '@/data/foods';
@@ -99,6 +100,7 @@ export function ScanFoodPage() {
         dataQuality: 'ai_estimate',
         source: 'scan',
         aiConfidence: c.confidence,
+        naturalness: findFoodById(c.foodId)?.naturalness,
       });
       touchRecent({ refId: c.foodId, refType: 'food' });
     }
@@ -219,6 +221,12 @@ export function ScanFoodPage() {
                     <b className="text-fat">{Math.round(c.nutrition.fatG)}g</b> fat
                   </span>
                 </div>
+
+                {findFoodById(c.foodId)?.naturalness && (
+                  <div className="mt-2 flex justify-center">
+                    <NaturalnessBadge score={findFoodById(c.foodId)!.naturalness.score} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

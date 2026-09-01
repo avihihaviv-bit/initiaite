@@ -5,6 +5,7 @@ import { restaurantService } from '@/services/RestaurantService';
 import { useAddContext } from '@/hooks/useAddContext';
 import { FoodDetailModal } from '@/components/food/FoodDetailModal';
 import { DataQualityBadge } from '@/components/ui/DataQualityBadge';
+import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { Restaurant, RestaurantDish } from '@/types';
@@ -82,6 +83,7 @@ export function RestaurantDetailPage() {
                   <span>~{Math.round((dish.per100g.calories * dish.defaultServing.grams) / 100)} kcal</span>
                   <span>· {dish.defaultServing.label}</span>
                   {!dish.nutritionReliable ? <span className="text-amber-600">Nutrition estimated</span> : <DataQualityBadge quality={dish.dataQuality} compact />}
+                  <NaturalnessBadge score={dish.naturalness.score} compact />
                 </div>
               </div>
               {dish.price && (

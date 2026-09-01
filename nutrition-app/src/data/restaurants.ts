@@ -1,10 +1,12 @@
-import type { Restaurant, RestaurantDish, ServingOption } from '@/types';
+import type { NaturalnessInfo, Restaurant, RestaurantDish, ServingOption } from '@/types';
 
 const serving = (label: string, unit: ServingOption['unit'], grams: number): ServingOption => ({
   label,
   unit,
   grams,
 });
+
+const nat = (score: number, reasons: string[]): NaturalnessInfo => ({ score, reasons });
 
 /**
  * Demo restaurant + dish database. Restaurant nutrition is inherently less
@@ -83,6 +85,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('2 slices (220g)', 'serving', 220),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(32, ['Made with several processed ingredients (dough, cheese, sauce)', 'A prepared, baked dish rather than a whole food', 'Contains refined flour']),
   },
   {
     id: 'd-pizza-pepperoni',
@@ -100,6 +103,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('2 slices (230g)', 'serving', 230),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(24, ['Includes a processed, cured meat topping', 'Made with several processed ingredients', 'A prepared, multi-ingredient dish']),
   },
   {
     id: 'd-tiramisu',
@@ -113,6 +117,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('1 slice (120g)', 'serving', 120),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(18, ['Multiple processed ingredients (sugar, cream, cocoa, alcohol)', 'A formulated dessert rather than a whole food', 'Contains added sugar']),
   },
   {
     id: 'd-classic-burger',
@@ -126,6 +131,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('Regular (250g)', 'serving', 250),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(22, ['Combines a processed bun, cheese, and sauces', 'Several prepared components', 'Contains processed cheese']),
   },
   {
     id: 'd-cheese-fries',
@@ -139,6 +145,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('Regular (200g)', 'serving', 200),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(16, ['Deep-fried potato product', 'Processed cheese topping', 'A highly prepared snack dish']),
   },
   {
     id: 'd-salmon-roll',
@@ -152,6 +159,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('8 pieces (240g)', 'serving', 240),
     dataQuality: 'estimated',
     nutritionReliable: true,
+    naturalness: nat(58, ['Built around a whole-food ingredient (salmon)', 'Rice is refined but simply prepared', 'Some processed components (nori, sauce)']),
   },
   {
     id: 'd-california-roll',
@@ -165,6 +173,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('8 pieces (230g)', 'serving', 230),
     dataQuality: 'estimated',
     nutritionReliable: true,
+    naturalness: nat(40, ['Contains imitation crab, a processed ingredient', 'A mayo-based sauce is typically added', 'Rice is refined']),
   },
   {
     id: 'd-hummus-plate',
@@ -178,6 +187,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('Regular plate (250g)', 'serving', 250),
     dataQuality: 'estimated',
     nutritionReliable: true,
+    naturalness: nat(65, ['Made from a few recognizable ingredients', 'A blended preparation rather than a whole food', 'Minimal industrial processing']),
   },
   {
     id: 'd-falafel-pita',
@@ -191,6 +201,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('1 pita (280g)', 'serving', 280),
     dataQuality: 'estimated',
     nutritionReliable: true,
+    naturalness: nat(42, ['Falafel is fried', 'Several components (falafel, pita, sauces)', 'Pita is made from refined flour']),
   },
   {
     id: 'd-fried-rice',
@@ -204,6 +215,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('Regular (300g)', 'serving', 300),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(38, ['Refined rice, stir-fried with oil and sauces', 'Multiple added seasonings', 'A prepared dish rather than a whole food']),
   },
   {
     id: 'd-sweet-sour-chicken',
@@ -217,6 +229,7 @@ export const RESTAURANT_DISHES: RestaurantDish[] = [
     defaultServing: serving('Regular (350g)', 'serving', 350),
     dataQuality: 'estimated',
     nutritionReliable: false,
+    naturalness: nat(28, ['Sauce contains added sugar', 'Chicken is typically breaded and fried', 'Several processed components']),
   },
 ];
 

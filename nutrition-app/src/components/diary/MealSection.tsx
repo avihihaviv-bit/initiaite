@@ -1,7 +1,10 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { DiaryEntryRow } from './DiaryEntryRow';
+import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { MEAL_LABELS } from '@/utils/mealTime';
+import { weightedNaturalness } from '@/utils/naturalness';
 import type { DiaryEntry, MealType, NutritionFacts } from '@/types';
 
 interface MealSectionProps {
@@ -14,6 +17,11 @@ interface MealSectionProps {
 export function MealSection({ mealType, entries, totals, date }: MealSectionProps) {
   const { label, emoji } = MEAL_LABELS[mealType];
 
+  const mealNaturalness = useMemo(
+    () => weightedNaturalness(entries.map((e) => ({ naturalness: e.naturalness, grams: e.quantityGrams }))),
+    [entries],
+  );
+
   return (
     <section>
       <div className="mb-2.5 flex items-center justify-between">
@@ -21,7 +29,10 @@ export function MealSection({ mealType, entries, totals, date }: MealSectionProp
           <span>{emoji}</span>
           {label}
         </h3>
-        <span className="text-sm font-semibold tabular-nums text-muted">{Math.round(totals.calories)} kcal</span>
+        <div className="flex items-center gap-2">
+          {mealNaturalness !== null && <NaturalnessBadge score={mealNaturalness} compact />}
+          <span className="text-sm font-semibold tabular-nums text-muted">{Math.round(totals.calories)} kcal</span>
+        </div>
       </div>
 
       {entries.length > 0 ? (
