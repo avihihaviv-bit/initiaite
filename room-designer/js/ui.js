@@ -84,6 +84,7 @@ RD.UI = (function () {
             ciCancel: $('ci-cancel'), ciAddPlain: $('ci-add-plain'), ciAddSmart: $('ci-add-smart'),
 
             modalAdvisor: $('modal-advisor'),
+            advisorStats: $('advisor-stats'),
             advisorList: $('advisor-list'),
             advisorClose: $('advisor-close'),
 
@@ -474,10 +475,30 @@ RD.UI = (function () {
         { severity: 'good', label: '🟢 תקין ורעיונות' }
     ];
 
+    function scoreBand(score) {
+        if (score >= 80) return 'good';
+        if (score >= 55) return 'notice';
+        return 'issue';
+    }
+
+    function renderAdvisorStats(findings) {
+        const stats = A.roomStats();
+        const score = A.designScore(findings);
+        els.advisorStats.innerHTML =
+            '<div class="rd-score-badge" data-band="' + scoreBand(score) + '">' + score + '<small>/100</small></div>' +
+            '<div class="rd-stats-grid">' +
+            '<div><b>' + stats.roomArea.toFixed(1) + '</b><span>מ"ר חדר</span></div>' +
+            '<div><b>' + stats.coveragePct + '%</b><span>תפוסת רצפה</span></div>' +
+            '<div><b>' + stats.freeArea.toFixed(1) + '</b><span>מ"ר פנוי</span></div>' +
+            '<div><b>' + stats.itemCount + '</b><span>פריטים</span></div>' +
+            '</div>';
+    }
+
     function wireAdvisorModal() {
         els.btnAdvisor.addEventListener('click', function () {
             const findings = A.analyzeRoom();
             findings.sort(function (a, b) { return SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]; });
+            renderAdvisorStats(findings);
             let html = '';
             PRIORITY_GROUPS.forEach(function (group) {
                 const inGroup = findings.filter(function (f) { return f.severity === group.severity; });

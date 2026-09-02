@@ -293,10 +293,44 @@ RD.Advisor = (function () {
         return findings;
     }
 
+    // Raw geometric numbers behind the findings above — room area,
+    // furniture footprint, and how much floor is actually free. Real
+    // measurements only, no estimated/invented figures.
+    function roomStats() {
+        const room = S.get().room;
+        const items = S.get().items;
+        const roomArea = room.width * room.depth;
+        let furnitureArea = 0;
+        items.forEach(function (item) { const fp = scaledFootprint(item); furnitureArea += fp.w * fp.d; });
+        const freeArea = Math.max(0, roomArea - furnitureArea);
+        return {
+            roomArea: roomArea,
+            furnitureArea: furnitureArea,
+            freeArea: freeArea,
+            coveragePct: roomArea > 0 ? Math.round((furnitureArea / roomArea) * 100) : 0,
+            itemCount: items.length
+        };
+    }
+
+    // A single 0-100 summary derived from the same findings analyzeRoom()
+    // already returns — not a separate/invented metric. Each real 'issue'
+    // costs more than a 'notice' since it actually breaks the layout
+    // (overlap, blocked walkway) rather than just being suboptimal.
+    function designScore(findings) {
+        let score = 100;
+        findings.forEach(function (f) {
+            if (f.severity === 'issue') score -= 18;
+            else if (f.severity === 'notice') score -= 7;
+        });
+        return Math.max(0, Math.min(100, score));
+    }
+
     return {
         categoryOf: categoryOf,
         findBestSpot: findBestSpot,
         quickCheck: quickCheck,
-        analyzeRoom: analyzeRoom
+        analyzeRoom: analyzeRoom,
+        roomStats: roomStats,
+        designScore: designScore
     };
 })();
