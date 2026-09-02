@@ -227,6 +227,11 @@ RD.FirstPerson = (function () {
         domEl.addEventListener('pointerdown', onPointerDown);
         domEl.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
+        // Same lost-capture gap as the joystick fix below: without this,
+        // an interrupted look-drag leaves `looking` stuck true and the
+        // view keeps rotating on the next hover move with no button held.
+        window.addEventListener('pointercancel', onPointerUp);
+        domEl.addEventListener('lostpointercapture', onPointerUp);
         window.addEventListener('keydown', onKeyDown);
         window.addEventListener('keyup', onKeyUp);
         window.addEventListener('blur', resetInputs);
@@ -252,6 +257,8 @@ RD.FirstPerson = (function () {
         domEl.removeEventListener('pointerdown', onPointerDown);
         domEl.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+        domEl.removeEventListener('lostpointercapture', onPointerUp);
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
         window.removeEventListener('blur', resetInputs);

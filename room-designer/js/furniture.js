@@ -251,6 +251,13 @@ RD.Furniture = (function () {
         domEl.addEventListener('pointerdown', onPointerDown);
         domEl.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
+        // If the browser ever yanks pointer capture away mid-drag without a
+        // pointerup (an OS gesture, alt-tab, a touch interruption) and
+        // relies on pointerup alone, `dragging` never clears — so onPointerMove
+        // keeps moving the item on every subsequent hover, with no button
+        // held at all, and orbit controls stay disabled forever.
+        window.addEventListener('pointercancel', onPointerUp);
+        domEl.addEventListener('lostpointercapture', onPointerUp);
     }
 
     function pickableObjects() {
