@@ -4,6 +4,7 @@ import { initHero3D } from "./hero3d.js";
 import { initFlagBackdrop } from "./flag.js";
 import { initA11y } from "./a11y.js";
 import { initCart } from "./cart.js";
+import { initImageFallback } from "./render.js";
 import { initTilt, markTiltTargets } from "./tilt.js";
 import {
   initScrollReveal,
@@ -25,6 +26,8 @@ import { renderFAQ } from "./faq.js";
 import { qs, qsa } from "./utils.js";
 
 function init() {
+  // Wired before anything renders, so no card can miss it.
+  initImageFallback();
   initPageLoader();
 
   renderHoursStatus();

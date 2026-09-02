@@ -29,9 +29,11 @@ export function artPlaceholder(categoryId, label) {
  */
 export function dishMedia(item, sizes = "(max-width: 700px) 50vw, 300px") {
   if (!item.img) return artPlaceholder(item.category);
+  // No inline onerror: an inline handler is script, and the site's CSP allows
+  // only first-party script files. The fallback is wired in initImageFallback.
   return `<img src="${item.img}" alt="${escapeHtml(item.name)} — פיצה איטליאנה חולון"
     loading="lazy" decoding="async" width="320" height="320" sizes="${sizes}"
-    onerror="this.closest('.dish-media')?.classList.add('img-failed');this.remove()">
+    data-dish-photo>
     ${artPlaceholder(item.category)}`;
 }
 
@@ -106,4 +108,23 @@ export function faqItemHTML(faq, index) {
       </div>
     </div>
   `;
+}
+
+/**
+ * A dish photo that fails to load hands over to the painted placeholder behind
+ * it. Delegated from the document, because the cards are rendered as HTML
+ * strings long before this runs — and error events do not bubble, so this
+ * listens in the capture phase.
+ */
+export function initImageFallback() {
+  document.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement) || !img.hasAttribute("data-dish-photo")) return;
+      img.closest(".dish-media")?.classList.add("img-failed");
+      img.remove();
+    },
+    true
+  );
 }

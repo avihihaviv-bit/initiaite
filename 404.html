@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>הדף לא נמצא (404) | פיצה איטליאנה</title>
+<meta name="description" content="הדף שחיפשתם לא קיים. חזרו לדף הבית של פיצה איטליאנה חולון, או עברו ישירות לתפריט ולהזמנה בוולט.">
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#150f0a">
+<meta name="color-scheme" content="dark">
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Hebrew:wght@400;700;900&family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+
+<style>
+  /* The 404 borrows the site's tokens but needs none of its machinery. */
+  .nf {
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: var(--space-6) var(--container-pad);
+    text-align: center;
+    background:
+      radial-gradient(60% 50% at 50% 0%, rgba(226, 73, 44, 0.16), transparent 70%),
+      var(--color-cream);
+  }
+  .nf-inner { max-width: 46ch; display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
+  .nf-logo { width: 108px; height: auto; }
+  .nf-code {
+    font-family: var(--font-display);
+    font-size: clamp(3.4rem, 16vw, 6rem);
+    line-height: 1;
+    color: var(--color-tomato-dark);
+    letter-spacing: 0.02em;
+  }
+  .nf h1 { font-family: var(--font-display); font-size: clamp(1.4rem, 5vw, 2.1rem); line-height: 1.2; }
+  .nf p { color: var(--color-charcoal-soft); font-size: 1.02rem; line-height: 1.6; margin: 0; }
+  .nf-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; margin-top: var(--space-2); }
+  .nf-links { margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); justify-content: center; }
+  .nf-links a { color: var(--color-charcoal-soft); font-size: 0.9rem; text-decoration: underline; text-underline-offset: 3px; }
+  .nf-links a:hover, .nf-links a:focus-visible { color: var(--color-tomato-dark); }
+</style>
+</head>
+<body>
+<main class="nf">
+  <div class="nf-inner">
+    <img class="nf-logo" src="assets/images/logo-badge.png"
+         alt="פיצה איטליאנה — פיצריה איטלקית בחולון" width="904" height="679">
+
+    <span class="nf-code" aria-hidden="true">404</span>
+    <h1>הדף הזה יצא מהתנור</h1>
+    <p>לא מצאנו את הדף שחיפשתם — אבל התפריט, השעות והדרך אלינו נמצאים במרחק לחיצה.</p>
+
+    <div class="nf-actions">
+      <a class="btn btn-wolt btn-lg" href="/">חזרה לדף הבית</a>
+      <a class="btn btn-outline btn-lg" href="/#menu">לתפריט המלא</a>
+    </div>
+
+    <nav class="nf-links" aria-label="קישורים מהירים">
+      <a href="/#bestsellers">הכי נמכרים</a>
+      <a href="/#gallery">גלריה</a>
+      <a href="/#reviews">ביקורות</a>
+      <a href="/#location">מיקום ושעות</a>
+      <a href="/#faq">שאלות נפוצות</a>
+      <a href="tel:+97236225040">03-622-5040</a>
+    </nav>
+  </div>
+</main>
+</body>
+</html>

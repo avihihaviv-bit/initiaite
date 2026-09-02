@@ -927,9 +927,12 @@ html.has-backtotop .a11y {
   display: none;
 }
 
-.a11y-panel h4 {
+.a11y-panel .a11y-panel-title {
+  /* Was an h4, which put a heading above the page's h1 in the outline. The
+     weight and size are kept; only its role in the outline changed. */
   font-size: 0.95rem;
-  margin-bottom: var(--space-1);
+  font-weight: 700;
+  margin: 0 0 var(--space-1);
 }
 
 .a11y-row {

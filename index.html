@@ -17,11 +17,27 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="פיצה איטליאנה">
 
+<!-- One domain to set: replace every SITE-DOMAIN in this file, robots.txt and
+     sitemap.xml with the real domain once it is registered. -->
+<link rel="canonical" href="https://SITE-DOMAIN/">
+
 <meta property="og:type" content="restaurant">
+<meta property="og:site_name" content="פיצה איטליאנה">
 <meta property="og:title" content="פיצה איטליאנה — פיצריה איטלקית בחולון">
 <meta property="og:description" content="דירוג 4.8 מתוך 83 ביקורות. הזמינו משלוח דרך וולט, אספו עצמאית או התקשרו אלינו.">
 <meta property="og:locale" content="he_IL">
-<meta property="og:image" content="assets/images/hero-pizza.png">
+<meta property="og:url" content="https://SITE-DOMAIN/">
+<!-- Absolute: social scrapers do not resolve relative image paths. -->
+<meta property="og:image" content="https://SITE-DOMAIN/assets/images/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="פיצה איטליאנה — פיצה טרייה והלוגו של המסעדה">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="פיצה איטליאנה — פיצריה איטלקית בחולון">
+<meta name="twitter:description" content="דירוג 4.8 מתוך 83 ביקורות. הזמינו משלוח דרך וולט, אספו עצמאית או התקשרו אלינו.">
+<meta name="twitter:image" content="https://SITE-DOMAIN/assets/images/og-cover.png">
+<meta name="twitter:image:alt" content="פיצה איטליאנה — פיצה טרייה והלוגו של המסעדה">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,31 +48,575 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Restaurant",
-  "name": "פיצה איטליאנה",
-  "servesCuisine": "Italian",
-  "priceRange": "50-100 ILS",
-  "telephone": "+97236225040",
-  "url": "https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "אריה שנקר 61",
-    "addressLocality": "חולון",
-    "postalCode": "5833323",
-    "addressCountry": "IL"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "reviewCount": "83"
-  },
-  "openingHoursSpecification": [
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "15:00", "closes": "23:00" },
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Monday", "opens": "14:00", "closes": "23:00" },
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday", "opens": "14:00", "closes": "23:00" },
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "14:00", "closes": "23:00" },
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday", "opens": "14:00", "closes": "23:00" },
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "20:00", "closes": "23:59" }
+  "@graph": [
+    {
+      "@type": "Restaurant",
+      "@id": "https://SITE-DOMAIN/#restaurant",
+      "name": "פיצה איטליאנה",
+      "alternateName": "Pizza Italiana Holon",
+      "description": "פיצריה איטלקית כשרה בחולון — פיצה על אבן, פסטות, מלווח וטוסטים. הזמנות דרך וולט.",
+      "url": "https://SITE-DOMAIN/",
+      "telephone": "+97236225040",
+      "image": [
+        "https://SITE-DOMAIN/assets/images/og-cover.png"
+      ],
+      "logo": "https://SITE-DOMAIN/assets/images/logo-badge.png",
+      "servesCuisine": [
+        "Italian",
+        "Pizza",
+        "Kosher"
+      ],
+      "priceRange": "₪₪",
+      "currenciesAccepted": "ILS",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "אריה שנקר 61",
+        "addressLocality": "חולון",
+        "postalCode": "5833323",
+        "addressCountry": "IL"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "83",
+        "bestRating": "5"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Sunday",
+          "opens": "15:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Monday",
+          "opens": "14:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Tuesday",
+          "opens": "14:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Wednesday",
+          "opens": "14:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Thursday",
+          "opens": "14:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Saturday",
+          "opens": "20:00",
+          "closes": "23:59"
+        }
+      ],
+      "hasMenu": {
+        "@type": "Menu",
+        "name": "התפריט של פיצה איטליאנה",
+        "inLanguage": "he",
+        "hasMenuSection": [
+          {
+            "@type": "MenuSection",
+            "name": "פיצות בהרכבה",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "פיצה אישית",
+                "description": "רוטב עגבניות וגבינה. ניתן להוסיף תוספות.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pizza-ishit.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "27",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פיצה משפחתית",
+                "description": "רוטב עגבניות וגבינה. ניתן להוסיף תוספות.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pizza-mishpahtit.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "70",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "פיצות הבית",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "פיצה לבנה | אישית",
+                "description": "על בסיס אלפרדו, מוצרלה, בולגרית, פרמזן ופטריות.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pizza-levana.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "40",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פיצה לבנה | משפחתית",
+                "description": "על בסיס אלפרדו, מוצרלה, בולגרית, פרמזן ופטריות.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pizza-levana.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "80",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פיצה יוונית | אישית",
+                "description": "על בסיס רוטב עגבניות, בצל, זיתי קלמטה, בולגרית ועגבניות שרי.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pizza-yevanit.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "40",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פיצה יוונית | משפחתית",
+                "description": "על בסיס רוטב עגבניות, בצל, זיתי קלמטה, בולגרית ועגבניות שרי.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pizza-yevanit.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "80",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "הפסטיליאנה",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "פסטה פנה",
+                "description": "בחרו רוטב.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/pasta-penne.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "45",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "ספגטי",
+                "description": "בחרו רוטב.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/spaghetti.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "45",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "תפו\"א מוקרם",
+                "description": "בחרו תוספות.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/potato-mukram.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "40",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "רביולי גבינה",
+                "description": "בחרו רוטב.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/ravioli-gvina.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "50",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "רביולי בטטה",
+                "description": "בחרו רוטב.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/ravioli-batata.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "50",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "תימניאלה",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "זיווה בהרכבה",
+                "description": "מוגש עם 2 תוספות לבחירה, רסק, ביצה וטחינה.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/ziva-harkava.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "38",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "מלווח פתוח",
+                "description": "מוגש עם רסק, ביצה וטחינה.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/malawach-patuach.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "30",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "מלווח מגולגל",
+                "description": "מוגש עם רסק, ביצה וטחינה.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/malawach-megulgal.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "27",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "זיווה זיתים",
+                "description": "מוגש עם רסק, ביצה וטחינה.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/ziva-zeitim.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "38",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "זיווה פטריות",
+                "description": "מוגש עם רסק, ביצה וטחינה.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/ziva-pitriot.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "38",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "מלווח פיצה",
+                "description": "מוגש עם שתי תוספות.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/malawach-pizza.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "33",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "טוסטים",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "טוסט",
+                "description": "מוגש עם 3 תוספות לבחירה ו-2 רטבים בצד.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/toast.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "35",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "טוסט הבית",
+                "description": "רוטב פיצה, זיתים ובולגרית. מוגש עם 2 רטבים לבחירה בצד.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/toast-habait.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "35",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "טוסט על בסיס אלפרדו",
+                "description": "מוגש עם 3 תוספות ו-2 רטבים לבחירה בצד.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/toast-alfredo.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "38",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "קינוחים",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "זיווה שוקולד קטן",
+                "description": "זיווה חמה במילוי שוקולד.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/ziva-chocolate.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "30",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "סמבוסק שוקולד",
+                "description": "סמבוסק חם במילוי שוקולד.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/sambusak-chocolate.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "24",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "שתיה קלה",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "פחית קוקה קולה",
+                "description": "0.33 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/coke-can.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "10",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פחית קולה זירו",
+                "description": "0.33 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/coke-zero-can.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "10",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פחית ספרייט",
+                "description": "0.33 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/sprite-can.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "10",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פחית פאנטה",
+                "description": "0.33 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/fanta-can.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "10",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "קוקה קולה - גדול",
+                "description": "1.5 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/coke-big.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "15",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "קולה זירו - גדול",
+                "description": "1.5 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/coke-zero-big.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "15",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "ספרייט - גדול",
+                "description": "1.5 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/sprite-big.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "15",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "ספרייט זירו - גדול",
+                "description": "1.5 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/sprite-zero-big.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "15",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פאנטה תפוזים - גדול",
+                "description": "1.5 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/fanta-big.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "15",
+                  "priceCurrency": "ILS"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "פיוזטי אפרסק - גדול",
+                "description": "1.5 ליטר.",
+                "image": "https://SITE-DOMAIN/assets/images/menu/fuzetea-big.webp",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "15",
+                  "priceCurrency": "ILS"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "potentialAction": {
+        "@type": "OrderAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon",
+          "actionPlatform": [
+            "https://schema.org/DesktopWebPlatform",
+            "https://schema.org/MobileWebPlatform"
+          ]
+        },
+        "deliveryMethod": [
+          "https://schema.org/OnSitePickup",
+          "https://schema.org/ParcelService"
+        ]
+      },
+      "sameAs": [
+        "https://wolt.com/he/isr/rishon-lezion-hashfela-area/restaurant/italianaholon"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://SITE-DOMAIN/#website",
+      "url": "https://SITE-DOMAIN/",
+      "name": "פיצה איטליאנה",
+      "inLanguage": "he",
+      "publisher": {
+        "@id": "https://SITE-DOMAIN/#restaurant"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://SITE-DOMAIN/#webpage",
+      "url": "https://SITE-DOMAIN/",
+      "name": "פיצה איטליאנה | פיצריה איטלקית בחולון — הזמנות בוולט",
+      "isPartOf": {
+        "@id": "https://SITE-DOMAIN/#website"
+      },
+      "about": {
+        "@id": "https://SITE-DOMAIN/#restaurant"
+      },
+      "inLanguage": "he",
+      "primaryImageOfPage": "https://SITE-DOMAIN/assets/images/og-cover.png"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://SITE-DOMAIN/#breadcrumbs",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "דף הבית",
+          "item": "https://SITE-DOMAIN/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "התפריט",
+          "item": "https://SITE-DOMAIN/#menu"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "מיקום ושעות",
+          "item": "https://SITE-DOMAIN/#location"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://SITE-DOMAIN/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "איך מזמינים מפיצה איטליאנה?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ההזמנות מתבצעות דרך וולט — לוחצים על \"הזמנה בוולט\" בכל מקום באתר ומגיעים ישר לעמוד המסעדה שלנו. אפשר גם להתקשר אלינו ישירות ל-03-622-5040."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "האם יש משלוחים ואיסוף עצמי?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "כן. משלוח עד הבית לוקח 55–70 דקות. אנחנו מציעים גם משלוח ללא מגע, איסוף עצמי מהסניף באריה שנקר 61 בחולון, וכמובן ישיבה ואכילה במקום."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "מה שעות הפעילות?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ראשון 15:00–23:00, שני עד חמישי 14:00–23:00, שבת 20:00–00:00. בימי שישי אנחנו סגורים. הסטטוס פתוח/סגור באתר מתעדכן בזמן אמת."
+          }
+        }
+      ]
+    }
   ]
 }
 </script>
@@ -92,7 +652,7 @@
         <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(244,233,216,.14)" stroke-width="1"/>
         <circle class="intro-ring-arc" cx="60" cy="60" r="54" fill="none" stroke="#e2492c" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      <img class="intro-logo" src="assets/images/logo-badge.png" alt="" width="828" height="582">
+      <img class="intro-logo" src="assets/images/logo-badge.png" alt="" width="904" height="679">
     </div>
     <div class="intro-word">פיצה איטליאנה</div>
     <div class="intro-sub">פיצה שעושה חשק לעוד</div>
@@ -127,7 +687,7 @@
     </svg>
   </button>
   <div class="a11y-panel" id="a11y-panel" role="dialog" aria-label="הגדרות נגישות" hidden>
-    <h4>הגדרות נגישות</h4>
+    <p class="a11y-panel-title" id="a11y-panel-title">הגדרות נגישות</p>
     <div class="a11y-row">
       <span>גודל טקסט</span>
       <div class="a11y-buttons">
@@ -206,7 +766,7 @@
 <header class="site-header" id="site-header">
   <div class="container header-inner">
     <a class="brand" href="#home" aria-label="פיצה איטליאנה, חולון — לדף הבית">
-      <img class="brand-logo" src="assets/images/logo-badge.png" alt="פיצה איטליאנה — Pizza Italiana" width="828" height="582">
+      <img class="brand-logo" src="assets/images/logo-badge.png" alt="פיצה איטליאנה — Pizza Italiana" width="904" height="679">
     </a>
 
     <nav class="main-nav" aria-label="ניווט ראשי">
@@ -343,7 +903,7 @@
           <div class="pizza-plate-shadow" aria-hidden="true"></div>
           <div class="pizza-steam" aria-hidden="true"></div>
           <div class="pizza-3d" id="pizza-3d">
-            <img class="pizza-photo" src="assets/images/hero-pizza.png" alt="פיצה משפחתית טרייה מהתנור של פיצה איטליאנה" width="436" height="347">
+            <img class="pizza-photo" src="assets/images/hero-pizza.webp" alt="פיצה משפחתית טרייה מהתנור של פיצה איטליאנה" width="436" height="347">
           </div>
         </div>
       </div>
@@ -440,7 +1000,7 @@
   <section id="about">
     <div class="container about-grid">
       <div class="about-media reveal-scale">
-        <img src="assets/images/hero-pizza.png" alt="פיצה משפחתית טרייה של פיצה איטליאנה, יוצאת מהתנור" loading="lazy" decoding="async" width="436" height="347" data-parallax="0.05" style="width:100%;height:114%;object-fit:cover;">
+        <img src="assets/images/hero-pizza.webp" alt="פיצה משפחתית טרייה של פיצה איטליאנה, יוצאת מהתנור" loading="lazy" decoding="async" width="436" height="347" data-parallax="0.05" style="width:100%;height:114%;object-fit:cover;">
       </div>
       <div class="reveal">
         <span class="eyebrow">הסיפור שלנו</span>
@@ -586,7 +1146,7 @@
   <div class="container footer-grid">
     <div>
       <div class="footer-brand">
-        <img class="brand-logo brand-logo-footer" src="assets/images/logo-badge.png" alt="פיצה איטליאנה — Pizza Italiana" width="828" height="582">
+        <img class="brand-logo brand-logo-footer" src="assets/images/logo-badge.png" alt="פיצה איטליאנה — Pizza Italiana" width="904" height="679">
       </div>
       <p class="footer-tagline">פיצריה איטלקית בחולון — פיצה על אבן, פסטות ופוקאצ׳ות טריות. הזמנות באמצעות וולט.</p>
     </div>

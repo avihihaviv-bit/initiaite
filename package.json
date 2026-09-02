@@ -2,6 +2,7 @@
   "name": "pizza-italiana-website",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "פיצה איטליאנה — premium static restaurant website (ordering via Wolt)",
   "scripts": {
     "dev": "serve . -l 5173",
