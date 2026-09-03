@@ -12,7 +12,7 @@ RD.UI = (function () {
     let els = {};
     let customPhotoDataUrl = null;
 
-    const CATEGORY_ICON = { 'ישיבה': '🛋️', 'שולחנות': '🪑', 'אחסון': '🗄️', 'תאורה': '💡', 'עיצוב': '🖼️', 'חדר שינה': '🛏️' };
+    const CATEGORY_ICON = { 'ישיבה': '🛋️', 'שולחנות': '🪑', 'אחסון': '🗄️', 'תאורה': '💡', 'עיצוב': '🖼️', 'חדר שינה': '🛏️', 'מחשבים': '🖥️' };
     const SEVERITY_ICON = { issue: '⚠️', notice: 'ℹ️', good: '✅' };
     const SEVERITY_RANK = { issue: 0, notice: 1, good: 2 };
 

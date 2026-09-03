@@ -35,6 +35,7 @@ RD.Custom = (function () {
         'שולחנות': { w: 1.0, d: 0.6, h: 0.45 },
         'אחסון': { w: 0.9, d: 0.45, h: 0.9 },
         'תאורה': { w: 0.3, d: 0.3, h: 1.5 },
+        'מחשבים': { w: 0.55, d: 0.22, h: 0.4 },
         'עיצוב': { w: 0.4, d: 0.4, h: 0.4 }
     };
 
@@ -122,6 +123,30 @@ RD.Custom = (function () {
         return g;
     }
 
+    // A flat-screen-on-stand shape — reads as a monitor/PC/laptop-style
+    // "computers" item rather than a generic box, for whatever exact
+    // electronics product the user is placing.
+    function electronicsLike(color, w, d, h) {
+        const g = new THREE.Group();
+        const standH = h * 0.28;
+        const baseR = Math.max(0.05, Math.min(w, d) * 0.35);
+        const base = cyl(baseR, h * 0.02, M.hexMat(METAL_COLOR, { metalness: 0.5, roughness: 0.4 }), 16);
+        base.position.y = h * 0.01;
+        g.add(base);
+        const neck = cyl(Math.max(0.012, baseR * 0.25), standH, M.hexMat(METAL_COLOR, { metalness: 0.5, roughness: 0.4 }), 8);
+        neck.position.y = h * 0.02 + standH / 2;
+        g.add(neck);
+        const screenH = h - standH - h * 0.02;
+        const screenD = Math.max(0.015, d * 0.15);
+        const bezel = main(box(w, screenH, screenD, M.hexMat(color, { roughness: 0.5 })));
+        bezel.position.y = standH + h * 0.02 + screenH / 2;
+        g.add(bezel);
+        const screen = box(w * 0.92, screenH * 0.88, 0.004, M.hexMat('#1a2230', { roughness: 0.3, metalness: 0.2 }));
+        screen.position.set(0, bezel.position.y, screenD / 2 + 0.003);
+        g.add(screen);
+        return g;
+    }
+
     function decorLike(color, w, d, h) {
         const g = new THREE.Group();
         if (h <= 0.08) {
@@ -143,12 +168,37 @@ RD.Custom = (function () {
         'שולחנות': tableLike,
         'אחסון': storageLike,
         'תאורה': lightingLike,
+        'מחשבים': electronicsLike,
         'עיצוב': decorLike
     };
 
-    function build(color, footprint, category) {
+    // If the user uploaded a reference photo, put it on the item's front
+    // face as a real texture instead of leaving every custom item a flat
+    // color — the closest thing to "make it look like the actual product"
+    // without fabricating 3D reconstruction from a single photo. Sized
+    // from the built shape's own bounding box, so it fits whatever category
+    // shape it's attached to.
+    function applyPhotoFace(group, photoDataUrl) {
+        const box3 = new THREE.Box3().setFromObject(group);
+        const size = box3.getSize(new THREE.Vector3());
+        const center = box3.getCenter(new THREE.Vector3());
+        const faceW = Math.max(0.05, size.x * 0.94);
+        const faceH = Math.max(0.05, size.y * 0.94);
+        const texture = new THREE.TextureLoader().load(photoDataUrl);
+        texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
+        const mat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.75, metalness: 0 });
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(faceW, faceH), mat);
+        plane.position.set(center.x, center.y, box3.max.z + 0.004);
+        plane.renderOrder = 1;
+        group.add(plane);
+        return group;
+    }
+
+    function build(color, footprint, category, photo) {
         const fn = BUILDERS[category] || decorLike;
-        return fn(color, Math.max(footprint.w, 0.05), Math.max(footprint.d, 0.05), Math.max(footprint.h, 0.03));
+        const group = fn(color, Math.max(footprint.w, 0.05), Math.max(footprint.d, 0.05), Math.max(footprint.h, 0.03));
+        if (photo) applyPhotoFace(group, photo);
+        return group;
     }
 
     return {

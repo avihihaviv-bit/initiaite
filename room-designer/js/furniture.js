@@ -90,7 +90,7 @@ RD.Furniture = (function () {
     function createObjectForItem(item, animate) {
         let obj, footprint;
         if (item.isCustom) {
-            obj = RD.Custom.build(item.color, item.footprint, item.category);
+            obj = RD.Custom.build(item.color, item.footprint, item.category, item.photo);
             footprint = item.footprint;
         } else {
             const entry = C.get(item.type);
