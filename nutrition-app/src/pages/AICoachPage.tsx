@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Mic, Send, Sparkles } from 'lucide-react';
 import { DailyAnalysisView } from '@/components/aicoach/DailyAnalysisView';
@@ -39,6 +39,15 @@ export function AICoachPage() {
   const initialView = VALID_VIEWS.includes(requestedView as CoachView) ? (requestedView as CoachView) : 'hub';
   const [view, setView] = useState<CoachView>(initialView);
   const [planMode, setPlanMode] = useState<'build' | 'analyze'>('build');
+
+  // Re-sync when arriving via a fresh link/navigation (e.g. from another page's "view=plan"
+  // shortcut, or the bare /coach link resetting back to the hub) — internal in-page setView
+  // calls never touch the URL's query string, so this never fights with those.
+  useEffect(() => {
+    setView(VALID_VIEWS.includes(requestedView as CoachView) ? (requestedView as CoachView) : 'hub');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedView]);
+
   const language = useLocaleStore((s) => s.language);
   const setLanguage = useLocaleStore((s) => s.setLanguage);
   const rtl = isRTL(language);

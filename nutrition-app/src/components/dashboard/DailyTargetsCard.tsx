@@ -1,10 +1,16 @@
+import { Link } from 'react-router-dom';
 import type { MacroTargets } from '@/types';
 
 /** A single clear statement of what the user needs today — separate from the consumed/progress framing below. */
 export function DailyTargetsCard({ targets }: { targets: MacroTargets }) {
   return (
     <div className="rounded-xl2 bg-surface p-4 shadow-card">
-      <p className="mb-3 text-sm font-bold text-fg">🎯 Your daily targets</p>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-bold text-fg">🎯 Your daily targets</p>
+        <Link to="/nutrition" className="text-xs font-semibold text-primary-600 hover:underline">
+          My Nutrition →
+        </Link>
+      </div>
       <div className="grid grid-cols-4 gap-2 text-center">
         <TargetStat emoji="🔥" value={targets.calories} unit="kcal" label="Calories" />
         <TargetStat emoji="🥩" value={targets.proteinG} unit="g" label="Protein" />

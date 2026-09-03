@@ -2,6 +2,7 @@ import { findFoodById } from '@/data/foods';
 import { calculateNutrition, proteinDensity, sumNutrition } from '@/utils/nutritionCalculator';
 import { weightedNaturalness } from '@/utils/naturalness';
 import { reasonFor, scoreNutritionAgainstRemaining } from '@/services/RecommendationService';
+import { templateMatchesRestrictions, likedFoodBonus } from '@/utils/dietaryTags';
 import type { MacroTargets, MealType, NutritionFacts, UserProfile } from '@/types';
 
 /**
@@ -102,14 +103,16 @@ export interface MealSuggestionResult {
 
 function eligibleScoredTemplates(remaining: MacroTargets, profile?: UserProfile | null): MealOption[] {
   const dislikedIds = new Set(profile?.dislikedFoodIds ?? []);
-  const isVegetarian = profile?.dietaryRestrictions?.includes('vegetarian') ?? false;
 
   const eligible = TEMPLATES.filter((t) => {
-    if (isVegetarian && !t.vegetarian) return false;
+    if (!templateMatchesRestrictions(t.items, t.vegetarian, profile?.dietaryRestrictions)) return false;
     return !t.items.some((i) => dislikedIds.has(i.foodId));
   });
 
-  return eligible.map((t) => scoreTemplate(t, remaining)).filter((o): o is MealOption => !!o);
+  return eligible
+    .map((t) => scoreTemplate(t, remaining))
+    .filter((o): o is MealOption => !!o)
+    .map((o) => ({ ...o, matchScore: o.matchScore + likedFoodBonus(o.items, profile?.likedFoodIds) }));
 }
 
 export function suggestMealOptions(

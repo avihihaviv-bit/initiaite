@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Info, LogOut, Settings, ShieldAlert, Trash2 } from 'lucide-react';
+import { ChevronRight, Info, LogOut, Settings, ShieldAlert, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useLocaleStore } from '@/store/useLocaleStore';
 import { healthService } from '@/services/HealthService';
@@ -205,6 +205,17 @@ export function ProfilePage() {
           </span>
         </div>
       )}
+
+      <button
+        onClick={() => navigate('/nutrition')}
+        className="flex w-full items-center justify-between gap-3 rounded-xl2 bg-surface p-4 text-left shadow-card transition hover:bg-surface-alt"
+      >
+        <div>
+          <p className="text-sm font-bold text-fg">🍽️ My Nutrition</p>
+          <p className="text-xs text-muted">Dietary restrictions, allergies, foods you like/avoid — used by every AI feature</p>
+        </div>
+        <ChevronRight size={18} className="shrink-0 text-faint" />
+      </button>
 
       {/* Achievements */}
       <section>

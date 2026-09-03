@@ -3,6 +3,7 @@ import { calculateNutrition, sumNutrition } from '@/utils/nutritionCalculator';
 import { scoreNutritionAgainstRemaining } from '@/services/RecommendationService';
 import { generateId } from '@/utils/id';
 import { addDays, todayISO } from '@/utils/date';
+import { templateMatchesRestrictions, likedFoodBonus } from '@/utils/dietaryTags';
 import type { MacroTargets, MealPlanDay, MealPlanSlot, MealType, NutritionFacts, UserProfile } from '@/types';
 
 /**
@@ -77,10 +78,9 @@ function computeTotals(items: { foodId: string; grams: number }[]): NutritionFac
 
 function eligibleTemplates(mealType: MealType, profile?: UserProfile | null): PlanTemplate[] {
   const dislikedIds = new Set(profile?.dislikedFoodIds ?? []);
-  const isVegetarian = profile?.dietaryRestrictions?.includes('vegetarian') ?? false;
   return PLAN_TEMPLATES.filter((t) => {
     if (!t.suitableMealTypes.includes(mealType)) return false;
-    if (isVegetarian && !t.vegetarian) return false;
+    if (!templateMatchesRestrictions(t.items, t.vegetarian, profile?.dietaryRestrictions)) return false;
     return !t.items.some((i) => dislikedIds.has(i.foodId));
   });
 }
@@ -100,6 +100,7 @@ function pickTemplate(
       const totals = computeTotals(t.items);
       if (!totals) return null;
       let score = scoreNutritionAgainstRemaining(totals, remaining);
+      score += likedFoodBonus(t.items, profile?.likedFoodIds);
       if (bias === 'protein') score += (totals.proteinG >= remaining.proteinG ? 10 : 0);
       if (bias === 'cheaper' && t.cheap) score += 15;
       if (bias === 'faster' && t.items.length <= 2) score += 10;

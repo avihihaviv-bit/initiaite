@@ -20,6 +20,7 @@ const ProfilePage = lazy(() => import('@/pages/ProfilePage').then((m) => ({ defa
 const MeasurementsPage = lazy(() => import('@/pages/MeasurementsPage').then((m) => ({ default: m.MeasurementsPage })));
 const AICoachPage = lazy(() => import('@/pages/AICoachPage').then((m) => ({ default: m.AICoachPage })));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const NutritionPage = lazy(() => import('@/pages/NutritionPage').then((m) => ({ default: m.NutritionPage })));
 
 export default function App() {
   const onboardingComplete = useAppStore((s) => s.onboardingComplete);
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/measurements" element={<MeasurementsPage />} />
           <Route path="/coach" element={<AICoachPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/nutrition" element={<NutritionPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
