@@ -734,8 +734,8 @@ function chooseQrTag(qrId, taskIndex) {
     else State.draftAlarm.challenge.tasks[taskIndex] = task;
     closeModal(); rerenderEditor();
 }
-function openQrRegisterFlow(taskIndex) {
-    const supported = Ch.supportsBarcodeDetector() && Ch.supportsCamera();
+function openQrRegisterFlow(taskIndex, forceManual) {
+    const supported = !forceManual && Ch.supportsBarcodeDetector() && Ch.supportsCamera();
     openModal(() => `
     <div class="modal-header"><h2>${t('createQrChallenge')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
     <div class="field"><label>${t('qrName')}</label><input type="text" id="qrNameInput" placeholder="Bathroom mirror"></div>
@@ -744,16 +744,17 @@ function openQrRegisterFlow(taskIndex) {
       <p class="row-sub" style="margin:10px 0">Point the camera at any QR code you already have (or generate one free online, print it, and place it where you want).</p>
       <div id="registerStatus" class="row-sub"></div>
       <button class="btn btn-primary btn-block" style="margin-top:10px" onclick="saveRegisteredQr(${taskIndex == null ? 'null' : taskIndex})" id="registerSaveBtn" disabled>${t('save')}</button>
+      <button class="btn btn-ghost btn-block" onclick="openQrRegisterFlow(${taskIndex == null ? 'null' : taskIndex}, true)">${t('qrManualCode')}</button>
     ` : `
       <p class="row-sub">${t('qrNotSupported')}</p>
       <div class="field"><label>${t('qrManualCode')}</label><input type="text" id="qrManualCodeInput" placeholder="A private phrase only you know"></div>
       <button class="btn btn-primary btn-block" onclick="saveManualQr(${taskIndex == null ? 'null' : taskIndex})">${t('save')}</button>
     `}
   `);
-    if (supported) setTimeout(() => startRegisterScanner(), 50);
+    if (supported) setTimeout(() => startRegisterScanner(taskIndex), 50);
 }
 let registerCaptured = null;
-async function startRegisterScanner() {
+async function startRegisterScanner(taskIndex) {
     registerCaptured = null;
     const video = document.getElementById('registerVideo');
     if (!video) return;
@@ -776,8 +777,10 @@ async function startRegisterScanner() {
         };
         poll();
     } catch (e) {
-        const status = document.getElementById('registerStatus');
-        if (status) status.innerHTML = `<span class="badge badge-danger">${t('permissionNeeded')}</span>`;
+        const nameEntered = (document.getElementById('qrNameInput') || {}).value || '';
+        openQrRegisterFlow(taskIndex, true);
+        setTimeout(() => { const el = document.getElementById('qrNameInput'); if (el) el.value = nameEntered; }, 0);
+        toast(t('permissionNeeded'));
     }
 }
 function stopQrStream() { if (State.qrStream) { State.qrStream.getTracks().forEach(tr => tr.stop()); State.qrStream = null; } }
@@ -1294,7 +1297,7 @@ function confirmSimpleTask() {
 }
 function qrTaskHTML(taskState) {
     const supported = Ch.supportsBarcodeDetector() && Ch.supportsCamera();
-    if (!supported) {
+    if (!supported || taskState.cameraFailed) {
         return `<p class="row-sub" style="color:#fff">${t('qrNotSupported')}</p>
       <input type="text" id="qrManualInput" class="math-input" placeholder="${esc(t('qrManualCode'))}">
       ${taskState.mistakes ? `<div class="row-sub" style="text-align:center;color:#ffb4b4">${t('tryAgain')}</div>` : ''}
@@ -1330,7 +1333,10 @@ async function startRingQrScanner() {
             requestAnimationFrame(poll);
         };
         poll();
-    } catch (e) { /* camera denied — manual fallback already offered when unsupported */ }
+    } catch (e) {
+        const taskState = State.activeRing && State.activeRing.runner && State.activeRing.runner.currentTask();
+        if (taskState) { taskState.cameraFailed = true; renderRing(); }
+    }
 }
 
 function finishChallenge() { dismissRing('challenge'); }

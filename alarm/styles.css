@@ -37,7 +37,7 @@
 :root[data-accent="teal"] { --accent-h: 173; --accent-s: 62%; --accent-l: 40%; }
 :root[data-accent="rose"] { --accent-h: 340; --accent-s: 78%; --accent-l: 58%; }
 :root[data-accent="amber"] { --accent-h: 38; --accent-s: 92%; --accent-l: 50%; }
-:root[data-accent="emerald"] { --accent-h: 152; --accent-s: 60%, --accent-l: 40%; }
+:root[data-accent="emerald"] { --accent-h: 152; --accent-s: 60%; --accent-l: 40%; }
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
