@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import { Check, Play, Sparkles } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { Card } from '../components/ui/Card'
-import { ProgressRing } from '../components/ui/ProgressRing'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { AnimatedNumber } from '../components/ui/AnimatedNumber'
 import { Button } from '../components/ui/Button'
@@ -13,9 +12,10 @@ import { ChoreDetailModal } from '../components/chores/ChoreDetailModal'
 import { ChoreFormModal } from '../components/chores/ChoreFormModal'
 import { ChoreTimerModal } from '../components/chores/ChoreTimerModal'
 import { levelFromXP } from '../lib/gamification'
-import { rankChores, bestNextChore, isBlocked } from '../lib/priority'
-import { todayISO } from '../lib/date'
+import { rankChores, bestNextChore } from '../lib/priority'
+import { formatTime, todayISO } from '../lib/date'
 import { effectiveDueDate, isCompletedOn, isDueOn, isOverdue } from '../lib/occurrence'
+import { useToast } from '../components/ui/Toast'
 
 function greeting(): string {
   const h = new Date().getHours()
@@ -31,6 +31,8 @@ export default function Home() {
   const currentUserId = useStore((s) => s.settings.currentUserId)
   const chores = useStore((s) => s.chores)
   const streaks = useStore((s) => s.streaks)
+  const completeChore = useStore((s) => s.completeChore)
+  const { show } = useToast()
   const [openChoreId, setOpenChoreId] = useState<string | null>(null)
   const [editChoreId, setEditChoreId] = useState<string | null>(null)
   const [timerChoreId, setTimerChoreId] = useState<string | null>(null)
@@ -44,20 +46,22 @@ export default function Home() {
   const myChoresToday = useMemo(
     () =>
       chores.filter(
-        (c) => !c.archived && (isDueOn(c, today) || isOverdue(c, today)) && (c.assigneeId === user?.id || !c.assigneeId)
+        (c) =>
+          !c.archived &&
+          (isDueOn(c, today) || isOverdue(c, today)) &&
+          (c.assigneeIds.length === 0 || (!!user && c.assigneeIds.includes(user.id)))
       ),
     [chores, today, user]
   )
   const completedToday = myChoresToday.filter((c) => isCompletedOn(c, effectiveDueDate(c, today)))
+  const overdueToday = myChoresToday.filter((c) => !isCompletedOn(c, effectiveDueDate(c, today)) && isOverdue(c, today))
+  const remaining = myChoresToday.length - completedToday.length
   const pct = myChoresToday.length ? Math.round((completedToday.length / myChoresToday.length) * 100) : 0
 
   const streak = streaks.find((s) => s.userId === user?.id)
   const { level, intoLevel, forNext } = user ? levelFromXP(user.xp) : { level: 1, intoLevel: 0, forNext: 100 }
 
-  const upNext = useMemo(() => {
-    const pending = myChoresToday.filter((c) => !isCompletedOn(c, effectiveDueDate(c, today)) && !isBlocked(c, chores))
-    return rankChores(pending).slice(0, 5)
-  }, [myChoresToday, chores, today])
+  const rankedToday = useMemo(() => rankChores(myChoresToday), [myChoresToday])
 
   const bestNext = useMemo(() => bestNextChore(chores, user?.id ?? null, chores), [chores, user])
 
@@ -70,69 +74,79 @@ export default function Home() {
           <h1 className="font-display text-2xl font-extrabold text-ink sm:text-3xl">
             {greeting()}, {user.name} 👋
           </h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            {myChoresToday.length === 0
-              ? "Nothing scheduled today — a great day to get ahead."
-              : completedToday.length === myChoresToday.length
-              ? "Everything's done. Enjoy the rest of your day!"
-              : `${myChoresToday.length - completedToday.length} chore${myChoresToday.length - completedToday.length === 1 ? '' : 's'} left today.`}
-          </p>
+          <p className="mt-1 text-sm text-ink-soft">Here's what needs to be done.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-ink">
+            🔥 <AnimatedNumber value={streak?.current ?? 0} /> day streak
+          </span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-ink">
+            🏆 Level {level}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="col-span-1 flex items-center gap-4 sm:col-span-1">
-          <ProgressRing value={pct} size={72} color="var(--color-primary-500)">
-            <span className="font-display text-base font-extrabold text-ink">{pct}%</span>
-          </ProgressRing>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-ink-faint">Today's progress</p>
-            <p className="mt-1 font-display text-xl font-extrabold text-ink">
-              <AnimatedNumber value={completedToday.length} /> / {myChoresToday.length}
-            </p>
-            <p className="text-xs text-ink-soft">chores completed</p>
+      <Card>
+        <div className="mb-4 flex items-center justify-between">
+          <p className="font-display text-sm font-bold text-ink">📊 Today's overview</p>
+          <span className="font-display text-sm font-extrabold text-primary-500">{pct}%</span>
+        </div>
+        <ProgressBar value={pct} height={10} className="mb-5" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl bg-surface-2 py-3 text-center">
+            <p className="font-display text-xl font-extrabold text-ink"><AnimatedNumber value={myChoresToday.length} /></p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-ink-faint">Total today</p>
           </div>
-        </Card>
-
-        <Card className="flex items-center gap-4">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400/20 to-accent-500/20 text-3xl">🔥</span>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-ink-faint">Streak</p>
-            <p className="font-display text-xl font-extrabold text-ink"><AnimatedNumber value={streak?.current ?? 0} /> days</p>
-            <p className="text-xs text-ink-soft">{(streak?.current ?? 0) > 0 ? "You're on fire!" : 'Complete a chore to start one'}</p>
+          <div className="rounded-xl bg-surface-2 py-3 text-center">
+            <p className="font-display text-xl font-extrabold text-success-500"><AnimatedNumber value={completedToday.length} /></p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-ink-faint">Completed</p>
           </div>
-        </Card>
-
-        <Card className="flex items-center gap-4">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400/20 to-primary-600/20 text-3xl">⭐</span>
-          <div className="flex-1">
-            <p className="text-xs font-bold uppercase tracking-wide text-ink-faint">Level {level}</p>
-            <p className="font-display text-xl font-extrabold text-ink"><AnimatedNumber value={user.xp} /> XP</p>
-            <ProgressBar value={forNext ? (intoLevel / forNext) * 100 : 100} height={6} className="mt-1.5" />
+          <div className="rounded-xl bg-surface-2 py-3 text-center">
+            <p className="font-display text-xl font-extrabold text-ink"><AnimatedNumber value={remaining} /></p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-ink-faint">Remaining</p>
           </div>
-        </Card>
-      </div>
+          <div className="rounded-xl bg-surface-2 py-3 text-center">
+            <p className="font-display text-xl font-extrabold text-danger-500"><AnimatedNumber value={overdueToday.length} /></p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-ink-faint">Overdue</p>
+          </div>
+        </div>
+        <ProgressBar value={forNext ? (intoLevel / forNext) * 100 : 100} height={5} className="mt-5" />
+        <p className="mt-1.5 text-center text-[11px] font-semibold text-ink-faint">{intoLevel} / {forNext} XP to Level {level + 1}</p>
+      </Card>
 
       {bestNext && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="relative overflow-hidden border-primary-200 bg-gradient-to-br from-primary-50 via-surface to-surface dark:border-primary-800 dark:from-primary-900/20">
+            <p className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-primary-600 dark:text-primary-300">
+              <Sparkles size={13} /> Next chore
+            </p>
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div className="flex items-start gap-3">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-500 text-2xl text-white shadow-[var(--shadow-glow)]">
                   {bestNext.chore.emoji}
                 </span>
                 <div>
-                  <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-primary-600 dark:text-primary-300">
-                    <Sparkles size={13} /> Your best next task
-                  </p>
-                  <p className="mt-1 font-display text-lg font-extrabold text-ink">{bestNext.chore.title}</p>
+                  <p className="font-display text-lg font-extrabold text-ink">{bestNext.chore.title}</p>
                   <p className="text-sm text-ink-soft">
-                    Only {bestNext.chore.estimatedMinutes} min · +{bestNext.chore.xp} XP
-                    {bestNext.reasons[0] ? ` · ${bestNext.reasons[0]}` : ''}
+                    {user.name} · {bestNext.chore.dueTime ? `Today · ${formatTime(bestNext.chore.dueTime)}` : 'Today'} · {bestNext.chore.estimatedMinutes} min · +{bestNext.chore.xp} XP
                   </p>
                 </div>
               </div>
-              <Button onClick={() => setOpenChoreId(bestNext.chore.id)} className="w-full sm:w-auto">Let's do it</Button>
+              <div className="flex w-full gap-2 sm:w-auto">
+                <Button variant="secondary" icon={<Play size={15} />} onClick={() => setTimerChoreId(bestNext.chore.id)} className="flex-1 sm:flex-none">
+                  Start
+                </Button>
+                <Button
+                  icon={<Check size={15} />}
+                  onClick={() => {
+                    completeChore(bestNext.chore.id)
+                    show('Nice! Marked complete.')
+                  }}
+                  className="flex-1 sm:flex-none"
+                >
+                  Complete
+                </Button>
+              </div>
             </div>
           </Card>
         </motion.div>
@@ -140,14 +154,14 @@ export default function Home() {
 
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-base font-bold text-ink">⚡ Next up</h2>
-          {upNext.length > 0 && <span className="text-xs font-semibold text-ink-faint">{upNext.length} chore{upNext.length === 1 ? '' : 's'}</span>}
+          <h2 className="font-display text-base font-bold text-ink">📋 My chores today</h2>
+          {rankedToday.length > 0 && <span className="text-xs font-semibold text-ink-faint">{rankedToday.length} chore{rankedToday.length === 1 ? '' : 's'}</span>}
         </div>
-        {upNext.length === 0 ? (
-          <EmptyState emoji="🌿" title="You're all clear" description="No pending chores need attention right now. Enjoy the calm." />
+        {rankedToday.length === 0 ? (
+          <EmptyState emoji="🌿" title="Nothing scheduled today" description="Enjoy the calm, or get ahead by assigning tomorrow's chores." />
         ) : (
           <div className="space-y-2.5">
-            {upNext.map((r) => (
+            {rankedToday.map((r) => (
               <ChoreCard
                 key={r.chore.id}
                 chore={r.chore}

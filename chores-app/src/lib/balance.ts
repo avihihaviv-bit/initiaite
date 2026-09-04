@@ -16,7 +16,7 @@ export function weeklyWorkload(chores: Chore[], users: User[]): WorkloadShare[] 
 
   const raw = users.map((u) => {
     const mine = chores.filter(
-      (c) => c.assigneeId === u.id && !c.archived
+      (c) => c.assigneeIds.includes(u.id) && !c.archived
     )
     let points = 0
     let minutes = 0
@@ -85,7 +85,8 @@ export function suggestRebalance(chores: Chore[], users: User[]): BalanceSuggest
   const candidates = chores
     .filter(
       (c) =>
-        c.assigneeId === most.userId &&
+        c.assigneeIds.length === 1 &&
+        c.assigneeIds[0] === most.userId &&
         !c.archived &&
         c.dueDate >= today &&
         !c.history.some((h) => h.occurrenceDate === c.dueDate)

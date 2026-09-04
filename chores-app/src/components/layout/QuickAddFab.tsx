@@ -98,7 +98,7 @@ function QuickChoreModal({ onClose }: { onClose: () => void }) {
       description: '',
       emoji: '⚡',
       categoryId: categories[0]?.id ?? 'cat-cleaning',
-      assigneeId: null,
+      assigneeIds: [],
       priority: 'medium',
       difficulty: 'easy',
       estimatedMinutes: 10,

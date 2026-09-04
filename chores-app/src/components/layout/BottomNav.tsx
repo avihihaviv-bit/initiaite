@@ -31,7 +31,7 @@ export function BottomNav() {
               {({ isActive }) => (
                 <>
                   <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                  {item.label === 'My Chores' ? 'Chores' : item.label}
+                  {item.label === 'All Chores' ? 'Chores' : item.label}
                 </>
               )}
             </NavLink>

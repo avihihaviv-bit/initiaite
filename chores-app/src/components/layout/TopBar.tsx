@@ -11,7 +11,9 @@ export function TopBar() {
   const location = useLocation()
   const [searchOpen, setSearchOpen] = useState(false)
   useGlobalSearchShortcut(() => setSearchOpen(true))
-  const current = NAV_ITEMS.find((i) => i.path === location.pathname)
+  const current =
+    NAV_ITEMS.find((i) => i.path === location.pathname) ??
+    NAV_ITEMS.find((i) => i.path !== '/' && location.pathname.startsWith(i.path))
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-canvas/80 px-4 py-3 backdrop-blur-lg sm:px-6 lg:px-8">

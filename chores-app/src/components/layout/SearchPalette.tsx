@@ -37,11 +37,11 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
     if (!q) return active.slice(0, 8)
     return active
       .filter((c) => {
-        const assignee = users.find((u) => u.id === c.assigneeId)?.name ?? ''
+        const names = users.filter((u) => c.assigneeIds.includes(u.id)).map((u) => u.name.toLowerCase())
         const category = categories.find((cat) => cat.id === c.categoryId)?.name ?? ''
         return (
           c.title.toLowerCase().includes(q) ||
-          assignee.toLowerCase().includes(q) ||
+          names.some((n) => n.includes(q)) ||
           category.toLowerCase().includes(q) ||
           c.priority.includes(q)
         )
@@ -77,7 +77,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                 <p className="px-3 py-8 text-center text-sm text-ink-soft">No chores match "{query}"</p>
               ) : (
                 results.map((c) => {
-                  const assignee = users.find((u) => u.id === c.assigneeId)
+                  const primaryAssignee = users.find((u) => c.assigneeIds[0] === u.id)
                   return (
                     <button
                       key={c.id}
@@ -91,7 +91,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-bold text-ink">{c.title}</span>
                         <span className="block text-xs text-ink-faint">
-                          {friendlyDate(c.dueDate)} {assignee ? `· ${assignee.name}` : ''}
+                          {friendlyDate(c.dueDate)} {primaryAssignee ? `· ${primaryAssignee.name}${c.assigneeIds.length > 1 ? ` +${c.assigneeIds.length - 1}` : ''}` : ''}
                         </span>
                       </span>
                     </button>

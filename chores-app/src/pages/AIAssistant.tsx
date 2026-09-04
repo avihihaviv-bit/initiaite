@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bot, CalendarClock, Send, Sparkles, User as UserIcon } from 'lucide-react'
+import { Bot, CalendarClock, Check, Send, Sparkles, User as UserIcon, X } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -11,8 +11,8 @@ const SUGGESTIONS = [
   "What should I do next?",
   "I have 30 minutes and my room is messy",
   "Any overdue chores?",
-  "Is our chore balance fair?",
-  "Show today's plan",
+  "Give Yoav three chores for Sunday",
+  "Who has the most chores this week?",
 ]
 
 export default function AIAssistant() {
@@ -21,6 +21,8 @@ export default function AIAssistant() {
   const currentUserId = useStore((s) => s.settings.currentUserId)
   const chatHistory = useStore((s) => s.chatHistory)
   const sendChatMessage = useStore((s) => s.sendChatMessage)
+  const confirmPendingAction = useStore((s) => s.confirmPendingAction)
+  const dismissPendingAction = useStore((s) => s.dismissPendingAction)
   const currentUser = users.find((u) => u.id === currentUserId)
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -84,8 +86,26 @@ export default function AIAssistant() {
                   ) : (
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2"><UserIcon size={15} /></span>
                   )}
-                  <div className={`max-w-[80%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${m.role === 'user' ? 'rounded-tr-sm bg-primary-500 text-white' : 'rounded-tl-sm bg-surface-2 text-ink'}`}>
-                    {m.text}
+                  <div className="flex max-w-[80%] flex-col gap-2">
+                    <div className={`whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm ${m.role === 'user' ? 'rounded-tr-sm bg-primary-500 text-white' : 'rounded-tl-sm bg-surface-2 text-ink'}`}>
+                      {m.text}
+                    </div>
+                    {m.pendingAction && m.actionStatus === 'proposed' && (
+                      <div className="flex items-center gap-2 rounded-2xl border border-primary-200 bg-primary-50 px-3 py-2 dark:border-primary-800 dark:bg-primary-900/20">
+                        <Button size="sm" icon={<Check size={13} />} onClick={() => confirmPendingAction(m.id)}>
+                          {m.actionLabel ?? 'Confirm'}
+                        </Button>
+                        <Button size="sm" variant="ghost" icon={<X size={13} />} onClick={() => dismissPendingAction(m.id)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                    {m.pendingAction && m.actionStatus === 'applied' && (
+                      <span className="flex items-center gap-1 text-xs font-semibold text-success-500"><Check size={12} /> Applied</span>
+                    )}
+                    {m.pendingAction && m.actionStatus === 'dismissed' && (
+                      <span className="flex items-center gap-1 text-xs font-semibold text-ink-faint"><X size={12} /> Dismissed</span>
+                    )}
                   </div>
                 </div>
               ))}

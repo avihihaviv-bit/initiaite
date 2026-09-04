@@ -56,7 +56,7 @@ interface SeedChoreSpec {
   title: string
   emoji: string
   categoryId: string
-  assigneeId: string | null
+  assigneeIds: string[]
   priority: Chore['priority']
   difficulty: Chore['difficulty']
   estimatedMinutes: number
@@ -67,19 +67,19 @@ interface SeedChoreSpec {
 }
 
 const SPECS: SeedChoreSpec[] = [
-  { id: 'c-makebed', title: 'Make bed', emoji: '🛏', categoryId: 'cat-bedroom', assigneeId: 'u-yoav', priority: 'low', difficulty: 'easy', estimatedMinutes: 3, dueTime: '08:00', frequency: 'daily', color: '#ff6bd6' },
-  { id: 'c-cleanroom', title: 'Clean bedroom', emoji: '🧹', categoryId: 'cat-cleaning', assigneeId: 'u-yoav', priority: 'high', difficulty: 'medium', estimatedMinutes: 15, dueTime: '16:30', frequency: 'weekly', daysOfWeek: [6], color: '#7c5cff' },
-  { id: 'c-dishwasher', title: 'Load dishwasher', emoji: '🍽', categoryId: 'cat-kitchen', assigneeId: 'u-mom', priority: 'medium', difficulty: 'easy', estimatedMinutes: 10, dueTime: '20:00', frequency: 'daily', color: '#ff9f0a' },
-  { id: 'c-trash', title: 'Take out trash', emoji: '🗑', categoryId: 'cat-trash', assigneeId: 'u-dad', priority: 'high', difficulty: 'easy', estimatedMinutes: 5, dueTime: '18:00', frequency: 'weekly', daysOfWeek: [0, 3], color: '#6b6580' },
-  { id: 'c-laundry', title: 'Fold laundry', emoji: '🧺', categoryId: 'cat-laundry', assigneeId: 'u-sis', priority: 'medium', difficulty: 'medium', estimatedMinutes: 20, dueTime: '17:00', frequency: 'weekly', daysOfWeek: [2, 5], color: '#2f8fef' },
-  { id: 'c-bathroom', title: 'Clean bathroom', emoji: '🧼', categoryId: 'cat-bathroom', assigneeId: 'u-mom', priority: 'high', difficulty: 'hard', estimatedMinutes: 25, dueTime: '11:00', frequency: 'weekly', daysOfWeek: [6], color: '#4fd1c5' },
-  { id: 'c-dog', title: 'Feed the dog', emoji: '🐶', categoryId: 'cat-pets', assigneeId: 'u-sis', priority: 'urgent', difficulty: 'easy', estimatedMinutes: 5, dueTime: '07:30', frequency: 'daily', color: '#e6810a' },
-  { id: 'c-plants', title: 'Water plants', emoji: '🌳', categoryId: 'cat-outside', assigneeId: 'u-dad', priority: 'low', difficulty: 'easy', estimatedMinutes: 8, dueTime: '09:00', frequency: 'weekly', daysOfWeek: [1, 4], color: '#33c17a' },
-  { id: 'c-vacuum', title: 'Vacuum living room', emoji: '🧹', categoryId: 'cat-cleaning', assigneeId: 'u-dad', priority: 'medium', difficulty: 'medium', estimatedMinutes: 20, dueTime: '10:00', frequency: 'weekly', daysOfWeek: [6], color: '#7c5cff' },
-  { id: 'c-sheets', title: 'Change bedsheets', emoji: '🛏', categoryId: 'cat-bedroom', assigneeId: 'u-mom', priority: 'low', difficulty: 'medium', estimatedMinutes: 15, dueTime: '12:00', frequency: 'biweekly', daysOfWeek: [6], color: '#ff6bd6' },
-  { id: 'c-groceries', title: 'Grocery shopping', emoji: '🛒', categoryId: 'cat-shopping', assigneeId: 'u-mom', priority: 'medium', difficulty: 'medium', estimatedMinutes: 45, dueTime: '15:00', frequency: 'weekly', daysOfWeek: [0], color: '#f0403f' },
-  { id: 'c-lightbulb', title: 'Fix hallway light', emoji: '🔧', categoryId: 'cat-maintenance', assigneeId: 'u-dad', priority: 'low', difficulty: 'medium', estimatedMinutes: 15, frequency: 'none', color: '#8b6bff' },
-  { id: 'c-garage', title: 'Organize garage shelf', emoji: '📦', categoryId: 'cat-organization', assigneeId: null, priority: 'low', difficulty: 'hard', estimatedMinutes: 40, frequency: 'none', color: '#f2a90c' },
+  { id: 'c-makebed', title: 'Make bed', emoji: '🛏', categoryId: 'cat-bedroom', assigneeIds: ['u-yoav'], priority: 'low', difficulty: 'easy', estimatedMinutes: 3, dueTime: '08:00', frequency: 'daily', color: '#ff6bd6' },
+  { id: 'c-cleanroom', title: 'Clean bedroom', emoji: '🧹', categoryId: 'cat-cleaning', assigneeIds: ['u-yoav'], priority: 'high', difficulty: 'medium', estimatedMinutes: 15, dueTime: '16:30', frequency: 'weekly', daysOfWeek: [6], color: '#7c5cff' },
+  { id: 'c-dishwasher', title: 'Load dishwasher', emoji: '🍽', categoryId: 'cat-kitchen', assigneeIds: ['u-mom'], priority: 'medium', difficulty: 'easy', estimatedMinutes: 10, dueTime: '20:00', frequency: 'daily', color: '#ff9f0a' },
+  { id: 'c-trash', title: 'Take out trash', emoji: '🗑', categoryId: 'cat-trash', assigneeIds: ['u-dad'], priority: 'high', difficulty: 'easy', estimatedMinutes: 5, dueTime: '18:00', frequency: 'weekly', daysOfWeek: [0, 3], color: '#6b6580' },
+  { id: 'c-laundry', title: 'Fold laundry', emoji: '🧺', categoryId: 'cat-laundry', assigneeIds: ['u-sis'], priority: 'medium', difficulty: 'medium', estimatedMinutes: 20, dueTime: '17:00', frequency: 'weekly', daysOfWeek: [2, 5], color: '#2f8fef' },
+  { id: 'c-bathroom', title: 'Clean bathroom', emoji: '🧼', categoryId: 'cat-bathroom', assigneeIds: ['u-mom'], priority: 'high', difficulty: 'hard', estimatedMinutes: 25, dueTime: '11:00', frequency: 'weekly', daysOfWeek: [6], color: '#4fd1c5' },
+  { id: 'c-dog', title: 'Feed the dog', emoji: '🐶', categoryId: 'cat-pets', assigneeIds: ['u-sis'], priority: 'urgent', difficulty: 'easy', estimatedMinutes: 5, dueTime: '07:30', frequency: 'daily', color: '#e6810a' },
+  { id: 'c-plants', title: 'Water plants', emoji: '🌳', categoryId: 'cat-outside', assigneeIds: ['u-dad'], priority: 'low', difficulty: 'easy', estimatedMinutes: 8, dueTime: '09:00', frequency: 'weekly', daysOfWeek: [1, 4], color: '#33c17a' },
+  { id: 'c-vacuum', title: 'Vacuum living room', emoji: '🧹', categoryId: 'cat-cleaning', assigneeIds: ['u-dad', 'u-yoav'], priority: 'medium', difficulty: 'medium', estimatedMinutes: 20, dueTime: '10:00', frequency: 'weekly', daysOfWeek: [6], color: '#7c5cff' },
+  { id: 'c-sheets', title: 'Change bedsheets', emoji: '🛏', categoryId: 'cat-bedroom', assigneeIds: ['u-mom'], priority: 'low', difficulty: 'medium', estimatedMinutes: 15, dueTime: '12:00', frequency: 'biweekly', daysOfWeek: [6], color: '#ff6bd6' },
+  { id: 'c-groceries', title: 'Grocery shopping', emoji: '🛒', categoryId: 'cat-shopping', assigneeIds: ['u-mom'], priority: 'medium', difficulty: 'medium', estimatedMinutes: 45, dueTime: '15:00', frequency: 'weekly', daysOfWeek: [0], color: '#f0403f' },
+  { id: 'c-lightbulb', title: 'Fix hallway light', emoji: '🔧', categoryId: 'cat-maintenance', assigneeIds: ['u-dad'], priority: 'low', difficulty: 'medium', estimatedMinutes: 15, frequency: 'none', color: '#8b6bff' },
+  { id: 'c-garage', title: 'Organize garage shelf', emoji: '📦', categoryId: 'cat-organization', assigneeIds: [], priority: 'low', difficulty: 'hard', estimatedMinutes: 40, frequency: 'none', color: '#f2a90c' },
 ]
 
 function xpFor(spec: SeedChoreSpec): number {
@@ -105,10 +105,11 @@ function buildChores(): Chore[] {
         // ~82% completion rate historically, weighted slightly better for lower-priority easy chores
         const chance = s.difficulty === 'easy' ? 0.88 : s.difficulty === 'medium' ? 0.8 : 0.68
         if (Math.random() < chance) {
+          const completer = s.assigneeIds[Math.floor(Math.random() * s.assigneeIds.length)] ?? 'u-mom'
           history.push({
             id: uid('rec'),
             occurrenceDate: dateISO,
-            completedBy: s.assigneeId ?? 'u-mom',
+            completedBy: completer,
             completedAt: `${dateISO}T${s.dueTime ?? '18:00'}:00.000Z`,
             xpEarned: xp,
             pointsEarned: points,
@@ -125,7 +126,7 @@ function buildChores(): Chore[] {
       description: '',
       emoji: s.emoji,
       categoryId: s.categoryId,
-      assigneeId: s.assigneeId,
+      assigneeIds: s.assigneeIds,
       priority: s.priority,
       difficulty: s.difficulty,
       estimatedMinutes: s.estimatedMinutes,

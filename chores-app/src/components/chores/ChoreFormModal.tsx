@@ -5,9 +5,10 @@ import { Select, TextArea, TextInput } from '../ui/Select'
 import { SegmentedControl } from '../ui/Tabs'
 import { EmojiPicker } from './EmojiPicker'
 import { RecurrencePicker } from './RecurrencePicker'
+import { ChoreWizard } from './ChoreWizard'
 import { useStore } from '../../store/useStore'
 import type { Chore, Difficulty, Priority, RecurrenceRule } from '../../types'
-import { suggestedPoints, suggestedXP } from '../../lib/gamification'
+import { suggestedPoints } from '../../lib/gamification'
 import { todayISO } from '../../lib/date'
 import { useToast } from '../ui/Toast'
 
@@ -16,6 +17,7 @@ interface Props {
   onClose: () => void
   editChore?: Chore | null
   defaultDate?: string
+  defaultUserId?: string
 }
 
 const PRIORITIES: { id: Priority; label: string; emoji: string }[] = [
@@ -30,15 +32,20 @@ const DIFFICULTIES: { id: Difficulty; label: string }[] = [
   { id: 'hard', label: 'Hard' },
 ]
 
-function emptyRecurrence(): RecurrenceRule {
-  return { frequency: 'none', startDate: todayISO(), daysOfWeek: [] }
+/** New chores go through the guided wizard (ChoreWizard); editing an existing
+ * chore uses this flat, single-page form — you already know the values, you
+ * just want to change one or two of them quickly. */
+export function ChoreFormModal({ open, onClose, editChore, defaultDate, defaultUserId }: Props) {
+  if (!editChore) {
+    return <ChoreWizard open={open} onClose={onClose} defaultDate={defaultDate} defaultUserId={defaultUserId} />
+  }
+  return <EditChoreForm open={open} onClose={onClose} editChore={editChore} />
 }
 
-export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props) {
+function EditChoreForm({ open, onClose, editChore }: { open: boolean; onClose: () => void; editChore: Chore }) {
   const users = useStore((s) => s.users)
   const categories = useStore((s) => s.categories)
   const chores = useStore((s) => s.chores)
-  const addChore = useStore((s) => s.addChore)
   const updateChore = useStore((s) => s.updateChore)
   const { show } = useToast()
 
@@ -46,74 +53,47 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
   const [description, setDescription] = useState('')
   const [emoji, setEmoji] = useState('🧹')
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? '')
-  const [assigneeId, setAssigneeId] = useState<string>('')
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([])
   const [priority, setPriority] = useState<Priority>('medium')
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
   const [estimatedMinutes, setEstimatedMinutes] = useState(15)
   const [xp, setXp] = useState(20)
   const [points, setPoints] = useState(16)
-  const [xpTouched, setXpTouched] = useState(false)
-  const [dueDate, setDueDate] = useState(defaultDate ?? todayISO())
+  const [dueDate, setDueDate] = useState(todayISO())
   const [dueTime, setDueTime] = useState('')
-  const [recurrence, setRecurrence] = useState<RecurrenceRule>(emptyRecurrence())
+  const [recurrence, setRecurrence] = useState<RecurrenceRule>({ frequency: 'none', startDate: todayISO() })
   const [reminder, setReminder] = useState<Chore['reminder']>('30-before')
   const [dependsOn, setDependsOn] = useState<string[]>([])
 
   useEffect(() => {
     if (!open) return
-    if (editChore) {
-      setTitle(editChore.title)
-      setDescription(editChore.description ?? '')
-      setEmoji(editChore.emoji)
-      setCategoryId(editChore.categoryId)
-      setAssigneeId(editChore.assigneeId ?? '')
-      setPriority(editChore.priority)
-      setDifficulty(editChore.difficulty)
-      setEstimatedMinutes(editChore.estimatedMinutes)
-      setXp(editChore.xp)
-      setPoints(editChore.points)
-      setXpTouched(true)
-      setDueDate(editChore.dueDate)
-      setDueTime(editChore.dueTime ?? '')
-      setRecurrence(editChore.recurrence)
-      setReminder(editChore.reminder ?? 'none')
-      setDependsOn(editChore.dependsOn)
-    } else {
-      setTitle('')
-      setDescription('')
-      setEmoji('🧹')
-      setCategoryId(categories[0]?.id ?? '')
-      setAssigneeId('')
-      setPriority('medium')
-      setDifficulty('medium')
-      setEstimatedMinutes(15)
-      setXpTouched(false)
-      setDueDate(defaultDate ?? todayISO())
-      setDueTime('')
-      setRecurrence({ ...emptyRecurrence(), startDate: defaultDate ?? todayISO() })
-      setReminder('30-before')
-      setDependsOn([])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTitle(editChore.title)
+    setDescription(editChore.description ?? '')
+    setEmoji(editChore.emoji)
+    setCategoryId(editChore.categoryId)
+    setAssigneeIds(editChore.assigneeIds)
+    setPriority(editChore.priority)
+    setDifficulty(editChore.difficulty)
+    setEstimatedMinutes(editChore.estimatedMinutes)
+    setXp(editChore.xp)
+    setPoints(editChore.points)
+    setDueDate(editChore.dueDate)
+    setDueTime(editChore.dueTime ?? '')
+    setRecurrence(editChore.recurrence)
+    setReminder(editChore.reminder ?? 'none')
+    setDependsOn(editChore.dependsOn)
   }, [open, editChore])
-
-  useEffect(() => {
-    if (xpTouched) return
-    const nextXp = suggestedXP(difficulty, estimatedMinutes)
-    setXp(nextXp)
-    setPoints(suggestedPoints(nextXp))
-  }, [difficulty, estimatedMinutes, xpTouched])
 
   const canSubmit = title.trim().length > 0 && categoryId
 
   const handleSubmit = () => {
     if (!canSubmit) return
-    const payload = {
+    updateChore(editChore.id, {
       title: title.trim(),
       description: description.trim(),
       emoji,
       categoryId,
-      assigneeId: assigneeId || null,
+      assigneeIds,
       priority,
       difficulty,
       estimatedMinutes,
@@ -123,17 +103,10 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
       dueTime: dueTime || undefined,
       recurrence: { ...recurrence, startDate: recurrence.startDate || dueDate },
       reminder,
-      subtasks: editChore?.subtasks ?? [],
       dependsOn,
       color: categories.find((c) => c.id === categoryId)?.color ?? '#7c5cff',
-    }
-    if (editChore) {
-      updateChore(editChore.id, payload)
-      show('Chore updated')
-    } else {
-      addChore(payload)
-      show('Chore created 🎉')
-    }
+    })
+    show('Chore updated')
     onClose()
   }
 
@@ -141,15 +114,14 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
     <Modal
       open={open}
       onClose={onClose}
-      title={editChore ? 'Edit chore' : 'New chore'}
-      subtitle={editChore ? undefined : 'Add a chore and the app will keep it fair & on track.'}
+      title="Edit chore"
       size="lg"
       footer={
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs text-ink-faint">+{xp} XP · +{points} pts on completion</p>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!canSubmit}>{editChore ? 'Save changes' : 'Create chore'}</Button>
+            <Button onClick={handleSubmit} disabled={!canSubmit}>Save changes</Button>
           </div>
         </div>
       }
@@ -164,18 +136,33 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
 
         <TextArea label="Description / notes" placeholder="Any details worth remembering…" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
 
-        <div className="grid grid-cols-2 gap-3">
-          <Select label="Category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>
-            ))}
-          </Select>
-          <Select label="Assigned to" value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)}>
-            <option value="">Unassigned</option>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>{u.avatarEmoji} {u.name}</option>
-            ))}
-          </Select>
+        <Select label="Category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>
+          ))}
+        </Select>
+
+        <div>
+          <span className="mb-1.5 block text-xs font-semibold text-ink-soft">Assigned to</span>
+          <div className="flex flex-wrap gap-1.5">
+            {users.map((u) => {
+              const active = assigneeIds.includes(u.id)
+              return (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() =>
+                    setAssigneeIds((prev) => (active ? prev.filter((id) => id !== u.id) : [...prev, u.id]))
+                  }
+                  className={`focus-ring rounded-xl border px-3 py-1.5 text-xs font-bold transition ${
+                    active ? 'border-primary-400 bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-200' : 'border-border bg-surface text-ink-soft hover:bg-surface-2'
+                  }`}
+                >
+                  {u.avatarEmoji} {u.name}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         <div>
@@ -222,7 +209,6 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
             min={1}
             value={xp}
             onChange={(e) => {
-              setXpTouched(true)
               const v = Math.max(1, Number(e.target.value) || 1)
               setXp(v)
               setPoints(suggestedPoints(v))
@@ -233,10 +219,7 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
             type="number"
             min={1}
             value={points}
-            onChange={(e) => {
-              setXpTouched(true)
-              setPoints(Math.max(1, Number(e.target.value) || 1))
-            }}
+            onChange={(e) => setPoints(Math.max(1, Number(e.target.value) || 1))}
           />
         </div>
 
@@ -255,7 +238,7 @@ export function ChoreFormModal({ open, onClose, editChore, defaultDate }: Props)
             <span className="mb-1.5 block text-xs font-semibold text-ink-soft">Depends on (optional)</span>
             <div className="flex flex-wrap gap-1.5">
               {chores
-                .filter((c) => c.id !== editChore?.id && !c.archived)
+                .filter((c) => c.id !== editChore.id && !c.archived)
                 .slice(0, 12)
                 .map((c) => {
                   const active = dependsOn.includes(c.id)

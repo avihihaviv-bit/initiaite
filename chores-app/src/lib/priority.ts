@@ -83,7 +83,7 @@ export function scoreChore(chore: Chore, now = new Date()): ScoredChore {
   }
 
   // Unassigned household-critical chores surface a bit more.
-  if (!chore.assigneeId) {
+  if (chore.assigneeIds.length === 0) {
     score += 2
   }
 
@@ -112,7 +112,7 @@ export function bestNextChore(chores: Chore[], userId: string | null, allChores:
   const today = todayISO()
   const candidates = chores.filter((c) => {
     if (c.archived) return false
-    if (userId && c.assigneeId && c.assigneeId !== userId) return false
+    if (userId && c.assigneeIds.length > 0 && !c.assigneeIds.includes(userId)) return false
     if (isBlocked(c, allChores)) return false
     if (!isDueOn(c, today) && !isOverdue(c, today)) return false
     return !isCompletedOn(c, effectiveDueDate(c, today))

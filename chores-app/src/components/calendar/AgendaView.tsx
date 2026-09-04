@@ -4,21 +4,25 @@ import clsx from 'clsx'
 import { useStore } from '../../store/useStore'
 import { addDays, friendlyDate, todayISO } from '../../lib/date'
 import { occurrencesForRange, type Occurrence } from '../../lib/occurrence'
-import { Avatar } from '../ui/Avatar'
+import { AvatarStack } from '../ui/AvatarStack'
 import { Pill } from '../ui/Pill'
 import { EmptyState } from '../ui/EmptyState'
 import { useToast } from '../ui/Toast'
 
 const STATUS_TONE = { completed: 'success', overdue: 'danger', today: 'primary', upcoming: 'info' } as const
 
-export function AgendaView({ onOpenChore }: { onOpenChore: (choreId: string) => void }) {
-  const chores = useStore((s) => s.chores)
+export function AgendaView({ onOpenChore, personId, rangeDaysBack = 3, rangeDaysForward = 21 }: { onOpenChore: (choreId: string) => void; personId?: string; rangeDaysBack?: number; rangeDaysForward?: number }) {
+  const allChores = useStore((s) => s.chores)
+  const chores = useMemo(() => (personId ? allChores.filter((c) => c.assigneeIds.includes(personId)) : allChores), [allChores, personId])
   const users = useStore((s) => s.users)
   const completeChore = useStore((s) => s.completeChore)
   const { show } = useToast()
   const today = todayISO()
 
-  const occurrences = useMemo(() => occurrencesForRange(chores, addDays(today, -3), addDays(today, 21)), [chores, today])
+  const occurrences = useMemo(
+    () => occurrencesForRange(chores, addDays(today, -rangeDaysBack), addDays(today, rangeDaysForward)),
+    [chores, today, rangeDaysBack, rangeDaysForward]
+  )
 
   const grouped = useMemo(() => {
     const map = new Map<string, Occurrence[]>()
@@ -40,7 +44,7 @@ export function AgendaView({ onOpenChore }: { onOpenChore: (choreId: string) => 
           <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-faint">{friendlyDate(date)}</h3>
           <div className="space-y-2">
             {occ.map((o) => {
-              const assignee = users.find((u) => u.id === o.chore.assigneeId)
+              const assignees = users.filter((u) => o.chore.assigneeIds.includes(u.id))
               return (
                 <div key={`${o.chore.id}-${o.date}`} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3">
                   <button
@@ -64,7 +68,7 @@ export function AgendaView({ onOpenChore }: { onOpenChore: (choreId: string) => 
                       {o.chore.dueTime && <span className="block text-xs text-ink-faint">{o.chore.dueTime}</span>}
                     </span>
                   </button>
-                  {assignee && <Avatar emoji={assignee.avatarEmoji} color={assignee.color} size={26} />}
+                  <AvatarStack users={assignees} size={26} />
                   <Pill tone={STATUS_TONE[o.status]}>{o.status}</Pill>
                 </div>
               )

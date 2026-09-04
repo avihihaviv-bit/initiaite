@@ -100,7 +100,7 @@ export function generateDailyPlan(chores: Chore[], userId: string): PlanItem[] {
   const mine = chores.filter(
     (c) =>
       !c.archived &&
-      c.assigneeId === userId &&
+      c.assigneeIds.includes(userId) &&
       (isDueOn(c, today) || isOverdue(c, today)) &&
       !isCompletedOn(c, effectiveDueDate(c, today)) &&
       !isBlocked(c, chores)
@@ -130,7 +130,7 @@ export function answerAssistant(
     if (!suggestion) {
       return `Household fairness is looking solid at ${score}/100. No rebalancing needed right now — nice work sharing the load! 🤝`
     }
-    return `Household fairness is ${score}/100. ${suggestion.reasoning} That would raise fairness to ${suggestion.projectedFairness}/100. Want me to make that move? You can accept it from the Family tab.`
+    return `Household fairness is ${score}/100. ${suggestion.reasoning} That would raise fairness to ${suggestion.projectedFairness}/100. Want me to make that move? You can accept it from the People tab.`
   }
 
   if (/overdue|late|behind/.test(text)) {

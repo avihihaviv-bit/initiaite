@@ -68,11 +68,11 @@ export default function Chores() {
     const q = query.trim().toLowerCase()
     if (q) {
       list = list.filter((c) => {
-        const assignee = users.find((u) => u.id === c.assigneeId)?.name ?? ''
-        return c.title.toLowerCase().includes(q) || assignee.toLowerCase().includes(q) || c.priority.includes(q)
+        const names = users.filter((u) => c.assigneeIds.includes(u.id)).map((u) => u.name.toLowerCase())
+        return c.title.toLowerCase().includes(q) || names.some((n) => n.includes(q)) || c.priority.includes(q)
       })
     }
-    if (mineOnly) list = list.filter((c) => c.assigneeId === currentUserId)
+    if (mineOnly) list = list.filter((c) => !!currentUserId && c.assigneeIds.includes(currentUserId))
     if (highPriorityOnly) list = list.filter((c) => c.priority === 'high' || c.priority === 'urgent')
     if (categoryFilter !== 'all') list = list.filter((c) => c.categoryId === categoryFilter)
 

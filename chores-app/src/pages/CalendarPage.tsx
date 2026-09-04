@@ -24,6 +24,7 @@ export default function CalendarPage() {
   const [dayModalDate, setDayModalDate] = useState<string | null>(null)
   const [openChoreId, setOpenChoreId] = useState<string | null>(null)
   const [editChoreId, setEditChoreId] = useState<string | null>(null)
+  const [createDate, setCreateDate] = useState<string | null>(null)
 
   const openChore = chores.find((c) => c.id === openChoreId) ?? null
   const editChore = chores.find((c) => c.id === editChoreId) ?? null
@@ -83,9 +84,14 @@ export default function CalendarPage() {
         occurrences={dayOccurrences}
         onClose={() => setDayModalDate(null)}
         onOpenChore={openChoreById}
+        onAddForDay={(date) => {
+          setDayModalDate(null)
+          setCreateDate(date)
+        }}
       />
       <ChoreDetailModal chore={openChore} onClose={() => setOpenChoreId(null)} onEdit={() => { setEditChoreId(openChoreId); setOpenChoreId(null) }} />
       <ChoreFormModal open={!!editChore} onClose={() => setEditChoreId(null)} editChore={editChore} />
+      <ChoreFormModal open={!!createDate} onClose={() => setCreateDate(null)} defaultDate={createDate ?? undefined} />
     </div>
   )
 }

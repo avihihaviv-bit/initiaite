@@ -4,7 +4,7 @@ import { Check, Clock, MoreHorizontal } from 'lucide-react'
 import clsx from 'clsx'
 import type { Chore } from '../../types'
 import { useStore } from '../../store/useStore'
-import { Avatar } from '../ui/Avatar'
+import { AvatarStack } from '../ui/AvatarStack'
 import { Pill } from '../ui/Pill'
 import { formatTime, friendlyDate, todayISO } from '../../lib/date'
 import { isBlocked } from '../../lib/priority'
@@ -34,7 +34,7 @@ export function ChoreCard({ chore, onOpen, onEdit, onStartTimer, compact, select
   const completeOpacity = useTransform(x, [10, 90], [0, 1])
   const actionsOpacity = useTransform(x, [-90, -10], [1, 0])
 
-  const assignee = users.find((u) => u.id === chore.assigneeId)
+  const assignees = users.filter((u) => chore.assigneeIds.includes(u.id))
   const category = categories.find((c) => c.id === chore.categoryId)
   const today = todayISO()
   const dueDate = effectiveDueDate(chore, today)
@@ -125,11 +125,7 @@ export function ChoreCard({ chore, onOpen, onEdit, onStartTimer, compact, select
           {overdue && !doneToday && <Pill tone="danger">Overdue</Pill>}
           {blocked && !doneToday && <Pill tone="neutral">Blocked</Pill>}
           <span className="hidden text-xs font-bold text-accent-600 sm:inline">+{chore.xp} XP</span>
-          {assignee ? (
-            <Avatar emoji={assignee.avatarEmoji} color={assignee.color} size={30} />
-          ) : (
-            <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full border border-dashed border-border text-[10px] text-ink-faint">?</span>
-          )}
+          <AvatarStack users={assignees} size={30} />
           <div className="relative">
             <button
               onClick={() => setMenuOpen((o) => !o)}

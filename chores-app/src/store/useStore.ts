@@ -10,7 +10,9 @@ import { todayISO } from '../lib/date'
 import { levelFromXP, BADGES, suggestedPoints, suggestedXP } from '../lib/gamification'
 import { suggestRebalance } from '../lib/balance'
 import { answerAssistant } from '../lib/ai'
+import { parseActionIntent } from '../lib/aiIntents'
 import { effectiveDueDate } from '../lib/occurrence'
+import { friendlyDate, WEEKDAY_LABELS_FULL } from '../lib/date'
 
 export type CelebrationEvent =
   | { type: 'complete'; choreTitle: string; emoji: string; xp: number; points: number; streak: number }
@@ -30,7 +32,7 @@ interface Store extends AppState {
   restoreChore: (id: string) => void
   duplicateChore: (id: string) => void
   deleteChoreForever: (id: string) => void
-  completeChore: (choreId: string, occurrenceDate?: string, durationMinutes?: number) => void
+  completeChore: (choreId: string, occurrenceDate?: string, durationMinutes?: number, completedByUserId?: string) => void
   undoCompletion: (choreId: string, occurrenceDate: string) => void
   skipOccurrence: (choreId: string, occurrenceDate: string) => void
   snoozeChore: (choreId: string, days: number) => void
@@ -82,6 +84,8 @@ interface Store extends AppState {
 
   // ai chat
   sendChatMessage: (text: string) => void
+  confirmPendingAction: (messageId: string) => void
+  dismissPendingAction: (messageId: string) => void
 
   // celebrations queue
   dismissCelebration: () => void
@@ -216,14 +220,22 @@ export const useStore = create<Store>((set, get) => ({
     get().persist()
   },
 
-  completeChore: (choreId, occurrenceDate, durationMinutes) => {
+  completeChore: (choreId, occurrenceDate, durationMinutes, completedByUserId) => {
     const s = get()
     const chore = s.chores.find((c) => c.id === choreId)
     if (!chore) return
     const dateISO = occurrenceDate ?? effectiveDueDate(chore)
     if (chore.history.some((h) => h.occurrenceDate === dateISO)) return
 
-    const userId = chore.assigneeId ?? s.settings.currentUserId ?? s.users[0]?.id
+    // Who gets credit: an explicit override, else the current user if they're
+    // one of the assignees (handles shared chores), else the first assignee,
+    // else whoever is logged in.
+    const currentUserId = s.settings.currentUserId
+    const userId =
+      completedByUserId ??
+      (currentUserId && chore.assigneeIds.includes(currentUserId) ? currentUserId : chore.assigneeIds[0]) ??
+      currentUserId ??
+      s.users[0]?.id
     if (!userId) return
     const user = s.users.find((u) => u.id === userId)
     if (!user) return
@@ -359,7 +371,9 @@ export const useStore = create<Store>((set, get) => ({
     ids.forEach((id) => get().completeChore(id))
   },
   bulkAssign: (ids, userId) => {
-    set((s) => ({ chores: s.chores.map((c) => (ids.includes(c.id) ? { ...c, assigneeId: userId } : c)) }))
+    set((s) => ({
+      chores: s.chores.map((c) => (ids.includes(c.id) ? { ...c, assigneeIds: userId ? [userId] : [] } : c)),
+    }))
     get().persist()
   },
   moveChoreDate: (choreId, newDate) => {
@@ -380,7 +394,9 @@ export const useStore = create<Store>((set, get) => ({
     set((s) => ({
       users: s.users.filter((u) => u.id !== id),
       family: { ...s.family, memberIds: s.family.memberIds.filter((m) => m !== id) },
-      chores: s.chores.map((c) => (c.assigneeId === id ? { ...c, assigneeId: null } : c)),
+      chores: s.chores.map((c) =>
+        c.assigneeIds.includes(id) ? { ...c, assigneeIds: c.assigneeIds.filter((a) => a !== id) } : c
+      ),
     }))
     get().persist()
   },
@@ -388,7 +404,7 @@ export const useStore = create<Store>((set, get) => ({
     const s = get()
     const suggestion = suggestRebalance(s.chores, s.users)
     if (!suggestion) return
-    get().updateChore(suggestion.choreId, { assigneeId: suggestion.toUserId })
+    get().updateChore(suggestion.choreId, { assigneeIds: [suggestion.toUserId] })
     get().pushNotification({
       title: '⚖️ Chore rebalanced',
       body: suggestion.reasoning,
@@ -527,7 +543,7 @@ export const useStore = create<Store>((set, get) => ({
         description: '',
         emoji: t.emoji,
         categoryId: t.categoryId,
-        assigneeId: selfUser.id,
+        assigneeIds: [selfUser.id],
         priority: 'medium',
         difficulty: t.difficulty,
         estimatedMinutes: t.estimatedMinutes,
@@ -574,9 +590,92 @@ export const useStore = create<Store>((set, get) => ({
     const userMsg: ChatMessage = { id: uid('msg'), role: 'user', text, createdAt: new Date().toISOString() }
     set((s) => ({ chatHistory: [...s.chatHistory, userMsg] }))
     const s = get()
-    const reply = answerAssistant(text, { chores: s.chores, users: s.users, currentUserId: s.settings.currentUserId })
-    const botMsg: ChatMessage = { id: uid('msg'), role: 'assistant', text: reply, createdAt: new Date().toISOString() }
+    const intent = parseActionIntent(text, { chores: s.chores, users: s.users, categories: s.categories, currentUserId: s.settings.currentUserId })
+    const reply = intent?.reply ?? answerAssistant(text, { chores: s.chores, users: s.users, currentUserId: s.settings.currentUserId })
+    const botMsg: ChatMessage = {
+      id: uid('msg'),
+      role: 'assistant',
+      text: reply,
+      createdAt: new Date().toISOString(),
+      pendingAction: intent?.action,
+      actionLabel: intent?.actionLabel,
+      actionStatus: intent?.action ? 'proposed' : undefined,
+    }
     set((state) => ({ chatHistory: [...state.chatHistory, botMsg] }))
+    get().persist()
+  },
+
+  confirmPendingAction: (messageId) => {
+    const s = get()
+    const msg = s.chatHistory.find((m) => m.id === messageId)
+    const action = msg?.pendingAction
+    if (!action || msg?.actionStatus !== 'proposed') return
+
+    let confirmText = ''
+    const userName = s.users.find((u) => u.id === action.userId)?.name ?? 'them'
+
+    if (action.kind === 'assign-chores') {
+      action.items.forEach((item) => {
+        const xp = suggestedXP(item.difficulty, item.estimatedMinutes)
+        get().addChore({
+          title: item.title,
+          description: '',
+          emoji: item.emoji,
+          categoryId: item.categoryId,
+          assigneeIds: [action.userId],
+          priority: 'medium',
+          difficulty: item.difficulty,
+          estimatedMinutes: item.estimatedMinutes,
+          points: suggestedPoints(xp),
+          xp,
+          dueDate: action.date,
+          recurrence: { frequency: 'none', startDate: action.date },
+          reminder: 'none',
+          subtasks: [],
+          dependsOn: [],
+          color: s.categories.find((c) => c.id === item.categoryId)?.color ?? '#7c5cff',
+        })
+      })
+      confirmText = `Done! Added ${action.items.length} chore${action.items.length === 1 ? '' : 's'} for ${userName} on ${friendlyDate(action.date)}. 🎉`
+    } else if (action.kind === 'move-chores') {
+      action.choreIds.forEach((id) => get().moveChoreDate(id, action.toDate))
+      confirmText = `Moved ${action.choreIds.length} chore${action.choreIds.length === 1 ? '' : 's'} for ${userName} to ${friendlyDate(action.toDate)}. ✅`
+    } else if (action.kind === 'create-recurring') {
+      const xp = suggestedXP('medium', 20)
+      get().addChore({
+        title: action.title,
+        description: '',
+        emoji: action.emoji,
+        categoryId: action.categoryId,
+        assigneeIds: [action.userId],
+        priority: 'medium',
+        difficulty: 'medium',
+        estimatedMinutes: 20,
+        points: suggestedPoints(xp),
+        xp,
+        dueDate: action.startDate,
+        dueTime: action.time,
+        recurrence: { frequency: 'weekly', daysOfWeek: action.daysOfWeek, startDate: action.startDate },
+        reminder: action.time ? '30-before' : 'none',
+        subtasks: [],
+        dependsOn: [],
+        color: s.categories.find((c) => c.id === action.categoryId)?.color ?? '#7c5cff',
+      })
+      confirmText = `Done! "${action.title}" is now scheduled for ${userName} every ${WEEKDAY_LABELS_FULL[action.daysOfWeek[0]]}. 🎉`
+    }
+
+    const botMsg: ChatMessage = { id: uid('msg'), role: 'assistant', text: confirmText, createdAt: new Date().toISOString() }
+    set((state) => ({
+      chatHistory: [...state.chatHistory.map((m) => (m.id === messageId ? { ...m, actionStatus: 'applied' as const } : m)), botMsg],
+    }))
+    get().persist()
+  },
+
+  dismissPendingAction: (messageId) => {
+    const botMsg: ChatMessage = { id: uid('msg'), role: 'assistant', text: `No problem — I won't make that change.`, createdAt: new Date().toISOString() }
+    set((state) => ({
+      chatHistory: [...state.chatHistory.map((m) => (m.id === messageId ? { ...m, actionStatus: 'dismissed' as const } : m)), botMsg],
+    }))
     get().persist()
   },
 

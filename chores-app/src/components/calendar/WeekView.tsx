@@ -11,8 +11,9 @@ const STATUS_DOT: Record<Occurrence['status'], string> = {
   upcoming: 'bg-info-400',
 }
 
-export function WeekView({ anchor, onOpenDay }: { anchor: string; onOpenDay: (dateISO: string) => void }) {
-  const chores = useStore((s) => s.chores)
+export function WeekView({ anchor, onOpenDay, personId }: { anchor: string; onOpenDay: (dateISO: string) => void; personId?: string }) {
+  const allChores = useStore((s) => s.chores)
+  const chores = useMemo(() => (personId ? allChores.filter((c) => c.assigneeIds.includes(personId)) : allChores), [allChores, personId])
   const today = todayISO()
   const days = useMemo(() => getWeekDays(anchor), [anchor])
   const occurrences = useMemo(() => occurrencesForRange(chores, days[0], days[days.length - 1]), [chores, days])

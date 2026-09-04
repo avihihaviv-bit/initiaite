@@ -5,6 +5,7 @@ import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { Pill } from '../ui/Pill'
 import { Avatar } from '../ui/Avatar'
+import { Select } from '../ui/Select'
 import { ProgressBar } from '../ui/ProgressBar'
 import type { Chore } from '../../types'
 import { useStore } from '../../store/useStore'
@@ -32,13 +33,17 @@ export function ChoreDetailModal({ chore, onClose, onEdit }: { chore: Chore | nu
   const completeChore = useStore((s) => s.completeChore)
   const { show } = useToast()
 
+  const [completeAs, setCompleteAs] = useState<string>('')
+
   if (!chore) return null
 
-  const assignee = users.find((u) => u.id === chore.assigneeId)
+  const assignees = users.filter((u) => chore.assigneeIds.includes(u.id))
   const category = categories.find((c) => c.id === chore.categoryId)
   const today = todayISO()
   const dueDate = effectiveDueDate(chore, today)
   const doneToday = isCompletedOn(chore, dueDate)
+  const defaultCompleter =
+    (currentUserId && chore.assigneeIds.includes(currentUserId) ? currentUserId : chore.assigneeIds[0]) ?? currentUserId ?? ''
   const subtaskDone = chore.subtasks.filter((s) => s.done).length
   const deps = chore.dependsOn.map((id) => chores.find((c) => c.id === id)).filter(Boolean) as Chore[]
   const before = chore.photos.filter((p) => p.kind === 'before')
@@ -55,9 +60,27 @@ export function ChoreDetailModal({ chore, onClose, onEdit }: { chore: Chore | nu
         <div className="flex items-center justify-between gap-2">
           <Button variant="secondary" onClick={onEdit}>Edit chore</Button>
           {!doneToday ? (
-            <Button variant="success" icon={<Check size={16} />} onClick={() => { completeChore(chore.id); show('Marked complete!') }}>
-              Mark complete
-            </Button>
+            <div className="flex items-center gap-2">
+              {assignees.length > 1 && (
+                <div className="w-36">
+                  <Select value={completeAs || defaultCompleter} onChange={(e) => setCompleteAs(e.target.value)} className="!h-9 !text-xs" aria-label="Complete as">
+                    {assignees.map((u) => (
+                      <option key={u.id} value={u.id}>{u.avatarEmoji} {u.name}</option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+              <Button
+                variant="success"
+                icon={<Check size={16} />}
+                onClick={() => {
+                  completeChore(chore.id, undefined, undefined, completeAs || defaultCompleter || undefined)
+                  show('Marked complete!')
+                }}
+              >
+                Mark complete
+              </Button>
+            </div>
           ) : (
             <Pill tone="success">✓ Completed today</Pill>
           )}
@@ -71,6 +94,7 @@ export function ChoreDetailModal({ chore, onClose, onEdit }: { chore: Chore | nu
           <Pill tone="neutral">{describeRecurrence(chore.recurrence)}</Pill>
           {chore.dueTime && <Pill tone="neutral">Due {formatTime(chore.dueTime)}</Pill>}
           <Pill tone="neutral">+{chore.xp} XP · +{chore.points} pts</Pill>
+          {assignees.length > 1 && <Pill tone="primary">🤝 Shared</Pill>}
         </div>
 
         {chore.description && <p className="text-sm leading-relaxed text-ink-soft">{chore.description}</p>}
@@ -78,10 +102,14 @@ export function ChoreDetailModal({ chore, onClose, onEdit }: { chore: Chore | nu
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-xl border border-border bg-surface-2 p-3">
             <p className="text-[11px] font-bold uppercase tracking-wide text-ink-faint">Assigned to</p>
-            {assignee ? (
-              <div className="mt-1.5 flex items-center gap-2">
-                <Avatar emoji={assignee.avatarEmoji} color={assignee.color} size={26} />
-                <span className="font-semibold text-ink">{assignee.name}</span>
+            {assignees.length > 0 ? (
+              <div className="mt-1.5 space-y-1.5">
+                {assignees.map((a) => (
+                  <div key={a.id} className="flex items-center gap-2">
+                    <Avatar emoji={a.avatarEmoji} color={a.color} size={26} />
+                    <span className="font-semibold text-ink">{a.name}</span>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="mt-1.5 font-semibold text-ink-faint">Unassigned</p>

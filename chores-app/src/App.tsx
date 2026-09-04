@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Suspense, lazy, useEffect } from 'react'
+import type { LazyExoticComponent, ReactElement } from 'react'
 import { AppShell } from './components/layout/AppShell'
 import { useStore } from './store/useStore'
 import { useThemeEffect } from './hooks/useTheme'
@@ -7,8 +8,10 @@ import Home from './pages/Home'
 import Onboarding from './pages/Onboarding'
 
 const Chores = lazy(() => import('./pages/Chores'))
-const Family = lazy(() => import('./pages/Family'))
+const People = lazy(() => import('./pages/People'))
+const PersonProfile = lazy(() => import('./pages/PersonProfile'))
 const CalendarPage = lazy(() => import('./pages/CalendarPage'))
+const Schedule = lazy(() => import('./pages/Schedule'))
 const Rewards = lazy(() => import('./pages/Rewards'))
 const Streaks = lazy(() => import('./pages/Streaks'))
 const Statistics = lazy(() => import('./pages/Statistics'))
@@ -23,6 +26,14 @@ function PageFallback() {
       <div className="skeleton h-24 w-full rounded-2xl" />
       <div className="skeleton h-24 w-full rounded-2xl" />
     </div>
+  )
+}
+
+function lazyPage(Component: LazyExoticComponent<() => ReactElement>) {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <Component />
+    </Suspense>
   )
 }
 
@@ -47,70 +58,17 @@ export default function App() {
     <Routes>
       <Route element={<AppShell />}>
         <Route path="/" element={<Home />} />
-        <Route
-          path="/chores"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <Chores />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/family"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <Family />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/calendar"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <CalendarPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/rewards"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <Rewards />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/streaks"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <Streaks />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/stats"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <Statistics />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/ai"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <AIAssistant />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <Settings />
-            </Suspense>
-          }
-        />
+        <Route path="/chores" element={lazyPage(Chores)} />
+        <Route path="/people" element={lazyPage(People)} />
+        <Route path="/people/:personId" element={lazyPage(PersonProfile)} />
+        <Route path="/calendar" element={lazyPage(CalendarPage)} />
+        <Route path="/schedule" element={lazyPage(Schedule)} />
+        <Route path="/rewards" element={lazyPage(Rewards)} />
+        <Route path="/streaks" element={lazyPage(Streaks)} />
+        <Route path="/stats" element={lazyPage(Statistics)} />
+        <Route path="/ai" element={lazyPage(AIAssistant)} />
+        <Route path="/settings" element={lazyPage(Settings)} />
+        <Route path="/family" element={<Navigate to="/people" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

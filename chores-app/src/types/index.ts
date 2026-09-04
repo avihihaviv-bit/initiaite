@@ -90,7 +90,8 @@ export interface Chore {
   description?: string
   emoji: string
   categoryId: string
-  assigneeId: string | null
+  /** empty array = unassigned. Multiple ids = shared responsibility (anyone can complete it). */
+  assigneeIds: string[]
   priority: Priority
   difficulty: Difficulty
   estimatedMinutes: number
@@ -201,6 +202,10 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   text: string
   createdAt: string
+  /** A proposed action awaiting user confirmation (e.g. "assign 3 chores to Yoav"). */
+  pendingAction?: import('../lib/aiIntents').PendingAction
+  actionLabel?: string
+  actionStatus?: 'proposed' | 'applied' | 'dismissed'
 }
 
 export interface AppState {

@@ -12,8 +12,9 @@ const STATUS_DOT: Record<Occurrence['status'], string> = {
   upcoming: 'bg-info-400',
 }
 
-export function MonthView({ anchor, onOpenDay }: { anchor: string; onOpenDay: (dateISO: string) => void }) {
-  const chores = useStore((s) => s.chores)
+export function MonthView({ anchor, onOpenDay, personId }: { anchor: string; onOpenDay: (dateISO: string) => void; personId?: string }) {
+  const allChores = useStore((s) => s.chores)
+  const chores = useMemo(() => (personId ? allChores.filter((c) => c.assigneeIds.includes(personId)) : allChores), [allChores, personId])
   const moveChoreDate = useStore((s) => s.moveChoreDate)
   const { show } = useToast()
   const today = todayISO()

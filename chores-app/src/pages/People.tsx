@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, UserPlus } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { Card } from '../components/ui/Card'
@@ -11,11 +12,12 @@ import { MemberFormModal } from '../components/family/MemberFormModal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { weeklyWorkload, fairnessScore, suggestRebalance } from '../lib/balance'
 
-export default function Family() {
+export default function People() {
   const users = useStore((s) => s.users)
   const chores = useStore((s) => s.chores)
   const streaks = useStore((s) => s.streaks)
   const removeMember = useStore((s) => s.removeMember)
+  const navigate = useNavigate()
   const [addOpen, setAddOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<string | null>(null)
   const [suggestionDismissed, setSuggestionDismissed] = useState(false)
@@ -30,10 +32,10 @@ export default function Family() {
     <div className="space-y-6 animate-[var(--animate-in)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-ink">Family</h1>
+          <h1 className="font-display text-2xl font-extrabold text-ink">People</h1>
           <p className="mt-0.5 text-sm text-ink-soft">{users.length} member{users.length === 1 ? '' : 's'} sharing the household</p>
         </div>
-        <Button icon={<UserPlus size={16} />} onClick={() => setAddOpen(true)}>Add member</Button>
+        <Button icon={<UserPlus size={16} />} onClick={() => setAddOpen(true)}>Add person</Button>
       </div>
 
       <Card>
@@ -43,7 +45,8 @@ export default function Family() {
       {suggestion && !suggestionDismissed && <SmartBalanceCard suggestion={suggestion} onReject={() => setSuggestionDismissed(true)} />}
 
       <Card>
-        <p className="mb-4 font-display text-sm font-bold text-ink">This week's balance</p>
+        <p className="mb-1 font-display text-sm font-bold text-ink">⚖️ Family workload</p>
+        <p className="mb-4 text-xs text-ink-faint">Not just chore count — weighted by time, difficulty and frequency.</p>
         <div className="space-y-3">
           {shares
             .slice()
@@ -54,11 +57,13 @@ export default function Family() {
               return (
                 <div key={s.userId} className="flex items-center gap-3">
                   <Avatar emoji={user.avatarEmoji} color={user.color} size={30} />
-                  <span className="w-16 shrink-0 text-sm font-semibold text-ink">{user.name}</span>
+                  <span className="w-16 shrink-0 truncate text-sm font-semibold text-ink">{user.name}</span>
                   <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border/70">
                     <div className="h-full rounded-full transition-all duration-700" style={{ width: `${s.sharePct}%`, background: user.color }} />
                   </div>
-                  <span className="w-10 shrink-0 text-right text-xs font-bold text-ink-faint">{s.sharePct}%</span>
+                  <span className="w-28 shrink-0 text-right text-xs font-bold text-ink-faint">
+                    {Math.round(s.count)} chores · {Math.round(s.minutes)} min
+                  </span>
                 </div>
               )
             })}
@@ -79,6 +84,7 @@ export default function Family() {
                 sharePct={share?.sharePct ?? 0}
                 weeklyCount={Math.round(share?.count ?? 0)}
                 onRemove={() => setRemoveTarget(u.id)}
+                onView={() => navigate(`/people/${u.id}`)}
               />
             )
           })}
