@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lexend", ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #f6f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #faf9fd;
+  --color-border: #e9e7f1;
+  --color-ink: #191625;
+  --color-ink-soft: #6b6580;
+  --color-ink-faint: #9d97ae;
+
+  --color-primary-50: #f2efff;
+  --color-primary-100: #e6e0ff;
+  --color-primary-200: #cabeff;
+  --color-primary-300: #a894ff;
+  --color-primary-400: #8b6bff;
+  --color-primary-500: #7c5cff;
+  --color-primary-600: #6a41f5;
+  --color-primary-700: #5931d6;
+  --color-primary-800: #4726a8;
+  --color-primary-900: #372080;
+
+  --color-accent-50: #fff7ea;
+  --color-accent-300: #ffcf6b;
+  --color-accent-400: #ffb830;
+  --color-accent-500: #ff9f0a;
+  --color-accent-600: #e6810a;
+
+  --color-success-100: #dcf6e6;
+  --color-success-400: #33c17a;
+  --color-success-500: #1fa863;
+  --color-success-600: #178a51;
+
+  --color-warning-100: #fff1d6;
+  --color-warning-500: #f2a90c;
+
+  --color-danger-100: #ffe4e4;
+  --color-danger-400: #ff6161;
+  --color-danger-500: #f0403f;
+  --color-danger-600: #d62f2f;
+
+  --color-info-400: #4fa8ff;
+  --color-info-500: #2f8fef;
+
+  --shadow-soft: 0 1px 2px rgba(25, 22, 37, 0.04), 0 8px 24px -8px rgba(25, 22, 37, 0.10);
+  --shadow-lift: 0 4px 12px rgba(25, 22, 37, 0.06), 0 20px 40px -16px rgba(25, 22, 37, 0.18);
+  --shadow-glow: 0 0 0 1px rgba(124, 92, 255, 0.12), 0 12px 32px -8px rgba(124, 92, 255, 0.35);
+
+  --animate-in: enter 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-pop: pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-float: float 4.5s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    60% { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+:root.dark {
+  --color-canvas: #100e18;
+  --color-surface: #1a1726;
+  --color-surface-2: #201c2e;
+  --color-border: #322c46;
+  --color-ink: #f3f1fa;
+  --color-ink-soft: #b3adc7;
+  --color-ink-faint: #746e8a;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 4px 16px rgba(0, 0, 0, 0.3), 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 0 1px rgba(139, 107, 255, 0.25), 0 12px 32px -8px rgba(139, 107, 255, 0.45);
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+::selection {
+  background: var(--color-primary-200);
+  color: var(--color-primary-900);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-2) 37%, var(--color-border) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
