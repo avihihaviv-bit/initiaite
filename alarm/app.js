@@ -1145,11 +1145,22 @@ function ensureNotificationPermissionPrompted(force) {
     if (!('Notification' in window)) return;
     if (Notification.permission === 'default' || force) Notification.requestPermission().then(render);
 }
-function exportData() {
-    const data = DB.exportAll();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+async function exportData() {
+    const json = JSON.stringify(DB.exportAll(), null, 2);
+    const filename = 'wake-data-export.json';
+    // When embedded as a Claude artifact, plain <a download> links are
+    // inert — offer the file through the platform's downloads capability
+    // instead. Outside that context (the real hosted app) window.claude
+    // is undefined and we fall through to the normal browser download.
+    if (window.claude && window.claude.use) {
+        try {
+            const downloads = await window.claude.use('downloads');
+            if (downloads) { await downloads.save({ filename, data: json }); toast(t('exportData') + ' ✓'); return; }
+        } catch (e) { /* declined/unavailable — fall back below */ }
+    }
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'wake-data-export.json'; document.body.appendChild(a); a.click(); a.remove();
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 function confirmDeleteAllData() {
