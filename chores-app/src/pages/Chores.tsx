@@ -142,7 +142,7 @@ export default function Chores() {
           />
         </div>
 
-        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto">
+        <div className="no-scrollbar scroll-fade-x flex items-center gap-1.5 overflow-x-auto">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.id}

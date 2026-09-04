@@ -69,7 +69,7 @@ export default function Schedule() {
         <Button size="sm" icon={<Plus size={14} />} onClick={() => setCreateOpen(true)}>Assign chore</Button>
       </div>
 
-      <div className="no-scrollbar flex gap-2 overflow-x-auto">
+      <div className="no-scrollbar scroll-fade-x flex gap-2 overflow-x-auto">
         {users.map((u) => (
           <button
             key={u.id}

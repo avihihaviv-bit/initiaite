@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check, Play, Sparkles } from 'lucide-react'
 import { useStore } from '../store/useStore'
@@ -77,12 +78,18 @@ export default function Home() {
           <p className="mt-1 text-sm text-ink-soft">Here's what needs to be done.</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-ink">
+          <Link
+            to="/streaks"
+            className="focus-ring flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-ink transition hover:border-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+          >
             🔥 <AnimatedNumber value={streak?.current ?? 0} /> day streak
-          </span>
-          <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-ink">
+          </Link>
+          <Link
+            to="/streaks"
+            className="focus-ring flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-ink transition hover:border-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+          >
             🏆 Level {level}
-          </span>
+          </Link>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { BarChart3, Bot, Calendar, CalendarClock, Gift, Home, ListChecks, Settings, Users } from 'lucide-react'
+import { BarChart3, Bot, Calendar, CalendarClock, Flame, Gift, Home, ListChecks, Settings, Users } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 export interface NavItem {
@@ -16,6 +16,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'calendar', path: '/calendar', label: 'Calendar', icon: Calendar, emoji: '📅' },
   { id: 'schedule', path: '/schedule', label: 'Schedule', icon: CalendarClock, emoji: '🗓' },
   { id: 'rewards', path: '/rewards', label: 'Rewards', icon: Gift, emoji: '🏆' },
+  { id: 'streaks', path: '/streaks', label: 'Streaks & Badges', icon: Flame, emoji: '🔥' },
   { id: 'stats', path: '/stats', label: 'Statistics', icon: BarChart3, emoji: '📊' },
   { id: 'ai', path: '/ai', label: 'AI Assistant', icon: Bot, emoji: '🤖' },
   { id: 'settings', path: '/settings', label: 'Settings', icon: Settings, emoji: '⚙️' },

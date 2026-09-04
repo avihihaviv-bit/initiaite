@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { getMonthGrid, MONTH_LABELS, todayISO, WEEKDAY_LABELS } from '../../lib/date'
 import { occurrencesForRange, type Occurrence } from '../../lib/occurrence'
 import { useStore } from '../../store/useStore'
+import { useUIStore } from '../../store/useUIStore'
 import { useToast } from '../ui/Toast'
 
 const STATUS_DOT: Record<Occurrence['status'], string> = {
@@ -21,6 +22,11 @@ export function MonthView({ anchor, onOpenDay, personId }: { anchor: string; onO
   const days = useMemo(() => getMonthGrid(anchor), [anchor])
   const monthIndex = new Date(anchor).getMonth()
   const [dragOverDate, setDragOverDate] = useState<string | null>(null)
+
+  useEffect(() => {
+    useUIStore.getState().pushDenseGrid()
+    return () => useUIStore.getState().popDenseGrid()
+  }, [])
 
   const occurrences = useMemo(() => occurrencesForRange(chores, days[0], days[days.length - 1]), [chores, days])
   const byDate = useMemo(() => {

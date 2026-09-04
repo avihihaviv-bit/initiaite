@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import clsx from 'clsx'
 import { getWeekDays, todayISO, WEEKDAY_LABELS_FULL } from '../../lib/date'
 import { occurrencesForRange, type Occurrence } from '../../lib/occurrence'
 import { useStore } from '../../store/useStore'
+import { useUIStore } from '../../store/useUIStore'
 
 const STATUS_DOT: Record<Occurrence['status'], string> = {
   completed: 'bg-success-500',
@@ -16,6 +17,12 @@ export function WeekView({ anchor, onOpenDay, personId }: { anchor: string; onOp
   const chores = useMemo(() => (personId ? allChores.filter((c) => c.assigneeIds.includes(personId)) : allChores), [allChores, personId])
   const today = todayISO()
   const days = useMemo(() => getWeekDays(anchor), [anchor])
+
+  useEffect(() => {
+    useUIStore.getState().pushDenseGrid()
+    return () => useUIStore.getState().popDenseGrid()
+  }, [])
+
   const occurrences = useMemo(() => occurrencesForRange(chores, days[0], days[days.length - 1]), [chores, days])
 
   const byDate = useMemo(() => {

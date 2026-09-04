@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Calendar, Gift, Plus, User, X, Zap } from 'lucide-react'
 import { ChoreFormModal } from '../chores/ChoreFormModal'
@@ -9,6 +9,7 @@ import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { TextInput } from '../ui/Select'
 import { useStore } from '../../store/useStore'
+import { useUIStore } from '../../store/useUIStore'
 import { todayISO } from '../../lib/date'
 import { useToast } from '../ui/Toast'
 
@@ -26,6 +27,11 @@ export function QuickAddFab() {
   const [memberModal, setMemberModal] = useState(false)
   const [rewardModal, setRewardModal] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  // Hide the fixed button while a dense calendar grid (Month/Week view) is on
+  // screen — it would float on top of day cells and block clicks into them —
+  // or on the AI Assistant page, where it sits directly over the chat Send button.
+  const hidden = (useUIStore((s) => s.denseGridCount > 0) || location.pathname === '/ai') && !open
 
   const handle = (id: (typeof ACTIONS)[number]['id']) => {
     setOpen(false)
@@ -38,7 +44,10 @@ export function QuickAddFab() {
 
   return (
     <>
-      <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+76px)] right-4 z-40 lg:bottom-8 lg:right-8">
+      <div
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+76px)] right-4 z-40 transition-opacity lg:bottom-8 lg:right-8"
+        style={hidden ? { opacity: 0, pointerEvents: 'none' } : undefined}
+      >
         <AnimatePresence>
           {open && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 -z-10" onClick={() => setOpen(false)} />

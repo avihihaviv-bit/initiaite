@@ -136,6 +136,13 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Fades the trailing edge of a horizontally-scrollable row so a partially
+   cut-off item reads as "more to scroll to" instead of looking clipped. */
+.scroll-fade-x {
+  mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+}
+
 .skeleton {
   background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-2) 37%, var(--color-border) 63%);
   background-size: 400% 100%;

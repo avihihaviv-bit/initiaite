@@ -33,7 +33,7 @@ export default function Streaks() {
         <p className="mt-0.5 text-sm text-ink-soft">Consistency, celebrated.</p>
       </div>
 
-      <div className="no-scrollbar flex gap-2 overflow-x-auto">
+      <div className="no-scrollbar scroll-fade-x flex gap-2 overflow-x-auto">
         {users.map((u) => (
           <button
             key={u.id}
@@ -50,7 +50,7 @@ export default function Streaks() {
       <Card className="relative overflow-hidden bg-gradient-to-br from-accent-50 via-surface to-surface text-center dark:from-accent-500/10">
         <div className="flex flex-col items-center py-4">
           <span className="animate-[var(--animate-float)] text-6xl">🔥</span>
-          <p className="mt-3 font-display text-4xl font-extrabold text-ink">{streak?.current ?? 0} days</p>
+          <p className="mt-3 font-display text-4xl font-extrabold text-ink">{streak?.current ?? 0} day{(streak?.current ?? 0) === 1 ? '' : 's'}</p>
           <p className="mt-1 text-sm font-semibold text-ink-soft">
             {(streak?.current ?? 0) >= 7 ? "You're on fire!" : (streak?.current ?? 0) > 0 ? 'Keep the momentum going' : 'Complete a chore today to start your streak'}
           </p>

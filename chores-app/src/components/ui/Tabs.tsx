@@ -17,7 +17,7 @@ interface Props {
 
 export function Tabs({ tabs, active, onChange, className }: Props) {
   return (
-    <div className={clsx('no-scrollbar flex gap-1 overflow-x-auto rounded-xl bg-surface-2 p-1', className)} role="tablist">
+    <div className={clsx('no-scrollbar scroll-fade-x flex gap-1 overflow-x-auto rounded-xl bg-surface-2 p-1', className)} role="tablist">
       {tabs.map((t) => (
         <button
           key={t.id}
