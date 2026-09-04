@@ -29,7 +29,7 @@
             sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat',
             plus5: '+5m', plus10: '+10m', plus15: '+15m',
             noAlarms: 'No alarms yet', createFirstAlarm: 'Create your first alarm to get started.',
-            enabled: 'On', disabled: 'Off',
+            enabled: 'On', disabled: 'Off', alarm: 'Alarm',
 
             howDismiss: 'How should we wake you?', dismissNormal: 'Simple tap',
             dismissMath: 'Math', dismissSport: 'Sport', dismissSitups: 'Sit-ups',
@@ -78,6 +78,7 @@
             light: 'Light', dark: 'Dark', accentColor: 'Accent color', reducedMotion: 'Reduced motion',
             language: 'Language', timeFormat: 'Time format', weekStartsOn: 'Week starts on',
             haptics: 'Haptics', exportData: 'Export my data', deleteData: 'Delete my data',
+            alarmReminders: 'Alarm reminders', morningSummary: 'Morning summary',
             deleteDataConfirm: 'This permanently deletes every alarm, routine and stat stored on this device. This cannot be undone.',
             privacyExplainer: 'Everything you see lives only in this browser (localStorage) — nothing is sent to a server. Notifications and the camera (for QR challenges) are only used if you grant permission, and only for the feature you enabled.',
             yourName: 'Your name',
@@ -132,7 +133,7 @@
             sun: 'א׳', mon: 'ב׳', tue: 'ג׳', wed: 'ד׳', thu: 'ה׳', fri: 'ו׳', sat: 'ש׳',
             plus5: '+5 ד׳', plus10: '+10 ד׳', plus15: '+15 ד׳',
             noAlarms: 'עדיין אין שעונים', createFirstAlarm: 'צור/י את השעון הראשון כדי להתחיל.',
-            enabled: 'פעיל', disabled: 'כבוי',
+            enabled: 'פעיל', disabled: 'כבוי', alarm: 'שעון',
 
             howDismiss: 'איך תרצה לכבות את השעון?', dismissNormal: 'הקשה פשוטה',
             dismissMath: 'חשבון', dismissSport: 'ספורט', dismissSitups: 'כפיפות בטן',
@@ -181,6 +182,7 @@
             light: 'בהיר', dark: 'כהה', accentColor: 'צבע הדגשה', reducedMotion: 'הפחתת אנימציות',
             language: 'שפה', timeFormat: 'פורמט שעה', weekStartsOn: 'תחילת השבוע',
             haptics: 'רטט משוב', exportData: 'ייצוא הנתונים שלי', deleteData: 'מחיקת הנתונים שלי',
+            alarmReminders: 'תזכורות לשעון', morningSummary: 'סיכום בוקר',
             deleteDataConfirm: 'פעולה זו מוחקת לצמיתות את כל השעונים, השגרות והסטטיסטיקה במכשיר זה. לא ניתן לבטל.',
             privacyExplainer: 'כל מה שאתה רואה נשמר רק בדפדפן הזה (localStorage) — שום דבר לא נשלח לשרת. התראות והמצלמה (לאתגרי QR) נעשה בהן שימוש רק אם תאשר הרשאה, ורק עבור התכונה שהפעלת.',
             yourName: 'השם שלך',
