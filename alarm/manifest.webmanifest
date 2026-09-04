@@ -1,0 +1,14 @@
+{
+  "name": "Wake — Alarm Clock",
+  "short_name": "Wake",
+  "description": "A premium alarm clock with smart wake windows, wake-up challenges, sleep planning and routines.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0c16",
+  "theme_color": "#5b4cf5",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

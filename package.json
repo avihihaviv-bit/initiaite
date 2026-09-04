@@ -5,7 +5,8 @@
   "description": "Initiate // Patrol C2 - tactical dispatch and field terminal POC",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:alarm": "node --test alarm/tests/*.test.js"
   },
   "engines": {
     "node": ">=18"

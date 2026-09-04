@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wake — Alarm Clock</title>
+<meta name="description" content="A premium alarm clock: smart wake windows, wake-up challenges, sleep planning and routines.">
+<meta name="theme-color" content="#5b4cf5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wake">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app-root">
+  <div class="app-body">
+    <nav class="sidebar" id="sidebar" aria-label="Primary"></nav>
+    <main class="view-container" id="view" role="main"></main>
+  </div>
+  <nav class="bottom-nav" id="bottom-nav" aria-label="Primary"></nav>
+</div>
+
+<div id="ring-overlay" class="hidden" role="alertdialog" aria-modal="true" aria-label="Alarm ringing"></div>
+<div id="modal-root"></div>
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+<script src="logic.js"></script>
+<script src="storage.js"></script>
+<script src="i18n.js"></script>
+<script src="sounds.js"></script>
+<script src="challenges.js"></script>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* offline caching is a nice-to-have, not required */ });
+  });
+}
+</script>
+</body>
+</html>
