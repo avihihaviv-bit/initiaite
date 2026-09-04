@@ -215,10 +215,16 @@
 
     function randInt(rng, min, max) { return Math.floor(rng() * (max - min + 1)) + min; }
 
-    function generateMathQuestion(difficulty, rng) {
+    function generateMathQuestion(difficulty, rng, opts) {
         rng = rng || Math.random;
         let a, b, op;
-        if (difficulty === 'easy') {
+        if (difficulty === 'custom') {
+            const ops = (opts && opts.operators && opts.operators.length) ? opts.operators : ['+', '-'];
+            op = ops[randInt(rng, 0, ops.length - 1)];
+            if (op === '×') { a = randInt(rng, 2, 12); b = randInt(rng, 2, 12); }
+            else if (op === '÷') { b = randInt(rng, 2, 12); const result = randInt(rng, 2, 12); a = b * result; }
+            else { a = randInt(rng, 1, 50); b = randInt(rng, 1, 50); if (op === '-' && b > a) [a, b] = [b, a]; }
+        } else if (difficulty === 'easy') {
             op = rng() < 0.5 ? '+' : '-';
             a = randInt(rng, 1, 20); b = randInt(rng, 1, 20);
             if (op === '-' && b > a) [a, b] = [b, a];
@@ -242,9 +248,9 @@
         return { question: `${a} ${op} ${b}`, answer };
     }
 
-    function generateMathSet(difficulty, count, rng) {
+    function generateMathSet(difficulty, count, rng, opts) {
         const out = [];
-        for (let i = 0; i < count; i++) out.push(generateMathQuestion(difficulty, rng));
+        for (let i = 0; i < count; i++) out.push(generateMathQuestion(difficulty, rng, opts));
         return out;
     }
 

@@ -63,8 +63,14 @@
         switch (task.type) {
             case 'math': {
                 const count = task.count || 5;
-                const questions = Logic.generateMathSet(task.difficulty || 'easy', count, rng);
-                return Object.assign(base, { questions, index: 0, correctCount: 0 });
+                const difficulty = task.difficulty || 'easy';
+                const opts = { operators: task.operators };
+                const questions = Logic.generateMathSet(difficulty, count, rng, opts);
+                return Object.assign(base, {
+                    questions, index: 0, correctCount: 0, questionMistakes: 0,
+                    difficulty, opts, rng,
+                    maxMistakes: task.maxMistakes || null, timeLimitSec: task.timeLimitSec || null
+                });
             }
             case 'memory': {
                 const length = Logic.MEMORY_LEVEL_LENGTHS[task.level] || 5;
@@ -106,16 +112,31 @@
 
     // --- Per-type answer handlers, return true if the task step is now done ---
 
+    /**
+     * A wrong (or timed-out — call with NaN) answer never advances, but per
+     * the product spec it also doesn't just re-ask the same question: it's
+     * replaced with a fresh one of the same difficulty. If the caller set a
+     * maxMistakes cap and it's hit on one question, that question is
+     * "mercy-passed" instead of trapping the user forever.
+     */
     ChallengeRunner.prototype.submitMathAnswer = function (value) {
         const t = this.currentTask();
         const q = t.questions[t.index];
         const correct = Number(value) === q.answer;
         if (correct) {
-            t.correctCount++; t.index++;
+            t.correctCount++; t.index++; t.questionMistakes = 0;
             if (t.index >= t.questions.length) { this.advance(); return { correct: true, taskDone: true }; }
             return { correct: true, taskDone: false };
         }
         t.mistakes++;
+        t.questionMistakes = (t.questionMistakes || 0) + 1;
+        const mercyPass = !!(t.maxMistakes && t.questionMistakes >= t.maxMistakes);
+        if (mercyPass) {
+            t.correctCount++; t.index++; t.questionMistakes = 0;
+            if (t.index >= t.questions.length) { this.advance(); return { correct: false, taskDone: true, mercyPass: true }; }
+            return { correct: false, taskDone: false, mercyPass: true };
+        }
+        t.questions[t.index] = Logic.generateMathQuestion(t.difficulty, t.rng, t.opts);
         return { correct: false, taskDone: false };
     };
 

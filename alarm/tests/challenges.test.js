@@ -12,7 +12,9 @@ test('ChallengeRunner: single math task, wrong answers never advance', () => {
     assert.equal(runner.isComplete(), false);
     assert.equal(runner.currentTask().index, 0); // still on question 1
 
-    const right1 = runner.submitMathAnswer(q1.answer);
+    // The wrong guess replaced question 1 with a fresh one — answer THAT.
+    const replacedQ1 = runner.currentTask().questions[0];
+    const right1 = runner.submitMathAnswer(replacedQ1.answer);
     assert.equal(right1.correct, true);
     assert.equal(right1.taskDone, false); // one more question left
 
@@ -20,6 +22,33 @@ test('ChallengeRunner: single math task, wrong answers never advance', () => {
     const right2 = runner.submitMathAnswer(q2.answer);
     assert.equal(right2.taskDone, true);
     assert.equal(runner.isComplete(), true);
+});
+
+test('ChallengeRunner: a wrong math answer replaces the question instead of repeating it', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'math', difficulty: 'easy', count: 1 }], L.mulberry32(9));
+    const original = runner.currentTask().questions[0];
+    runner.submitMathAnswer(original.answer + 999);
+    const replaced = runner.currentTask().questions[0];
+    assert.notDeepEqual(replaced, original);
+    // Submitting the OLD (no-longer-current) answer should not complete the task.
+    const stillWrong = runner.submitMathAnswer(original.answer);
+    assert.equal(stillWrong.correct, replaced.answer === original.answer);
+});
+
+test('ChallengeRunner: maxMistakes mercy-passes a question instead of trapping the user', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'math', difficulty: 'easy', count: 1, maxMistakes: 2 }], L.mulberry32(4));
+    const r1 = runner.submitMathAnswer(NaN);
+    assert.equal(r1.correct, false);
+    assert.equal(r1.taskDone, false);
+    assert.equal(runner.isComplete(), false);
+    const r2 = runner.submitMathAnswer(NaN); // second miss on this question hits maxMistakes
+    assert.equal(r2.mercyPass, true);
+    assert.equal(runner.isComplete(), true); // it was the only question
+});
+
+test('ChallengeRunner: custom math operators only draw from the configured set', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'math', difficulty: 'custom', operators: ['×'], count: 5 }], L.mulberry32(11));
+    for (const q of runner.currentTask().questions) assert.match(q.question, /×/);
 });
 
 test('ChallengeRunner: combo advances through each task type in order', () => {

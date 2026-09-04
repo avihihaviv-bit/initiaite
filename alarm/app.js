@@ -602,7 +602,10 @@ function builderStepHTML(tsk, i, total) {
 }
 function needsConfig(type) { return ['math', 'memory', 'situps', 'sport', 'qr'].includes(type); }
 function builderStepSub(tsk) {
-    if (tsk.type === 'math') return `${t(tsk.difficulty)} · ${tsk.count} ${t('questionsCount').toLowerCase()}`;
+    if (tsk.type === 'math') {
+        const diffLabel = tsk.difficulty === 'custom' ? `${t('custom')} (${(tsk.operators || []).join(' ')})` : t(tsk.difficulty);
+        return `${diffLabel} · ${tsk.count} ${t('questionsCount').toLowerCase()}`;
+    }
     if (tsk.type === 'memory') return t(tsk.level);
     if (tsk.type === 'situps') return `${tsk.count} reps`;
     if (tsk.type === 'sport') return `${tsk.count} ${tsk.activity}`;
@@ -621,10 +624,14 @@ function removeTaskAt(i) { State.draftAlarm.challenge.tasks.splice(i, 1); rerend
 function configureTask(i) {
     const tsk = State.draftAlarm.challenge.tasks[i];
     if (tsk.type === 'math') {
+        if (!tsk.operators || !tsk.operators.length) tsk.operators = ['+', '-'];
         openModal(() => `
       <div class="modal-header"><h2>${t('dismissMath')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
-      <div class="field"><label>${t('difficulty')}</label><div class="preset-row">${['easy', 'medium', 'hard'].map(d => `<button class="${tsk.difficulty === d ? 'active' : ''}" onclick="setTaskField(${i},'difficulty','${d}')">${t(d)}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('difficulty')}</label><div class="preset-row">${['easy', 'medium', 'hard', 'custom'].map(d => `<button class="${tsk.difficulty === d ? 'active' : ''}" onclick="setTaskField(${i},'difficulty','${d}')">${d === 'custom' ? t('custom') : t(d)}</button>`).join('')}</div></div>
+      ${tsk.difficulty === 'custom' ? `<div class="field"><label>+ − × ÷</label><div class="preset-row">${['+', '-', '×', '÷'].map(op => `<button class="${tsk.operators.includes(op) ? 'active' : ''}" onclick="toggleMathOperator(${i},'${op}')">${op}</button>`).join('')}</div></div>` : ''}
       <div class="field"><label>${t('questionsCount')}</label><div class="preset-row">${[1, 3, 5, 10, 20].map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('maxMistakes')}</label><div class="preset-row">${[null, 1, 2, 3, 5].map(n => `<button class="${(tsk.maxMistakes || null) === n ? 'active' : ''}" onclick="setTaskField(${i},'maxMistakes',${n === null ? 'null' : n})">${n === null ? '∞' : n}</button>`).join('')}</div></div>
+      <div class="field"><label>Time per question</label><div class="preset-row">${[null, 10, 20, 30].map(n => `<button class="${(tsk.timeLimitSec || null) === n ? 'active' : ''}" onclick="setTaskField(${i},'timeLimitSec',${n === null ? 'null' : n})">${n === null ? '∞' : n + 's'}</button>`).join('')}</div></div>
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'memory') {
         openModal(() => `
@@ -634,19 +641,37 @@ function configureTask(i) {
     } else if (tsk.type === 'situps') {
         openModal(() => `
       <div class="modal-header"><h2>${t('dismissSitups')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
-      <div class="field"><label>${t('reps')}</label><div class="preset-row">${Ch.SITUP_COUNTS.map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('reps')}</label><div class="preset-row">${Ch.SITUP_COUNTS.map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div>
+        ${customCountInputHTML(i, tsk.count)}</div>
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'sport') {
         openModal(() => `
       <div class="modal-header"><h2>${t('dismissSport')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
       <div class="field"><label>Activity</label><div class="preset-row">${['squats', 'pushups', 'jumpingjacks', 'walk'].map(act => `<button class="${tsk.activity === act ? 'active' : ''}" onclick="setTaskField(${i},'activity','${act}')">${act}</button>`).join('')}</div></div>
-      <div class="field"><label>${t('reps')}</label><div class="preset-row">${[5, 10, 15, 20, 30].map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('reps')}</label><div class="preset-row">${[5, 10, 15, 20, 30].map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div>
+        ${customCountInputHTML(i, tsk.count)}</div>
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'qr') {
         openQrTaskPicker(i);
     }
 }
 function setTaskField(i, field, value) { State.draftAlarm.challenge.tasks[i][field] = value; rerenderEditor(); openModal(currentModalRenderer); }
+function customCountInputHTML(i, currentCount) {
+    return `<div style="margin-top:8px"><input type="number" min="1" max="500" value="${currentCount}" placeholder="${esc(t('custom'))}"
+    style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px"
+    onchange="setCustomCount(${i}, this.value)"></div>`;
+}
+function setCustomCount(i, value) {
+    const n = Math.max(1, Math.min(500, Math.round(+value) || 1));
+    setTaskField(i, 'count', n);
+}
+function toggleMathOperator(i, op) {
+    const tsk = State.draftAlarm.challenge.tasks[i];
+    const idx = tsk.operators.indexOf(op);
+    if (idx > -1) { if (tsk.operators.length > 1) tsk.operators.splice(idx, 1); }
+    else tsk.operators.push(op);
+    rerenderEditor(); openModal(currentModalRenderer);
+}
 
 function saveAlarm() {
     const a = State.draftAlarm;
@@ -1224,19 +1249,37 @@ function mathTaskHTML(taskState) {
     const q = taskState.questions[taskState.index];
     return `
     <div class="challenge-progress">${t('mathQuestionOf', { cur: taskState.index + 1, total: taskState.questions.length })}</div>
+    ${taskState.timeLimitSec ? `<div class="row-sub" style="text-align:center;color:#fff;font-weight:800" id="mathTimerLabel">${taskState.timeLimitSec}s</div>` : ''}
     <div class="math-display">${q.question} = ?</div>
     <input type="number" inputmode="numeric" class="math-input" id="mathAnswerInput" autofocus>
     ${taskState.mistakes ? `<div class="row-sub" style="text-align:center;color:#ffb4b4;margin-bottom:8px">${t('tryAgain')}</div>` : ''}
     <button class="btn btn-primary btn-block btn-lg" onclick="submitMathAnswer()">${t('done')}</button>
   `;
 }
-function submitMathAnswer() {
+function submitMathAnswer(value) {
+    clearMathTimer();
     const input = document.getElementById('mathAnswerInput');
-    const res = State.activeRing.runner.submitMathAnswer(input.value);
+    const res = State.activeRing.runner.submitMathAnswer(value === undefined ? (input && input.value) : value);
     haptic(res.correct ? 20 : [40, 40, 40]);
     if (res.taskDone && State.activeRing.runner.isComplete()) return finishChallenge();
     renderRing();
     const el = document.getElementById('mathAnswerInput'); if (el) el.focus();
+}
+let mathTimerHandle = null;
+function clearMathTimer() { if (mathTimerHandle) { clearInterval(mathTimerHandle); mathTimerHandle = null; } }
+function startMathTimerIfNeeded() {
+    clearMathTimer();
+    const ring = State.activeRing;
+    if (!ring || !ring.runner) return;
+    const taskState = ring.runner.currentTask();
+    if (!taskState || taskState.config.type !== 'math' || !taskState.timeLimitSec) return;
+    let remaining = taskState.timeLimitSec;
+    mathTimerHandle = setInterval(() => {
+        remaining--;
+        const label = document.getElementById('mathTimerLabel');
+        if (label) label.textContent = remaining + 's';
+        if (remaining <= 0) submitMathAnswer(NaN);
+    }, 1000);
 }
 function memoryTaskHTML(taskState) {
     if (taskState.phase === 'watch' && !taskState._watchStarted) { taskState._watchStarted = true; setTimeout(() => startMemoryWatch(taskState), 400); }
@@ -1357,6 +1400,7 @@ function bindRingEvents() {
     if (ring.runner && ring.runner.currentTask().config.type === 'qr' && Ch.supportsBarcodeDetector() && Ch.supportsCamera()) startRingQrScanner();
     const mathInput = document.getElementById('mathAnswerInput');
     if (mathInput) mathInput.addEventListener('keyup', e => { if (e.key === 'Enter') submitMathAnswer(); });
+    startMathTimerIfNeeded();
 
     const swipeEl = document.getElementById('swipeTarget');
     if (swipeEl) {
@@ -1391,6 +1435,7 @@ function snoozeRing() {
     const durationMin = ring.alarm.snooze.antiSnooze ? L.antiSnoozeDuration(ring.alarm.snooze.durationMin, ring.snoozeCount) : ring.alarm.snooze.durationMin;
     Sounds.engine.stop();
     stopQrStream();
+    clearMathTimer();
     const fireAt = L.nextSnoozeTime(new Date(), durationMin);
     State.pendingSnoozes.push({ alarmId: ring.alarm.id, fireAt, scheduledAt: ring.scheduledAt, snoozeCount: ring.snoozeCount + 1 });
     State.activeRing = null;
@@ -1404,6 +1449,7 @@ function dismissRing(method) {
     if (!ring) return;
     Sounds.engine.stop();
     stopQrStream();
+    clearMathTimer();
     if (State.wakeLock) { State.wakeLock.release(); State.wakeLock = null; }
     const now = new Date();
     const settings = DB.getSettings();
