@@ -12,6 +12,8 @@ export interface User {
   avatarEmoji: string
   color: string // hex used for accents/charts
   role: Role
+  gender?: 'male' | 'female'
+  age?: number
   xp: number
   points: number // spendable currency for reward shop
   createdAt: string

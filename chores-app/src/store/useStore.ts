@@ -46,7 +46,7 @@ interface Store extends AppState {
   moveChoreDate: (choreId: string, newDate: string) => void
 
   // family
-  addMember: (name: string, avatarEmoji: string, color: string, role: User['role']) => void
+  addMember: (name: string, avatarEmoji: string, color: string, role: User['role'], gender?: User['gender'], age?: number) => void
   updateMember: (id: string, patch: Partial<User>) => void
   removeMember: (id: string) => void
   acceptBalanceSuggestion: () => void
@@ -381,8 +381,8 @@ export const useStore = create<Store>((set, get) => ({
     get().persist()
   },
 
-  addMember: (name, avatarEmoji, color, role) => {
-    const user: User = { id: uid('u'), name, avatarEmoji, color, role, xp: 0, points: 0, createdAt: new Date().toISOString() }
+  addMember: (name, avatarEmoji, color, role, gender, age) => {
+    const user: User = { id: uid('u'), name, avatarEmoji, color, role, gender, age, xp: 0, points: 0, createdAt: new Date().toISOString() }
     set((s) => ({ users: [...s.users, user], family: { ...s.family, memberIds: [...s.family.memberIds, user.id] }, streaks: [...s.streaks, { userId: user.id, current: 0, longest: 0, lastCompletedDate: null, freezeAvailable: true, freezeUsedThisMonth: false }] }))
     get().persist()
   },

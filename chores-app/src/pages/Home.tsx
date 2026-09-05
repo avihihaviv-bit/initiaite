@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Check, Play, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, Play, Plus, Sparkles } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { Card } from '../components/ui/Card'
 import { ProgressBar } from '../components/ui/ProgressBar'
@@ -14,7 +14,7 @@ import { ChoreFormModal } from '../components/chores/ChoreFormModal'
 import { ChoreTimerModal } from '../components/chores/ChoreTimerModal'
 import { levelFromXP } from '../lib/gamification'
 import { rankChores, bestNextChore } from '../lib/priority'
-import { formatTime, todayISO } from '../lib/date'
+import { addDays, friendlyDate, formatTime, todayISO } from '../lib/date'
 import { effectiveDueDate, isCompletedOn, isDueOn, isOverdue } from '../lib/occurrence'
 import { useToast } from '../components/ui/Toast'
 
@@ -37,6 +37,8 @@ export default function Home() {
   const [openChoreId, setOpenChoreId] = useState<string | null>(null)
   const [editChoreId, setEditChoreId] = useState<string | null>(null)
   const [timerChoreId, setTimerChoreId] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState(todayISO())
+  const [createOpen, setCreateOpen] = useState(false)
 
   const user = users.find((u) => u.id === currentUserId) ?? users[0]
   const openChore = chores.find((c) => c.id === openChoreId) ?? null
@@ -44,14 +46,11 @@ export default function Home() {
   const timerChore = chores.find((c) => c.id === timerChoreId) ?? null
   const today = todayISO()
 
+  // Only chores explicitly assigned to this person show up as "mine" — an
+  // unassigned chore isn't anyone's yet, so a new member starts with a clean
+  // list instead of inheriting whatever's still up for grabs.
   const myChoresToday = useMemo(
-    () =>
-      chores.filter(
-        (c) =>
-          !c.archived &&
-          (isDueOn(c, today) || isOverdue(c, today)) &&
-          (c.assigneeIds.length === 0 || (!!user && c.assigneeIds.includes(user.id)))
-      ),
+    () => chores.filter((c) => !c.archived && !!user && c.assigneeIds.includes(user.id) && (isDueOn(c, today) || isOverdue(c, today))),
     [chores, today, user]
   )
   const completedToday = myChoresToday.filter((c) => isCompletedOn(c, effectiveDueDate(c, today)))
@@ -62,7 +61,21 @@ export default function Home() {
   const streak = streaks.find((s) => s.userId === user?.id)
   const { level, intoLevel, forNext } = user ? levelFromXP(user.xp) : { level: 1, intoLevel: 0, forNext: 100 }
 
-  const rankedToday = useMemo(() => rankChores(myChoresToday), [myChoresToday])
+  // The list below the overview can browse other days, independent of the
+  // (always-today) stats above.
+  const myChoresForDay = useMemo(
+    () =>
+      chores.filter(
+        (c) =>
+          !c.archived &&
+          !!user &&
+          c.assigneeIds.includes(user.id) &&
+          (isDueOn(c, selectedDate) || (selectedDate === today && isOverdue(c, today)))
+      ),
+    [chores, selectedDate, today, user]
+  )
+  const rankedForDay = useMemo(() => rankChores(myChoresForDay), [myChoresForDay])
+  const dayLabel = friendlyDate(selectedDate)
 
   const bestNext = useMemo(() => bestNextChore(chores, user?.id ?? null, chores), [chores, user])
 
@@ -160,15 +173,32 @@ export default function Home() {
       )}
 
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-base font-bold text-ink">📋 My chores today</h2>
-          {rankedToday.length > 0 && <span className="text-xs font-semibold text-ink-faint">{rankedToday.length} chore{rankedToday.length === 1 ? '' : 's'}</span>}
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-bold text-ink">📋 My chores — {dayLabel}</h2>
+          <div className="flex items-center gap-1.5">
+            {rankedForDay.length > 0 && <span className="mr-1 text-xs font-semibold text-ink-faint">{rankedForDay.length} chore{rankedForDay.length === 1 ? '' : 's'}</span>}
+            <Button variant="secondary" size="icon" onClick={() => setSelectedDate((d) => addDays(d, -1))} aria-label="Previous day">
+              <ChevronLeft size={15} />
+            </Button>
+            {selectedDate !== today && (
+              <Button variant="ghost" size="sm" onClick={() => setSelectedDate(today)}>Today</Button>
+            )}
+            <Button variant="secondary" size="icon" onClick={() => setSelectedDate((d) => addDays(d, 1))} aria-label="Next day">
+              <ChevronRight size={15} />
+            </Button>
+            <Button size="sm" icon={<Plus size={14} />} onClick={() => setCreateOpen(true)}>Add</Button>
+          </div>
         </div>
-        {rankedToday.length === 0 ? (
-          <EmptyState emoji="🌿" title="Nothing scheduled today" description="Enjoy the calm, or get ahead by assigning tomorrow's chores." />
+        {rankedForDay.length === 0 ? (
+          <EmptyState
+            emoji="🌿"
+            title={`Nothing for ${dayLabel.toLowerCase()}`}
+            description="Nothing scheduled yet — add a chore to get started."
+            action={<Button icon={<Plus size={15} />} onClick={() => setCreateOpen(true)}>Add a chore</Button>}
+          />
         ) : (
           <div className="space-y-2.5">
-            {rankedToday.map((r) => (
+            {rankedForDay.map((r) => (
               <ChoreCard
                 key={r.chore.id}
                 chore={r.chore}
@@ -183,6 +213,7 @@ export default function Home() {
 
       <ChoreDetailModal chore={openChore} onClose={() => setOpenChoreId(null)} onEdit={() => { setEditChoreId(openChoreId); setOpenChoreId(null) }} />
       <ChoreFormModal open={!!editChore} onClose={() => setEditChoreId(null)} editChore={editChore} />
+      <ChoreFormModal open={createOpen} onClose={() => setCreateOpen(false)} defaultDate={selectedDate} defaultUserId={user.id} />
       <ChoreTimerModal chore={timerChore} onClose={() => setTimerChoreId(null)} />
     </div>
   )

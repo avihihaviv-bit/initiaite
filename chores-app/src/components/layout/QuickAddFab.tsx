@@ -98,6 +98,7 @@ function QuickChoreModal({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('')
   const addChore = useStore((s) => s.addChore)
   const categories = useStore((s) => s.categories)
+  const currentUserId = useStore((s) => s.settings.currentUserId)
   const { show } = useToast()
 
   const submit = () => {
@@ -107,7 +108,7 @@ function QuickChoreModal({ onClose }: { onClose: () => void }) {
       description: '',
       emoji: '⚡',
       categoryId: categories[0]?.id ?? 'cat-cleaning',
-      assigneeIds: [],
+      assigneeIds: currentUserId ? [currentUserId] : [],
       priority: 'medium',
       difficulty: 'easy',
       estimatedMinutes: 10,
