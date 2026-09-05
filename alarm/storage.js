@@ -64,6 +64,60 @@
         return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
     }
 
+    // --- IndexedDB blob store (uploaded song files) -----------------------
+    // A real song is a few MB, and localStorage's base64 encoding inflates
+    // that by ~33% against a ~5-10MB per-origin quota — a full song can
+    // silently fail to save. IndexedDB has a far larger quota and stores
+    // Blobs directly, so audio content lives there; the small, synchronous
+    // localStorage-backed customSounds list keeps only name/duration/start
+    // offset for instant rendering.
+    const MEDIA_DB_NAME = 'alarmapp-media';
+    const MEDIA_STORE = 'soundBlobs';
+    let mediaDbPromise = null;
+    function openMediaDB() {
+        if (!mediaDbPromise) {
+            mediaDbPromise = new Promise((resolve, reject) => {
+                if (typeof indexedDB === 'undefined') { reject(new Error('IndexedDB unavailable')); return; }
+                const req = indexedDB.open(MEDIA_DB_NAME, 1);
+                req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(MEDIA_STORE)) req.result.createObjectStore(MEDIA_STORE); };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        return mediaDbPromise;
+    }
+    function putMediaBlob(id, blob) {
+        return openMediaDB().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(MEDIA_STORE, 'readwrite');
+            tx.objectStore(MEDIA_STORE).put(blob, id);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        }));
+    }
+    function getMediaBlob(id) {
+        return openMediaDB().then(db => new Promise((resolve, reject) => {
+            const req = db.transaction(MEDIA_STORE, 'readonly').objectStore(MEDIA_STORE).get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+        }));
+    }
+    function deleteMediaBlob(id) {
+        return openMediaDB().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(MEDIA_STORE, 'readwrite');
+            tx.objectStore(MEDIA_STORE).delete(id);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        }));
+    }
+    function clearMediaBlobs() {
+        return openMediaDB().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(MEDIA_STORE, 'readwrite');
+            tx.objectStore(MEDIA_STORE).clear();
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        }));
+    }
+
     // --- Generic list CRUD -------------------------------------------------
 
     function list(key) { return readJSON(key, []); }
@@ -138,11 +192,29 @@
     function createQrChallenge(data) { return add(KEYS.qrChallenges, data); }
     function deleteQrChallenge(id) { return remove(KEYS.qrChallenges, id); }
 
-    // --- Custom sounds (stored as data URLs; size-limited by caller) ------
+    // --- Custom sounds: small metadata here, the actual audio Blob in
+    // IndexedDB (see above). ------------------------------------------
 
     function listCustomSounds() { return list(KEYS.customSounds); }
-    function addCustomSound(data) { return add(KEYS.customSounds, data); }
-    function deleteCustomSound(id) { return remove(KEYS.customSounds, id); }
+    /** data: { name, blob, startOffsetSec?, durationSec? }. Rolls the
+     * metadata record back if the blob fails to persist (e.g. a full
+     * IndexedDB quota), so the list never shows a sound with no audio. */
+    async function addCustomSound(data) {
+        const record = add(KEYS.customSounds, {
+            name: data.name, startOffsetSec: data.startOffsetSec || 0,
+            durationSec: data.durationSec || null, sizeBytes: data.blob ? data.blob.size : 0
+        });
+        try { await putMediaBlob(record.id, data.blob); }
+        catch (e) { remove(KEYS.customSounds, record.id); throw e; }
+        return record;
+    }
+    async function deleteCustomSound(id) {
+        remove(KEYS.customSounds, id);
+        try { await deleteMediaBlob(id); } catch (e) { /* nothing to clean up */ }
+        return true;
+    }
+    function updateCustomSoundMeta(id, patch) { return update(KEYS.customSounds, id, patch); }
+    function getCustomSoundBlob(id) { return getMediaBlob(id); }
 
     // --- Sound favorites / recents ----------------------------------------
 
@@ -213,9 +285,10 @@
         return out;
     }
 
-    function deleteAll() {
+    async function deleteAll() {
         Object.values(KEYS).forEach(key => rawRemove(key));
         mem = {};
+        try { await clearMediaBlobs(); } catch (e) { /* IndexedDB unavailable or already empty */ }
     }
 
     return {
@@ -224,7 +297,7 @@
         listDayLogs, addDayLog,
         listRoutines, saveRoutine, deleteRoutine, listRoutineRuns, addRoutineRun, updateRoutineRun,
         listQrChallenges, createQrChallenge, deleteQrChallenge,
-        listCustomSounds, addCustomSound, deleteCustomSound,
+        listCustomSounds, addCustomSound, deleteCustomSound, updateCustomSoundMeta, getCustomSoundBlob,
         getFavoriteSounds, toggleFavoriteSound, getRecentSounds, pushRecentSound,
         listChallengeHistory, addChallengeHistory,
         getUnlockedAchievements, setUnlockedAchievements,

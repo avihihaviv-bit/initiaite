@@ -74,7 +74,11 @@
         this.playing = false;
         this._clearTimers();
         this._stopNodes();
-        if (this.audioEl) { this.audioEl.pause(); this.audioEl.currentTime = 0; this.audioEl = null; }
+        if (this.audioEl) {
+            this.audioEl.pause(); this.audioEl.currentTime = 0; this.audioEl = null;
+            if (this.audioUrl && this.audioUrl.indexOf('blob:') === 0) { try { URL.revokeObjectURL(this.audioUrl); } catch (e) { /* already revoked */ } }
+            this.audioUrl = null;
+        }
     };
 
     /**
@@ -161,10 +165,18 @@
 
         if (opts.customDataUrl) {
             const el = new Audio(opts.customDataUrl);
-            el.loop = loop;
+            const startAt = opts.startOffsetSec || 0;
+            // Native `loop` always restarts from 0:00. For an uploaded song
+            // with a chosen start point (skip a slow intro), every repeat
+            // should jump back to that point instead — so looping is
+            // handled manually via 'ended' rather than the loop attribute.
+            el.loop = false;
+            if (startAt) el.addEventListener('loadedmetadata', () => { try { el.currentTime = startAt; } catch (e) { /* not seekable yet */ } }, { once: true });
+            if (loop) el.addEventListener('ended', () => { try { el.currentTime = startAt; el.play(); } catch (e) { /* stopped */ } });
             el.volume = opts.gradual ? 0.03 : target;
             el.play().catch(() => { /* needs a user gesture first on some browsers */ });
             this.audioEl = el;
+            this.audioUrl = opts.customDataUrl;
             if (opts.gradual) this._rampAudioEl(el, target, rampSeconds);
             return;
         }

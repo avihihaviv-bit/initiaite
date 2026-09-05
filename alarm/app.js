@@ -248,13 +248,22 @@ function fireAlarm(alarm, occurrence, snoozeCount) {
     render();
 }
 
-function playRingSound(alarm) {
+async function playRingSound(alarm) {
     const custom = DB.listCustomSounds().find(s => s.id === alarm.soundId);
+    let customUrl = null, startOffsetSec = 0;
+    if (custom) {
+        const blob = await DB.getCustomSoundBlob(alarm.soundId);
+        if (blob) { customUrl = URL.createObjectURL(blob); startOffsetSec = custom.startOffsetSec || 0; }
+    }
+    // The ring may already have been dismissed/snoozed while the blob load
+    // was in flight — don't start audio for an alarm that's no longer active.
+    if (!State.activeRing || State.activeRing.alarm !== alarm) { if (customUrl) URL.revokeObjectURL(customUrl); return; }
     Sounds.engine.play(alarm.soundId, {
         volume01: L.clamp(alarm.volume, 0, 100) / 100,
         gradual: !!alarm.gradualVolume,
         loop: true,
-        customDataUrl: custom ? custom.dataUrl : null
+        customDataUrl: customUrl,
+        startOffsetSec
     });
 }
 
@@ -702,36 +711,95 @@ function openSoundPicker() {
         const cats = Sounds.CATEGORIES;
         return `
       <div class="modal-header"><h2>${t('sound')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
-      <div class="field"><label>${t('uploadSound')}</label><input type="file" accept="audio/*" onchange="handleSoundUpload(event)"></div>
-      ${custom.length ? `<div class="section-title">${t('soundsCustom')}</div>${custom.map(s => soundRowHTML(s.id, s.name, favs, true)).join('')}` : ''}
+      <div class="field"><label>${t('uploadSound')}</label><input type="file" accept="audio/*" onchange="handleSoundUpload(event)">
+        <div class="row-sub" style="margin-top:6px">${t('uploadSoundHint')}</div></div>
+      ${custom.length ? `<div class="section-title">${t('soundsCustom')}</div>${custom.map(s => soundRowHTML(s.id, s.name, favs, s)).join('')}` : ''}
       ${recents.length ? `<div class="section-title">${t('recentlyUsed')}</div>${recents.map(id => soundRowHTML(id, soundName(id), favs)).join('')}` : ''}
       ${cats.map(cat => `<div class="section-title">${t('sounds' + cat[0].toUpperCase() + cat.slice(1))}</div>${Sounds.byCategory(cat).map(s => soundRowHTML(s.id, s.name, favs)).join('')}`).join('')}
     `;
     });
 }
-function soundRowHTML(id, name, favs, isCustom) {
+function formatSeconds(sec) { sec = Math.max(0, Math.round(sec || 0)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
+function soundRowHTML(id, name, favs, custom) {
     const selected = State.draftAlarm.soundId === id;
+    const sub = custom && custom.durationSec ? `${formatSeconds(custom.durationSec)}${custom.startOffsetSec ? ' · ' + t('startPoint').toLowerCase() + ' ' + formatSeconds(custom.startOffsetSec) : ''}` : '';
     return `<div class="sound-row ${selected ? 'selected' : ''}">
     <button class="play-btn" onclick="previewSound('${id}')" aria-label="${esc(t('preview'))}">▶</button>
-    <div class="name" onclick="selectSound('${id}')">${esc(name)}</div>
+    <div class="name" onclick="selectSound('${id}')">${esc(name)}${sub ? `<div class="row-sub" style="margin-top:2px">${esc(sub)}</div>` : ''}</div>
     <button class="star ${favs.has(id) ? 'fav' : ''}" onclick="event.stopPropagation(); toggleFav('${id}')">★</button>
-    ${isCustom ? `<button class="star" onclick="event.stopPropagation(); DB.deleteCustomSound('${id}'); openSoundPicker()">${icon('trash')}</button>` : ''}
+    ${custom ? `<button class="star" onclick="event.stopPropagation(); openTrimSoundModal('${id}')" aria-label="${esc(t('setStartPoint'))}">✂️</button>` : ''}
+    ${custom ? `<button class="star" onclick="event.stopPropagation(); DB.deleteCustomSound('${id}'); openSoundPicker()">${icon('trash')}</button>` : ''}
   </div>`;
 }
-function previewSound(id) {
+async function previewSound(id) {
     const custom = DB.listCustomSounds().find(s => s.id === id);
-    if (custom) { const el = new Audio(custom.dataUrl); el.volume = 0.6; el.play().catch(() => {}); setTimeout(() => el.pause(), 1800); }
-    else Sounds.engine.preview(id);
+    if (custom) {
+        const blob = await DB.getCustomSoundBlob(id);
+        if (!blob) { toast(t('couldNotSaveFile')); return; }
+        const url = URL.createObjectURL(blob);
+        const el = new Audio(url);
+        el.volume = 0.6;
+        el.addEventListener('loadedmetadata', () => { try { el.currentTime = custom.startOffsetSec || 0; } catch (e) { /* ignore */ } }, { once: true });
+        el.play().catch(() => {});
+        setTimeout(() => { el.pause(); URL.revokeObjectURL(url); }, 2200);
+        return;
+    }
+    Sounds.engine.preview(id);
 }
 function selectSound(id) { State.draftAlarm.soundId = id; DB.pushRecentSound(id); closeModal(); rerenderEditor(); }
 function toggleFav(id) { DB.toggleFavoriteSound(id); openModal(currentModalRenderer); }
-function handleSoundUpload(evt) {
+function probeAudioDuration(file) {
+    return new Promise(resolve => {
+        const url = URL.createObjectURL(file);
+        const probe = new Audio(url);
+        const done = sec => { URL.revokeObjectURL(url); resolve(sec); };
+        probe.addEventListener('loadedmetadata', () => done(isFinite(probe.duration) ? probe.duration : null));
+        probe.addEventListener('error', () => done(null));
+    });
+}
+async function handleSoundUpload(evt) {
     const file = evt.target.files[0];
+    evt.target.value = '';
     if (!file) return;
-    if (file.size > 2.5 * 1024 * 1024) { toast('File too large (max 2.5MB)'); return; }
-    const reader = new FileReader();
-    reader.onload = () => { DB.addCustomSound({ name: file.name.replace(/\.[^.]+$/, ''), dataUrl: reader.result }); openSoundPicker(); toast(t('uploadSound') + ' ✓'); };
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith('audio/')) { toast(t('chooseAudioFile')); return; }
+    if (file.size > 15 * 1024 * 1024) { toast(t('fileTooLarge')); return; }
+    try {
+        const durationSec = await probeAudioDuration(file);
+        await DB.addCustomSound({ name: file.name.replace(/\.[^.]+$/, ''), blob: file, durationSec });
+        openSoundPicker();
+        toast(t('uploadSound') + ' ✓');
+    } catch (e) { toast(t('couldNotSaveFile')); }
+}
+let trimObjectUrl = null;
+async function openTrimSoundModal(soundId) {
+    const meta = DB.listCustomSounds().find(s => s.id === soundId);
+    if (!meta) return;
+    const blob = await DB.getCustomSoundBlob(soundId);
+    if (!blob) { toast(t('couldNotSaveFile')); return; }
+    if (trimObjectUrl) { URL.revokeObjectURL(trimObjectUrl); }
+    trimObjectUrl = URL.createObjectURL(blob);
+    openModal(() => `
+    <div class="modal-header"><h2>${esc(meta.name)}</h2><button class="icon-btn" onclick="closeTrimModal()">${icon('close')}</button></div>
+    <audio id="trimAudio" controls style="width:100%" src="${trimObjectUrl}"></audio>
+    <p class="row-sub" style="margin:12px 0">${t('setStartPointHint')}</p>
+    <div class="row-sub" id="trimCurrentStart" style="font-weight:700">${t('startPoint')}: ${formatSeconds(meta.startOffsetSec || 0)}</div>
+    <button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="useCurrentAsStart('${soundId}')">${t('useCurrentPosition')}</button>
+    <button class="btn btn-primary btn-block" style="margin-top:10px" onclick="closeTrimModal()">${t('done')}</button>
+  `);
+}
+function closeTrimModal() {
+    if (trimObjectUrl) { URL.revokeObjectURL(trimObjectUrl); trimObjectUrl = null; }
+    closeModal();
+    openSoundPicker();
+}
+function useCurrentAsStart(soundId) {
+    const audioEl = document.getElementById('trimAudio');
+    if (!audioEl) return;
+    const sec = Math.floor(audioEl.currentTime);
+    DB.updateCustomSoundMeta(soundId, { startOffsetSec: sec });
+    const label = document.getElementById('trimCurrentStart');
+    if (label) label.textContent = `${t('startPoint')}: ${formatSeconds(sec)}`;
+    haptic(15);
 }
 
 // ---------------------------------------------------------------------- //
@@ -1194,7 +1262,7 @@ function confirmDeleteAllData() {
     <p class="row-sub" style="margin-bottom:16px">${t('deleteDataConfirm')}</p>
     <div class="row" style="gap:10px">
       <button class="btn btn-secondary btn-block" onclick="closeModal()">${t('cancel')}</button>
-      <button class="btn btn-danger btn-block" onclick="DB.deleteAll(); closeModal(); location.reload()">${t('delete')}</button>
+      <button class="btn btn-danger btn-block" onclick="DB.deleteAll().then(() => { closeModal(); location.reload(); })">${t('delete')}</button>
     </div>`);
 }
 

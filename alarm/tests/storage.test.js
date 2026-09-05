@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const DB = require('../storage.js');
 
-test.beforeEach(() => { DB.deleteAll(); });
+test.beforeEach(async () => { await DB.deleteAll(); });
 
 test('createAlarm applies defaults and persists', () => {
     const alarm = DB.createAlarm({ time: '06:30', label: 'Gym' });
@@ -65,15 +65,26 @@ test('favorite sounds toggle on and off', () => {
     assert.deepEqual(DB.getFavoriteSounds(), []);
 });
 
-test('exportAll includes every collection and deleteAll clears everything', () => {
+test('exportAll includes every collection and deleteAll clears everything', async () => {
     DB.createAlarm({ time: '07:00' });
     DB.updateSettings({ userName: 'Yoav' });
     const dump = DB.exportAll();
     assert.equal(dump.alarms.length, 1);
     assert.equal(dump.settings.userName, 'Yoav');
-    DB.deleteAll();
+    await DB.deleteAll();
     assert.equal(DB.listAlarms().length, 0);
     assert.equal(DB.getSettings().userName, ''); // back to default
+});
+
+test('addCustomSound rolls back the metadata record if the blob fails to persist', async () => {
+    // Node has no IndexedDB, so this exercises the real "storage unavailable"
+    // failure path — the same one a full quota would hit in a browser.
+    await assert.rejects(() => DB.addCustomSound({ name: 'Some Song', blob: new Blob(['x'], { type: 'audio/mpeg' }) }));
+    assert.equal(DB.listCustomSounds().length, 0); // no orphaned metadata left behind
+});
+
+test('deleteAll tolerates IndexedDB being unavailable', async () => {
+    await assert.doesNotReject(() => DB.deleteAll());
 });
 
 test('onboarded flag defaults false and can be set', () => {
