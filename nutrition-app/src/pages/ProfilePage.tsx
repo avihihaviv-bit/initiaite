@@ -13,6 +13,7 @@ import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { computeAchievements } from '@/utils/achievements';
 import { kgToLb, lbToKg, cmToFtIn, ftInToCm } from '@/utils/units';
 import { todayISO } from '@/utils/date';
+import { exportBackup } from '@/utils/backup';
 import { calculateFullTargets, calculateTargetRanges, recommendedProteinRange } from '@/utils/nutritionCalculator';
 import { ProteinRangeWarningModal } from '@/components/profile/ProteinRangeWarningModal';
 import type { ActivityLevel, Goal, TrainingType, UserProfile } from '@/types';
@@ -119,25 +120,8 @@ export function ProfilePage() {
     }
   }
 
-  function handleExportData() {
-    const state = useAppStore.getState();
-    const exportData = {
-      exportedAt: new Date().toISOString(),
-      profile: state.profile,
-      diaryEntries: state.diaryEntries,
-      favorites: state.favorites,
-      weightLog: state.weightLog,
-      measurements: state.measurements,
-      progressPhotos: state.progressPhotos,
-      waterLog: state.waterLog,
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nutrition-ai-export-${todayISO()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  async function handleExportData() {
+    await exportBackup();
   }
 
   const achievements = computeAchievements(diaryEntries, targets.proteinG);

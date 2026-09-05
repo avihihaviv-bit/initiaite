@@ -8,7 +8,7 @@ import { useTargets } from '@/hooks/useTargets';
 import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { Toggle } from '@/components/ui/Toggle';
-import { todayISO } from '@/utils/date';
+import { exportBackup } from '@/utils/backup';
 import type { UserProfile } from '@/types';
 
 const THEME_OPTIONS: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
@@ -41,25 +41,16 @@ export function SettingsPage() {
   const setNotification = useSettingsStore((s) => s.setNotification);
   const { targets, hasProfile } = useTargets();
 
-  function handleExportData() {
-    const state = useAppStore.getState();
-    const exportData = {
-      exportedAt: new Date().toISOString(),
-      profile: state.profile,
-      diaryEntries: state.diaryEntries,
-      favorites: state.favorites,
-      weightLog: state.weightLog,
-      measurements: state.measurements,
-      progressPhotos: state.progressPhotos,
-      waterLog: state.waterLog,
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nutrition-ai-export-${todayISO()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  async function handleExportData() {
+    const result = await exportBackup();
+    if (!result.ok) {
+      setImportMessage({
+        ok: false,
+        text: result.reason === 'declined' ? 'Export cancelled.' : "Couldn't save the file — try again.",
+      });
+    } else {
+      setImportMessage(null);
+    }
   }
 
   function handleImportFile(file: File | undefined) {
