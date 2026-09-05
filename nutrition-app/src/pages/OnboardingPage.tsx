@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Info, ShieldAlert, Sparkles } from 'lucide-react';
+import { ChevronLeft, Info, ShieldAlert, Sparkles, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { OptionCard } from '@/components/ui/OptionCard';
 import { Chip } from '@/components/ui/Chip';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, type BackupData } from '@/store/useAppStore';
 import { generateId } from '@/utils/id';
 import { calculateFullTargets, calculateTargetRanges } from '@/utils/nutritionCalculator';
 import type { TargetRanges } from '@/utils/nutritionCalculator';
@@ -53,6 +53,28 @@ const STEPS = ['Welcome', 'About you', 'Activity', 'Training', 'Goal', 'Your pla
 export function OnboardingPage() {
   const setProfile = useAppStore((s) => s.setProfile);
   const completeOnboarding = useAppStore((s) => s.completeOnboarding);
+  const importBackup = useAppStore((s) => s.importBackup);
+  const restoreInputRef = useRef<HTMLInputElement>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
+
+  function handleRestoreFile(file: File | undefined) {
+    if (!file) return;
+    setRestoreError(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string) as BackupData;
+        if (!data.profile) {
+          setRestoreError("That file doesn't have a saved profile in it — make sure it's a Nutrition AI backup.");
+          return;
+        }
+        importBackup(data);
+      } catch {
+        setRestoreError("Couldn't read that file — make sure it's a backup exported from this app.");
+      }
+    };
+    reader.readAsText(file);
+  }
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>({
@@ -175,15 +197,38 @@ export function OnboardingPage() {
       </div>
 
       <div className="sticky bottom-0 border-t border-subtle bg-surface/95 px-5 py-4 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-lg gap-3">
-          {step < STEPS.length - 1 ? (
-            <Button fullWidth size="lg" disabled={!canProceed} onClick={() => setStep((s) => s + 1)}>
-              {step === 0 ? "Let's start" : 'Continue'}
-            </Button>
-          ) : (
-            <Button fullWidth size="lg" icon={<Sparkles size={18} />} onClick={finish}>
-              Get Started
-            </Button>
+        <div className="mx-auto w-full max-w-lg">
+          <div className="flex gap-3">
+            {step < STEPS.length - 1 ? (
+              <Button fullWidth size="lg" disabled={!canProceed} onClick={() => setStep((s) => s + 1)}>
+                {step === 0 ? "Let's start" : 'Continue'}
+              </Button>
+            ) : (
+              <Button fullWidth size="lg" icon={<Sparkles size={18} />} onClick={finish}>
+                Get Started
+              </Button>
+            )}
+          </div>
+          {step === 0 && (
+            <div className="mt-3 text-center">
+              <button
+                onClick={() => restoreInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-primary-600"
+              >
+                <Upload size={12} /> Already used this app? Restore from a backup file
+              </button>
+              <input
+                ref={restoreInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                  handleRestoreFile(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+              {restoreError && <p className="mt-1.5 text-xs text-red-600">{restoreError}</p>}
+            </div>
           )}
         </div>
       </div>

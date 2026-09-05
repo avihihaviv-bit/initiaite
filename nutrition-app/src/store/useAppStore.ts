@@ -17,6 +17,17 @@ import type {
   WeightLogEntry,
 } from '@/types';
 
+/** Shape written by Settings > Export my data — also what Import my data reads back in. */
+export interface BackupData {
+  profile?: UserProfile | null;
+  diaryEntries?: DiaryEntry[];
+  favorites?: FavoriteItem[];
+  weightLog?: WeightLogEntry[];
+  measurements?: MeasurementEntry[];
+  progressPhotos?: ProgressPhoto[];
+  waterLog?: Record<string, number>;
+}
+
 interface AppState {
   profile: UserProfile | null;
   onboardingComplete: boolean;
@@ -57,6 +68,7 @@ interface AppState {
 
   addWater: (ml: number, date: string) => void;
   resetAllData: () => void;
+  importBackup: (data: BackupData) => void;
 
   addMeasurement: (type: MeasurementType, valueCm: number, date?: string) => void;
   deleteMeasurement: (id: string) => void;
@@ -234,6 +246,18 @@ export const useAppStore = create<AppState>()(
           progressPhotos: [],
           savedMealPlans: [],
         }),
+
+      importBackup: (data) =>
+        set((state) => ({
+          profile: data.profile ?? state.profile,
+          onboardingComplete: data.profile ? true : state.onboardingComplete,
+          diaryEntries: data.diaryEntries ?? state.diaryEntries,
+          favorites: data.favorites ?? state.favorites,
+          weightLog: data.weightLog ?? state.weightLog,
+          measurements: data.measurements ?? state.measurements,
+          progressPhotos: data.progressPhotos ?? state.progressPhotos,
+          waterLog: data.waterLog ?? state.waterLog,
+        })),
     }),
     {
       name: 'nutrition-ai-store',

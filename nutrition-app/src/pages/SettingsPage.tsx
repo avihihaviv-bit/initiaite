@@ -1,6 +1,7 @@
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Download, Laptop2, Moon, Sun, Trash2 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { AlertTriangle, ChevronRight, Download, Laptop2, Moon, Sun, Trash2, Upload } from 'lucide-react';
+import { useAppStore, type BackupData } from '@/store/useAppStore';
 import { useLocaleStore, type Language } from '@/store/useLocaleStore';
 import { useSettingsStore, type ThemeMode, type NotificationSettings } from '@/store/useSettingsStore';
 import { useTargets } from '@/hooks/useTargets';
@@ -29,6 +30,9 @@ export function SettingsPage() {
   const resetAllData = useAppStore((s) => s.resetAllData);
   const clearDiaryHistory = useAppStore((s) => s.clearDiaryHistory);
   const clearWeightHistory = useAppStore((s) => s.clearWeightHistory);
+  const importBackup = useAppStore((s) => s.importBackup);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [importMessage, setImportMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const language = useLocaleStore((s) => s.language);
   const setLanguage = useLocaleStore((s) => s.setLanguage);
   const theme = useSettingsStore((s) => s.theme);
@@ -56,6 +60,29 @@ export function SettingsPage() {
     a.download = `nutrition-ai-export-${todayISO()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleImportFile(file: File | undefined) {
+    if (!file) return;
+    setImportMessage(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string) as BackupData;
+        if (!data.profile && !data.diaryEntries) {
+          setImportMessage({ ok: false, text: "That doesn't look like a Nutrition AI backup file." });
+          return;
+        }
+        if (!window.confirm('This replaces your current profile and history on this device with the data in this backup. Continue?')) {
+          return;
+        }
+        importBackup(data);
+        setImportMessage({ ok: true, text: 'Data restored ✓' });
+      } catch {
+        setImportMessage({ ok: false, text: "Couldn't read that file — make sure it's a backup exported from this app." });
+      }
+    };
+    reader.readAsText(file);
   }
 
   function handleDeleteFoodHistory() {
@@ -174,6 +201,14 @@ export function SettingsPage() {
 
       {/* Privacy */}
       <SettingsSection emoji="🔐" title="Privacy">
+        <div className="mb-3 flex gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+          <span>
+            Your data lives only in this browser on this device — there&apos;s no account or server copy. If your phone or
+            browser ever clears site data (this can happen with bookmarked/home-screen pages), it&apos;s gone unless you&apos;ve
+            exported a backup. Export a copy below, then use Import to restore it any time.
+          </span>
+        </div>
         <div className="space-y-2">
           <PrivacyRow label="Delete food history" onClick={handleDeleteFoodHistory} />
           <PrivacyRow label="Delete weight history" onClick={handleDeleteWeightHistory} />
@@ -188,10 +223,32 @@ export function SettingsPage() {
             className="flex w-full items-center justify-between gap-3 rounded-xl bg-surface-alt p-3.5 text-left transition hover:bg-surface-alt2"
           >
             <span className="flex items-center gap-2 text-sm font-medium text-fg">
-              <Download size={15} /> Export my data
+              <Download size={15} /> Export my data (backup)
             </span>
             <ChevronRight size={16} className="text-faint" />
           </button>
+          <button
+            onClick={() => importInputRef.current?.click()}
+            className="flex w-full items-center justify-between gap-3 rounded-xl bg-surface-alt p-3.5 text-left transition hover:bg-surface-alt2"
+          >
+            <span className="flex items-center gap-2 text-sm font-medium text-fg">
+              <Upload size={15} /> Import data (restore backup)
+            </span>
+            <ChevronRight size={16} className="text-faint" />
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(e) => {
+              handleImportFile(e.target.files?.[0]);
+              e.target.value = '';
+            }}
+          />
+          {importMessage && (
+            <p className={`px-1 text-xs ${importMessage.ok ? 'text-primary-600' : 'text-red-600'}`}>{importMessage.text}</p>
+          )}
           <button
             onClick={handleDeleteAccount}
             className="flex w-full items-center justify-between gap-3 rounded-xl bg-red-50 p-3.5 text-left transition hover:bg-red-100"
