@@ -12,6 +12,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { NaturalnessBadge } from '@/components/ui/NaturalnessBadge';
 import { ScanAnimation } from '@/components/food/ScanAnimation';
 import { AddDetailsPanel } from '@/components/food/AddDetailsPanel';
+import { ScanCoachOpinion } from '@/components/food/ScanCoachOpinion';
 import { calculateNutrition, sumNutrition } from '@/utils/nutritionCalculator';
 import { findFoodById } from '@/data/foods';
 import type { HiddenIngredientEntry, MealType, ScanResult, ScannedFoodCandidate } from '@/types';
@@ -285,9 +286,12 @@ export function ScanFoodPage() {
           {candidates.length === 0 ? (
             <ErrorState title="No items left" description="You removed every detected item — retake or search manually." onRetry={retake} />
           ) : (
-            <Button fullWidth size="lg" onClick={confirmAdd}>
-              Add {candidates.length} item{candidates.length > 1 ? 's' : ''} to {MEAL_LABELS[mealType].label}
-            </Button>
+            <>
+              <ScanCoachOpinion candidates={candidates} />
+              <Button fullWidth size="lg" onClick={confirmAdd}>
+                Add {candidates.length} item{candidates.length > 1 ? 's' : ''} to {MEAL_LABELS[mealType].label}
+              </Button>
+            </>
           )}
         </div>
       )}
