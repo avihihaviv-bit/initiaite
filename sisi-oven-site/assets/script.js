@@ -8,8 +8,13 @@
   const ring = document.querySelector('.ring');
   const bandsEls = [...document.querySelectorAll('.band')];
 
-  const VIDEO_URL = 'assets/hero-scrub.mp4';
-  const VIDEO_BYTES = 6000000; // fallback estimate; replace once the real file is encoded
+  // h264 gets hardware-decoded almost everywhere, which is what keeps seeking smooth;
+  // the webm is for builds that ship without it
+  const canH264 = video.canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
+  const VIDEO_URL = canH264 ? 'assets/hero-scrub.mp4' : 'assets/hero-scrub.webm';
+  const VIDEO_TYPE = canH264 ? 'video/mp4' : 'video/webm';
+  const VIDEO_BYTES = canH264 ? 4542753 : 2858657; // the fallback when Content-Length is missing
+  const posterLayer = document.querySelector('.poster');
 
   /* split visual copy into word spans once, so entrances have something to drive */
   function splitWords(root) {
@@ -94,13 +99,17 @@
         band.el.style.setProperty('--k', k.toFixed(3));
       }
     });
-    if (p > 0.98) stage.classList.add('at-end');
-    else stage.classList.remove('at-end');
+    const settled = p > 0.98;
+    if (settled !== stage.classList.contains('at-end')) {
+      stage.classList.toggle('at-end', settled);
+      const settleBand = bands[bands.length - 1];
+      if (settleBand) settleBand.el.inert = !settled; // keep hidden CTAs out of the tab order
+    }
   }
 
   function driveLoadRamp(now) {
     loadK = Math.min(1, (now - loadStart) / 900);
-    updateCaptions(heroProgress());
+    if (scrubOn) updateCaptions(heroProgress());
     if (loadK < 1) requestAnimationFrame(driveLoadRamp);
   }
   requestAnimationFrame(driveLoadRamp);
@@ -122,7 +131,10 @@
       requestSeek(t);
     }
   });
-  video.addEventListener('error', () => { seekBusy = false; pendingTime = null; });
+  video.addEventListener('error', () => {
+    seekBusy = false; pendingTime = null;
+    failVideo();
+  });
 
   /* rAF lerp loop, rests when converged and off-screen */
   let target = 0, shown = 0, rafId = null, lastTick = 0, heroOnScreen = true;
@@ -146,14 +158,24 @@
   }
   new IntersectionObserver(([entry]) => { heroOnScreen = entry.isIntersecting; }, { threshold: 0 }).observe(hero);
 
-  /* streamed blob fetch with loading ring */
+  /* streamed blob fetch with loading ring; the poster wins the bandwidth race by design */
   let blobStarted = false;
   function startBlobFetch() {
     if (blobStarted) return;
     blobStarted = true;
     loadHeroBlob().catch(failVideo);
   }
-  setTimeout(startBlobFetch, 1200);
+  let heroInited = false;
+  function initHeroOnce() {
+    if (heroInited) return;
+    heroInited = true;
+    posterLayer.style.backgroundImage = "url('assets/hero-poster.jpg')";
+    const posterImg = new Image();
+    posterImg.onload = startBlobFetch;
+    posterImg.onerror = startBlobFetch;
+    posterImg.src = 'assets/hero-poster.jpg';
+    setTimeout(startBlobFetch, 4000);
+  }
 
   async function loadHeroBlob() {
     const ctrl = new AbortController();
@@ -180,7 +202,7 @@
     }
     clearTimeout(watchdog);
     if (ring) ring.style.setProperty('--ld', 0);
-    video.src = URL.createObjectURL(new Blob(chunks));
+    video.src = URL.createObjectURL(new Blob(chunks, { type: VIDEO_TYPE }));
     video.load();
     video.addEventListener('canplay', () => {
       requestSeek(heroProgress() * video.duration);
@@ -206,6 +228,9 @@
       b.el.style.opacity = '1';
       b.el.style.setProperty('--k', '1');
     });
+    const settleBand = bands[bands.length - 1];
+    if (settleBand) settleBand.el.inert = false;
+    stage.classList.add('at-end');
   }
   function unpinFinalStates() {
     bands.forEach(b => { b.op = -1; b.k = -1; });
@@ -213,7 +238,7 @@
   function enableScrub() {
     if (scrubOn) return;
     scrubOn = true;
-    startBlobFetch();
+    initHeroOnce();
     addEventListener('scroll', onScroll, { passive: true });
     unpinFinalStates();
     updateCaptions(heroProgress());
@@ -227,8 +252,12 @@
     pinToFinalStates();
   }
   function applyHeroMode() {
-    if (GATES.some(q => matchMedia(q).matches)) disableScrub();
-    else enableScrub();
+    if (GATES.some(q => matchMedia(q).matches)) {
+      disableScrub();
+      pinToFinalStates();   // also on a first load that never armed the scrub
+    } else {
+      enableScrub();
+    }
   }
   const MQLS = GATES.map(q => matchMedia(q));
   MQLS.forEach(m => m.addEventListener('change', applyHeroMode));
@@ -258,7 +287,7 @@
 
   /* ===================== Oven door: press-and-hold interactive moment ===================== */
   const ovenDoor = document.getElementById('ovenDoor');
-  const dish = document.querySelector('.today-dish');
+  const oven = document.getElementById('oven');
   const ARC = 327;
   let holdProgress = 0, holdRaf = null, holdDirection = 0, opened = false;
 
@@ -271,9 +300,7 @@
     setArc(holdProgress);
     if (holdProgress >= 1 && !opened) {
       opened = true;
-      ovenDoor.classList.add('opened');
-      dish.classList.add('revealed');
-      ovenDoor.querySelector('.oven-label').textContent = 'התנור פתוח';
+      oven.classList.add('opened');
     }
     if (holdProgress <= 0 && opened === false) {
       holdRaf = null;
@@ -303,9 +330,7 @@
     opened = true;
     holdProgress = 1;
     setArc(1);
-    ovenDoor.classList.add('opened');
-    dish.classList.add('revealed');
-    ovenDoor.querySelector('.oven-label').textContent = 'התנור פתוח';
+    oven.classList.add('opened');
   }
 
   ovenDoor.addEventListener('pointerdown', e => {

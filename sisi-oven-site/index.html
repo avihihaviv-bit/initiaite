@@ -16,10 +16,7 @@
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23201510'/%3E%3Cpath d='M50 20c-14 14-20 24-20 36a20 20 0 0 0 40 0c0-6-3-11-7-15 1 6-2 10-6 10-5 0-6-5-4-10 3-7 0-15-3-21z' fill='%23d97b3f'/%3E%3C/svg%3E">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -54,21 +51,21 @@
       </svg>
       <div class="scrim" aria-hidden="true"></div>
 
-      <div class="band band-1" data-range="0,0.22" data-entrance="depth">
+      <div class="band band-1" data-range="0,0.235" data-entrance="depth">
         <p class="line">
           <span class="sr-only">התנור של סבתא לא נכבה כבר עשרים שנה.</span>
           <span aria-hidden="true" class="visual">התנור של סבתא לא נכבה<br>כבר עשרים שנה</span>
         </p>
       </div>
 
-      <div class="band band-2" data-range="0.22,0.48" data-entrance="drift">
+      <div class="band band-2" data-range="0.215,0.50" data-entrance="drift">
         <p class="line">
           <span class="sr-only">מתכונים שעברו מדור לדור, חוזרים ישר לצלחת שלך.</span>
           <span aria-hidden="true" class="visual">מתכונים שעברו מדור לדור<br>חוזרים ישר לצלחת שלך</span>
         </p>
       </div>
 
-      <div class="band band-3" data-range="0.48,0.74" data-entrance="punch">
+      <div class="band band-3" data-range="0.48,0.755" data-entrance="punch">
         <p class="line">
           <span class="sr-only">בית חם, שולחן פתוח, מקום לכל אחד.</span>
           <span aria-hidden="true" class="visual">בית חם. שולחן פתוח.<br><span class="em">מקום לכל אחד.</span></span>
@@ -93,10 +90,15 @@
 
   <!-- STORY -->
   <section id="story" class="section story">
-    <div class="wrap reveal">
-      <p class="kicker">הרעיון שלנו</p>
-      <h2>התנור לא נסגר. הוא רק עבר כתובת.</h2>
-      <p class="lede">סיסי מבשלת כמו שבישלו בבית, בלי קיצורי דרך. יש יום עם קוסקוס עננים מהביל, יש יום עם מלבי קר, ותמיד יש משהו על האש שמזכיר לכם למי אתם מתגעגעים. השף צעיר, האוכל נקי, והמחיר נשאר כזה שאפשר לבוא גם באמצע השבוע.</p>
+    <div class="wrap story-split">
+      <div class="story-text reveal">
+        <p class="kicker">הרעיון שלנו</p>
+        <h2>התנור לא נסגר. הוא רק עבר כתובת.</h2>
+        <p class="lede">סיסי מבשלת כמו שבישלו בבית, בלי קיצורי דרך. יש יום עם קוסקוס עננים מהביל, יש יום עם מלבי קר, ותמיד יש משהו על האש שמזכיר לכם למי אתם מתגעגעים. השף צעיר, האוכל נקי, והמחיר נשאר כזה שאפשר לבוא גם באמצע השבוע.</p>
+      </div>
+      <figure class="story-img reveal">
+        <img src="assets/fire.jpg" alt="גחלים בוערות בתוך תנור חימר" loading="lazy" width="1280" height="720">
+      </figure>
     </div>
   </section>
 
@@ -107,22 +109,29 @@
       <h2>תפתחו את דלת התנור</h2>
       <p class="lede">לחצו והחזיקו כדי לפתוח, בדיוק כמו שסיסי עושה כל בוקר.</p>
 
-      <button id="ovenDoor" class="oven-door" aria-describedby="ovenHint">
-        <svg class="oven-progress" viewBox="0 0 120 120" aria-hidden="true">
-          <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="4" opacity="0.25"/>
-          <circle class="oven-progress-arc" cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="4"
-                  stroke-dasharray="327" style="stroke-dashoffset:var(--od,327)"/>
-        </svg>
-        <span class="oven-icon" aria-hidden="true">🔥</span>
-        <span class="oven-label">החזיקו לפתיחה</span>
-      </button>
-      <p id="ovenHint" class="hint">אפשר גם ללחוץ פעם אחת אם עדיף בלי החזקה</p>
+      <div class="oven" id="oven">
+        <div class="today-dish" aria-live="polite">
+          <img class="dish-img" src="assets/hero-ending.jpg" alt="צלחת קוסקוס עננים מהבילה על שולחן עץ" loading="lazy" width="1280" height="720">
+          <div class="dish-copy">
+            <p class="dish-kicker">המנה של היום</p>
+            <p class="dish-name">קוסקוס עננים</p>
+            <p class="dish-desc">קוסקוס אוורירי, ירקות שורש מתובלים, ומרק צלול שמוגש בצד. אצלנו הוא לא יורד מהתפריט.</p>
+          </div>
+        </div>
 
-      <div class="today-dish" aria-live="polite">
-        <p class="dish-kicker">המנה של היום</p>
-        <p class="dish-name">קוסקוס עננים</p>
-        <p class="dish-desc">קוסקוס אוורירי, ירקות שורש מתובלים, ומרק צלול שמוגש בצד. אצלנו הוא לא יורד מהתפריט.</p>
+        <button id="ovenDoor" class="oven-door" aria-describedby="ovenHint">
+          <span class="oven-handle" aria-hidden="true">
+            <svg class="oven-progress" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+              <circle class="oven-progress-arc" cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="4"
+                      stroke-dasharray="327" style="stroke-dashoffset:var(--od,327)"/>
+            </svg>
+            <span class="oven-icon">🔥</span>
+          </span>
+          <span class="oven-label">החזיקו לפתיחה</span>
+        </button>
       </div>
+      <p id="ovenHint" class="hint">אפשר גם ללחוץ פעם אחת אם עדיף בלי החזקה</p>
     </div>
   </section>
 
@@ -267,7 +276,7 @@
 
 <footer class="site-footer">
   <p>התנור של סבתא סיסי · אילת 36, חולון</p>
-  <p class="fine">הסרטון הפותח נוצר בעזרת בינה מלאכותית מתמונה אמיתית של המקום. פרטי המסעדה, התפריט והביקורות אמיתיים.</p>
+  <p class="fine">התמונות והסרטון באתר נוצרו בבינה מלאכותית להמחשה. פרטי המסעדה, התפריט והביקורות אמיתיים.</p>
 </footer>
 
 <script src="assets/script.js"></script>
