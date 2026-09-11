@@ -88,7 +88,13 @@ body::before{
   background:var(--accent); color:#1a1108 !important; padding:.5em 1.1em;
   border-radius:100px; font-weight:600;
 }
-@media (max-width:640px){ .site-nav nav a:not(.nav-cta){ display:none; } }
+@media (max-width:640px){
+  .site-nav{ padding:.7rem .9rem; }
+  .brand-mark span{ display:none; }       /* the mark carries the brand when the row is tight */
+  .site-nav nav{ gap:.85rem; }
+  .site-nav nav a{ font-size:.85rem; }
+  .nav-cta{ padding:.45em .9em; }
+}
 
 /* ===== Hero ===== */
 .hero{ position:relative; height:600vh; }
@@ -194,12 +200,9 @@ body::before{
 @keyframes cueBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
 .hero-stage.at-end .cue{ opacity:0; }
 
-/* Static-hero (5 gates) must match JS exactly */
-@media (max-width:720px),
-       (orientation:portrait) and (max-width:1024px),
-       (orientation:portrait) and (pointer:coarse),
-       (orientation:landscape) and (pointer:coarse) and (max-height:560px),
-       (prefers-reduced-motion:reduce){
+/* Static hero only for visitors who asked for less motion; phones get the
+   same scrubbing journey as desktop. Must match the JS gate exactly. */
+@media (prefers-reduced-motion:reduce){
   .hero{ height:100vh; }
   .hero-stage{ position:relative; }
   .poster{ background-image:url('hero-ending.jpg'); }

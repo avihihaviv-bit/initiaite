@@ -177,7 +177,21 @@
     setTimeout(startBlobFetch, 4000);
   }
 
+  function attachVideo(src) {
+    video.src = src;
+    video.load();
+    video.addEventListener('canplay', () => {
+      requestSeek(heroProgress() * video.duration);
+      stage.classList.add('video-ready');
+    }, { once: true });
+  }
+
   async function loadHeroBlob() {
+    if (VIDEO_URL.startsWith('data:')) {   // single-file build: the video already ships with the page
+      if (ring) ring.style.setProperty('--ld', 0);
+      attachVideo(VIDEO_URL);
+      return;
+    }
     const ctrl = new AbortController();
     let watchdog = setTimeout(() => ctrl.abort(), 20000);
     const res = await fetch(VIDEO_URL, { signal: ctrl.signal });
@@ -202,12 +216,7 @@
     }
     clearTimeout(watchdog);
     if (ring) ring.style.setProperty('--ld', 0);
-    video.src = URL.createObjectURL(new Blob(chunks, { type: VIDEO_TYPE }));
-    video.load();
-    video.addEventListener('canplay', () => {
-      requestSeek(heroProgress() * video.duration);
-      stage.classList.add('video-ready');
-    }, { once: true });
+    attachVideo(URL.createObjectURL(new Blob(chunks, { type: VIDEO_TYPE })));
   }
 
   function failVideo() {
@@ -215,13 +224,7 @@
   }
 
   /* ===================== Static-hero gates (must match CSS exactly) ===================== */
-  const GATES = [
-    '(max-width: 720px)',
-    '(orientation: portrait) and (max-width: 1024px)',
-    '(orientation: portrait) and (pointer: coarse)',
-    '(orientation: landscape) and (pointer: coarse) and (max-height: 560px)',
-    '(prefers-reduced-motion: reduce)'
-  ];
+  const GATES = ['(prefers-reduced-motion: reduce)'];
   let scrubOn = false;
   function pinToFinalStates() {
     bands.forEach(b => {
