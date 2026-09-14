@@ -55,7 +55,7 @@
   bands.forEach((band, bi) => {
     const r = rng(bi + 7);
     band.words.forEach((w, i) => {
-      const th = (i / Math.max(1, band.words.length)) * 0.5 + r() * 0.08;
+      const th = (i / Math.max(1, band.words.length)) * 0.34 + r() * 0.05;
       w.style.setProperty('--th', th.toFixed(3));
     });
   });
@@ -86,7 +86,7 @@
       else if (i === bands.length - 1) opacity = smoothstep(p, a, a + f);
       else opacity = smoothstep(p, a, a + f) * (1 - smoothstep(p, b - f, b));
 
-      const ramp = Math.min(0.025, (b - a) * 0.35);
+      const ramp = Math.min(0.05, (b - a) * 0.55);   // longer assembly, so words settle smoothly
       let k = Math.min(1, Math.max(0, (p - a) / ramp));
       if (i === 0) k = Math.max(k, loadK); // band one opens settled, then hands over to scroll
 
@@ -108,7 +108,7 @@
   }
 
   function driveLoadRamp(now) {
-    loadK = Math.min(1, (now - loadStart) / 900);
+    loadK = Math.min(1, (now - loadStart) / 1500);
     if (scrubOn) updateCaptions(heroProgress());
     if (loadK < 1) requestAnimationFrame(driveLoadRamp);
   }
@@ -141,7 +141,7 @@
   function tick(now) {
     const dt = Math.min(100, now - (lastTick || now));
     lastTick = now;
-    const k = 0.16;
+    const k = 0.11;   // gentler catch-up: the footage glides instead of snapping
     shown += (target - shown) * (1 - Math.pow(1 - k, dt / 16.667));
     if (Math.abs(target - shown) < 0.0005) {
       shown = target; rafId = null; lastTick = 0;
