@@ -288,6 +288,86 @@
   }, { threshold: 0.15 });
   revealEls.forEach(el => revealObserver.observe(el));
 
+
+  /* ===================== Open / closed, on Israel time ===================== */
+  const HOURS = [
+    { label: 'יום ראשון', open: 9 * 60, close: 20 * 60, text: '9:00–20:00' },
+    { label: 'יום שני', open: 9 * 60, close: 20 * 60, text: '9:00–20:00' },
+    { label: 'יום שלישי', open: 9 * 60, close: 20 * 60, text: '9:00–20:00' },
+    { label: 'יום רביעי', open: 9 * 60, close: 20 * 60, text: '9:00–20:00' },
+    { label: 'יום חמישי', open: 9 * 60, close: 20 * 60, text: '9:00–20:00' },
+    { label: 'יום שישי', open: 8 * 60 + 30, close: 15 * 60 + 30, text: '8:30–15:30' },
+    { label: 'יום שבת', closed: true, text: 'סגור' }
+  ];
+  const DAY_INDEX = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+  // the kitchen is in Holon, so the clock that matters is Israel's, not the visitor's
+  function israelNow() {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Jerusalem', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+      }).formatToParts(new Date());
+      const get = type => parts.find(p => p.type === type).value;
+      const day = DAY_INDEX[get('weekday')];
+      const hour = Number(get('hour')) % 24;
+      return { day, minutes: hour * 60 + Number(get('minute')) };
+    } catch (e) {
+      const d = new Date();
+      return { day: d.getDay(), minutes: d.getHours() * 60 + d.getMinutes() };
+    }
+  }
+
+  function fmt(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = String(minutes % 60).padStart(2, '0');
+    return h + ':' + m;
+  }
+
+  function openState() {
+    const { day, minutes } = israelNow();
+    const today = HOURS[day];
+    if (!today.closed && minutes >= today.open && minutes < today.close) {
+      return { day, open: true, label: 'פתוח עכשיו', detail: 'היום ' + today.text };
+    }
+    if (!today.closed && minutes < today.open) {
+      return { day, open: false, label: 'סגור עכשיו', detail: 'נפתח היום ב־' + fmt(today.open) };
+    }
+    for (let step = 1; step <= 7; step++) {
+      const next = HOURS[(day + step) % 7];
+      if (next.closed) continue;
+      const when = step === 1 ? 'מחר' : 'ב' + next.label;
+      return { day, open: false, label: 'סגור עכשיו', detail: 'נפתח ' + when + ' ב־' + fmt(next.open) };
+    }
+    return { day, open: false, label: 'סגור עכשיו', detail: '' };
+  }
+
+  const statusPills = [...document.querySelectorAll('.status-pill')];
+  const hoursRows = [...document.querySelectorAll('#hoursList li')];
+
+  function paintStatus() {
+    const state = openState();
+    statusPills.forEach(pill => {
+      pill.classList.toggle('status-open', state.open);
+      pill.classList.toggle('status-closed', !state.open);
+      pill.textContent = '';
+      const label = document.createElement('span');
+      label.textContent = state.label;
+      pill.appendChild(label);
+      if (state.detail) {
+        const detail = document.createElement('span');
+        detail.className = 'status-hours';
+        detail.textContent = '· ' + state.detail;
+        pill.appendChild(detail);
+      }
+      pill.hidden = false;
+    });
+    hoursRows.forEach(row => {
+      row.classList.toggle('today', Number(row.dataset.day) === state.day);
+    });
+  }
+  paintStatus();
+  setInterval(paintStatus, 60000);   // a page left open stays honest
+
   /* ===================== Oven door: press-and-hold interactive moment ===================== */
   const ovenDoor = document.getElementById('ovenDoor');
   const oven = document.getElementById('oven');
