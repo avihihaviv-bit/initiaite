@@ -6,14 +6,28 @@
 <title>התנור של סבתא סיסי</title>
 <meta name="description" content="מסעדה צמחונית כשרה בחולון. קציצות עירוק, סביח הבית, קוסקוס עננים ומרקים ביתיים. אכילה במקום, איסוף עצמי מהרכב ומשלוח ללא מגע.">
 <meta name="theme-color" content="#201510">
+<meta name="robots" content="index, follow">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<!-- DEPLOY STEP: set the live domain on canonical, og:url and og:image -->
+<link rel="canonical" href="">
 
 <!-- DEPLOY STEP: patch og:image and og:url with the live absolute URL before deploying -->
 <meta property="og:title" content="התנור של סבתא סיסי">
 <meta property="og:description" content="מסעדה צמחונית כשרה בחולון. מתכונים של סבתא, ישר מהתנור.">
-<meta property="og:image" content="assets/hero-ending.jpg">
+<meta property="og:image" content="assets/social-preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="צלחת קוסקוס עננים מהבילה על שולחן עץ">
 <meta property="og:url" content="">
-<meta property="og:type" content="website">
+<meta property="og:type" content="restaurant">
+<meta property="og:site_name" content="התנור של סבתא סיסי">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="התנור של סבתא סיסי">
+<meta name="twitter:description" content="מסעדה צמחונית כשרה בחולון. מתכונים של סבתא, ישר מהתנור.">
+<meta name="twitter:image" content="assets/social-preview.jpg">
 
+<link rel="apple-touch-icon" href="assets/hero-ending.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23201510'/%3E%3Cpath d='M50 20c-14 14-20 24-20 36a20 20 0 0 0 40 0c0-6-3-11-7-15 1 6-2 10-6 10-5 0-6-5-4-10 3-7 0-15-3-21z' fill='%23d97b3f'/%3E%3C/svg%3E">
 
 <link rel="stylesheet" href="assets/fonts.css">
@@ -30,6 +44,7 @@
       <span>התנור של סבתא סיסי</span>
     </a>
     <nav aria-label="ניווט ראשי">
+      <a class="nav-home" href="#top">דף הבית</a>
       <a href="#menu">התפריט</a>
       <a href="#reviews">ביקורות</a>
       <a href="#info">איך מגיעים</a>
@@ -55,8 +70,8 @@
 
       <div class="band band-1" data-range="0,0.235" data-entrance="depth">
         <p class="line">
-          <span class="sr-only">התנור של סבתא לא נכבה כבר עשרים שנה.</span>
-          <span aria-hidden="true" class="visual">התנור של סבתא לא נכבה<br>כבר עשרים שנה</span>
+          <span class="sr-only">התנור נדלק בבוקר ולא נח עד הערב.</span>
+          <span aria-hidden="true" class="visual">התנור נדלק בבוקר<br>ולא נח עד הערב</span>
         </p>
       </div>
 
@@ -707,6 +722,7 @@
   <section id="reviews" class="section reviews">
     <div class="wrap">
       <p class="kicker">מה אומרים עלינו</p>
+      <p class="section-note">הביקורות מצוטטות מדף העסק שלנו בגוגל, בלשון כותביהן.</p>
       <div class="rating-row reveal">
         <span class="rating-score">4.5</span>
         <span class="stars" aria-hidden="true">★★★★★</span>
@@ -763,7 +779,7 @@
         <div class="info-card">
           <h3><svg class="info-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6A7.4 7.4 0 0 0 4.6 10c0 5.2 7.4 11.4 7.4 11.4S19.4 15.2 19.4 10A7.4 7.4 0 0 0 12 2.6Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9.8" r="2.4"/></svg>כתובת</h3>
           <p class="info-lead">אילת 36, חולון</p>
-          <p class="fine">בלב השכונה, עם חניה ברחוב מסביב.</p>
+          <p class="fine">ברחוב אילת, בלב חולון.</p>
           <div class="info-actions">
             <a class="info-action" href="https://waze.com/ul?q=%D7%90%D7%99%D7%9C%D7%AA%2036%20%D7%97%D7%95%D7%9C%D7%95%D7%9F&amp;navigate=yes" target="_blank" rel="noopener">ניווט בוויז</a>
             <a class="info-action" href="https://www.google.com/maps/search/?api=1&query=%D7%90%D7%99%D7%9C%D7%AA%2036%2C%20%D7%97%D7%95%D7%9C%D7%95%D7%9F" target="_blank" rel="noopener">גוגל מפות</a>
@@ -828,6 +844,58 @@
         <details class="faq-item reveal">
           <summary>יש משלוחים?</summary>
           <p>כן, משלוח ללא מגע. מתקשרים לבירור אזור החלוקה.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- LEGAL -->
+  <section id="legal" class="section legal">
+    <div class="wrap">
+      <p class="kicker">מידע משפטי</p>
+      <h2>השקוף שבאתר</h2>
+      <p class="section-note">האתר הזה לא אוסף פרטים, לא דורש הרשמה ולא משתמש בעוגיות מעקב. כאן כתוב בדיוק מה כן קורה.</p>
+
+      <div class="legal-list">
+        <details class="faq-item reveal" id="privacy">
+          <summary>מדיניות פרטיות</summary>
+          <div class="legal-body">
+            <p>העסק: התנור של סבתא סיסי, אילת 36, חולון. טלפון 052-629-9357.</p>
+            <p><b>איזה מידע נאסף.</b> האתר לא אוסף ולא שומר פרטים אישיים. אין טפסים, אין הרשמה, אין חשבונות משתמש ואין מסד נתונים מאחורי האתר.</p>
+            <p><b>מה נשמר במכשיר שלכם.</b> שתי פיסות מידע נשמרות מקומית בדפדפן שלכם בלבד, ולא נשלחות לשום שרת: העדפות הנגישות שבחרתם, והמנות שהוספתם לעגלה. אפשר למחוק אותן בכל רגע דרך ניקוי נתוני האתר בדפדפן.</p>
+            <p><b>עוגיות.</b> האתר לא משתמש בעוגיות, לא בכלי אנליטיקה ולא בפיקסלים של פרסום. בגלל זה גם אין באתר חלון הסכמה לעוגיות.</p>
+            <p><b>קישורים לשירותים חיצוניים.</b> לחיצה על משלוחים, ווייז, וואטסאפ או גוגל מפות מעבירה אתכם לשירות חיצוני, שפועל לפי מדיניות הפרטיות שלו. אנחנו לא מעבירים אליו שום מידע עליכם מראש.</p>
+            <p><b>הזמנות.</b> כשמזמינים בטלפון או בוואטסאפ, הפרטים שאתם מוסרים משמשים רק להכנת ההזמנה ולמסירתה.</p>
+            <p><b>זכויות.</b> אפשר לפנות אלינו בטלפון בכל שאלה על מידע שמסרתם, כולל בקשה למחיקה.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal" id="terms">
+          <summary>תנאי שימוש</summary>
+          <div class="legal-body">
+            <p><b>מה האתר הזה.</b> אתר תדמית של המסעדה. הוא מציג תפריט ופרטי התקשרות, ואינו מבצע מכירה או חיוב.</p>
+            <p><b>מחירים וזמינות.</b> המחירים והמנות עשויים להשתנות, וחלק מהתבשילים מתחלפים לפי היום. המחיר והזמינות המחייבים הם אלה שנמסרים בטלפון או באתר ההזמנות בעת ההזמנה.</p>
+            <p><b>העגלה שבאתר.</b> העגלה כאן היא רשימה לנוחותכם בלבד. היא לא שולחת הזמנה ולא מבצעת תשלום. בסיום היא מועתקת אליכם כדי שתשלימו את ההזמנה בטלפון, בוואטסאפ או באתר ההזמנות.</p>
+            <p><b>ביטולים והחזרים.</b> אין תשלום דרך האתר, ולכן אין בו החזרים. ביטול הזמנה מול המסעדה נעשה בטלפון, בהקדם האפשרי לפני ההכנה. הזמנה שבוצעה באתר הזמנות חיצוני כפופה לתנאים ולמדיניות הביטולים של אותו שירות ושל חוק הגנת הצרכן.</p>
+            <p><b>אלרגנים ורגישויות.</b> התיאורים באתר אינם רשימת רכיבים מלאה. מי שיש לו אלרגיה או רגישות מתבקש לבדוק איתנו בטלפון לפני ההזמנה.</p>
+            <p><b>כשרות.</b> המטבח צמחוני וכשר. לפרטים על תעודת הכשרות אפשר לפנות אלינו.</p>
+            <p><b>תמונות.</b> התמונות והסרטון באתר נוצרו בבינה מלאכותית להמחשה, ואינם צילום של מנה מסוימת.</p>
+            <p><b>קניין רוחני.</b> העיצוב, הטקסטים והתמונות באתר שייכים לעסק. הביקורות מצוטטות מגוגל ושייכות לכותביהן.</p>
+            <p><b>אחריות.</b> אנחנו משתדלים שהמידע יהיה מדויק ומעודכן, אך ייתכנו טעויות או שינויים. השימוש באתר הוא באחריות המשתמש.</p>
+          </div>
+        </details>
+
+        <details class="faq-item reveal" id="accessibility">
+          <summary>הצהרת נגישות</summary>
+          <div class="legal-body">
+            <p>אנחנו רוצים שכל אחד יוכל להשתמש באתר בנוחות, ועשינו מאמץ להנגיש אותו ברוח תקן ישראלי 5568 ורמה AA של WCAG 2.1.</p>
+            <p><b>מה הותאם באתר.</b> ניווט מלא במקלדת עם סימון מיקוד ברור, קישור דילוג לתוכן, מבנה כותרות תקין, טקסט חלופי לתמונות, ניגודיות צבעים גבוהה, וכיבוד העדפת מערכת להפחתת תנועה.</p>
+            <p><b>כלי הנגישות.</b> בכפתור הנגישות שבפינה השמאלית התחתונה אפשר להגדיל ולהקטין טקסט, להפעיל ניגודיות גבוהה, להדגיש קישורים ולעצור אנימציות. הבחירה נשמרת לביקור הבא.</p>
+            <p><b>מגבלות ידועות.</b> הסרטון הפותח הוא אלמנט עיצובי בלבד, ואין בו מידע שלא מופיע גם בטקסט. מי שמעדיף בלי תנועה יקבל תמונה סטטית.</p>
+            <p><b>נתקלתם בבעיה?</b> נשמח לדעת ולתקן. טלפון 052-629-9357, או בוואטסאפ לאותו מספר.</p>
+            <p class="fine">עודכן בספטמבר 2026.</p>
+          </div>
         </details>
       </div>
     </div>
@@ -933,8 +1001,36 @@
 </div>
 
 <footer class="site-footer">
-  <p>התנור של סבתא סיסי · מסעדה צמחונית כשרה · אילת 36, חולון</p>
-  <p class="fine">התמונות והסרטון באתר נוצרו בבינה מלאכותית להמחשה. פרטי המסעדה, התפריט והביקורות אמיתיים.</p>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 20c-14 14-20 24-20 36a20 20 0 0 0 40 0c0-6-3-11-7-15 1 6-2 10-6 10-5 0-6-5-4-10 3-7 0-15-3-21z"/></svg>
+      <p class="footer-name">התנור של סבתא סיסי</p>
+      <p class="fine">מסעדה צמחונית כשרה</p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-head">פרטי העסק</p>
+      <p><a href="https://www.google.com/maps/search/?api=1&query=%D7%90%D7%99%D7%9C%D7%AA%2036%2C%20%D7%97%D7%95%D7%9C%D7%95%D7%9F" target="_blank" rel="noopener">אילת 36, חולון</a></p>
+      <p><a href="tel:0526299357">052-629-9357</a></p>
+      <p><a href="https://wa.me/972526299357" target="_blank" rel="noopener">וואטסאפ</a></p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-head">שעות</p>
+      <p>ראשון עד חמישי, 9:00 עד 20:00</p>
+      <p>שישי, 8:30 עד 15:30</p>
+      <p>שבת סגור</p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-head">מידע</p>
+      <p><a href="#menu">התפריט</a></p>
+      <p><a href="#privacy">מדיניות פרטיות</a></p>
+      <p><a href="#terms">תנאי שימוש</a></p>
+      <p><a href="#accessibility">הצהרת נגישות</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© <span id="year">2026</span> התנור של סבתא סיסי. כל הזכויות שמורות.</p>
+    <p class="fine">התמונות והסרטון באתר נוצרו בבינה מלאכותית להמחשה. פרטי המסעדה, התפריט והביקורות אמיתיים.</p>
+  </div>
 </footer>
 
 <script src="assets/script.js"></script>

@@ -371,6 +371,10 @@
 
 
 
+  /* the footer year never goes stale */
+  const yearOut = document.getElementById('year');
+  if (yearOut) yearOut.textContent = new Date().getFullYear();
+
   /* ===================== Menu search and filters ===================== */
   const menuSearch = document.getElementById('menuSearch');
   const searchClear = document.getElementById('searchClear');
@@ -573,7 +577,7 @@
   function renderCart() {
     const count = countItems();
     cartBadge.textContent = count;
-    cartFab.hidden = !(count > 0 || railsShown);
+    cartFab.hidden = !railsShown;   // appears with the rest, once the opening has played
     cartEmpty.hidden = count > 0;
     cartList.textContent = '';
 
