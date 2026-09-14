@@ -226,6 +226,7 @@
   /* ===================== Static-hero gates (must match CSS exactly) ===================== */
   const GATES = ['(prefers-reduced-motion: reduce)'];
   let scrubOn = false;
+  let motionOff = false;   // set by the accessibility panel
   function pinToFinalStates() {
     bands.forEach(b => {
       b.el.style.opacity = '1';
@@ -255,7 +256,7 @@
     pinToFinalStates();
   }
   function applyHeroMode() {
-    if (GATES.some(q => matchMedia(q).matches)) {
+    if (motionOff || GATES.some(q => matchMedia(q).matches)) {
       disableScrub();
       pinToFinalStates();   // also on a first load that never armed the scrub
     } else {
@@ -367,6 +368,372 @@
   }
   paintStatus();
   setInterval(paintStatus, 60000);   // a page left open stays honest
+
+
+
+  /* ===================== Menu search and filters ===================== */
+  const menuSearch = document.getElementById('menuSearch');
+  const searchClear = document.getElementById('searchClear');
+  const menuChips = document.getElementById('menuChips');
+  const menuCount = document.getElementById('menuCount');
+  const menuCats = [...document.querySelectorAll('.menu-cat')];
+  const dishRows = [...document.querySelectorAll('.dish-row')];
+  let activeFilter = 'all';
+
+  const emptyNote = document.createElement('p');
+  emptyNote.className = 'menu-empty';
+  emptyNote.hidden = true;
+  emptyNote.textContent = 'לא מצאנו מנה כזו. אפשר לנקות את החיפוש, או פשוט להתקשר ולשאול.';
+  document.querySelector('.menu-cats').after(emptyNote);
+
+  function matchesFilter(row) {
+    if (activeFilter === 'all') return true;
+    const [kind, value] = activeFilter.split(/:(.+)/);
+    if (kind === 'cat') return row.dataset.cat === value;
+    if (kind === 'tag') {
+      const tags = row.dataset.tags.split('|');
+      // "חריף" also covers "חריף מאוד"
+      return tags.some(t => t === value || t.startsWith(value + ' '));
+    }
+    return true;
+  }
+
+  function applyMenuFilter() {
+    const q = menuSearch.value.trim().toLowerCase();
+    let shown = 0;
+    dishRows.forEach(row => {
+      const hit = (!q || row.dataset.search.toLowerCase().includes(q)) && matchesFilter(row);
+      row.hidden = !hit;
+      if (hit) shown++;
+    });
+    menuCats.forEach(cat => {
+      cat.hidden = ![...cat.querySelectorAll('.dish-row')].some(row => !row.hidden);
+    });
+    emptyNote.hidden = shown > 0;
+    searchClear.hidden = q === '';
+    if (!q && activeFilter === 'all') menuCount.textContent = '';
+    else menuCount.textContent = shown === 1 ? 'מנה אחת' : shown + ' מנות';
+  }
+
+  menuSearch.addEventListener('input', applyMenuFilter);
+  searchClear.addEventListener('click', () => {
+    menuSearch.value = '';
+    applyMenuFilter();
+    menuSearch.focus();
+  });
+  menuChips.addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    activeFilter = chip.dataset.filter;
+    menuChips.querySelectorAll('.chip').forEach(c => {
+      const on = c === chip;
+      c.classList.toggle('is-on', on);
+      c.setAttribute('aria-pressed', String(on));
+    });
+    applyMenuFilter();
+  });
+  applyMenuFilter();
+
+  /* ===================== Floating rails, back to top, accessibility ===================== */
+  const railTop = document.getElementById('railTop');
+  const railBottom = document.getElementById('railBottom');
+  const toTop = document.getElementById('toTop');
+  const a11yBtn = document.getElementById('a11yBtn');
+  const a11yPanel = document.getElementById('a11yPanel');
+
+  let railsShown = null, railTick = false;
+  var onRailsToggle = null;   // the basket hooks in here once it is set up
+  function updateRails() {
+    railTick = false;
+    const show = window.scrollY > hero.offsetHeight * 0.88;   // once the opening journey has played
+    if (show === railsShown) return;
+    railsShown = show;
+    [railTop, railBottom].forEach(rail => {
+      if (show) {
+        rail.hidden = false;
+        requestAnimationFrame(() => rail.classList.add('visible'));
+      } else {
+        rail.classList.remove('visible');
+        setTimeout(() => { if (!railsShown) rail.hidden = true; }, 500);
+      }
+    });
+    if (!show) closeA11y();
+    if (onRailsToggle) onRailsToggle();
+  }
+  addEventListener('scroll', () => {
+    if (!railTick) { railTick = true; requestAnimationFrame(updateRails); }
+  }, { passive: true });
+  updateRails();
+
+  const stillPrefersMotion = () => !motionOff && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  toTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: stillPrefersMotion() ? 'smooth' : 'auto' });
+  });
+
+  /* the accessibility panel */
+  const SCALES = [100, 112, 125, 140];
+  const PREFS_KEY = 'sisi-a11y';
+  let prefs = { scale: 100, contrast: false, links: false, nomotion: false };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null');
+    if (saved && typeof saved === 'object') prefs = Object.assign(prefs, saved);
+  } catch (e) { /* private mode, or storage blocked: defaults are fine */ }
+
+  function savePrefs() {
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* nothing to do */ }
+  }
+
+  function applyPrefs() {
+    document.documentElement.style.fontSize = prefs.scale + '%';
+    document.body.classList.toggle('a11y-contrast', prefs.contrast);
+    document.body.classList.toggle('a11y-links', prefs.links);
+    document.body.classList.toggle('a11y-nomotion', prefs.nomotion);
+    const scaleOut = document.getElementById('a11yScale');
+    if (scaleOut) scaleOut.textContent = prefs.scale + '%';
+    a11yPanel.querySelectorAll('.a11y-toggle').forEach(btn => {
+      btn.setAttribute('aria-pressed', String(!!prefs[btn.dataset.a11y]));
+    });
+    if (prefs.nomotion !== motionOff) {
+      motionOff = prefs.nomotion;
+      applyHeroMode();
+      if (motionOff) pinToFinalStates();
+    }
+  }
+
+  function openA11y() {
+    a11yPanel.hidden = false;
+    a11yBtn.setAttribute('aria-expanded', 'true');
+    const first = a11yPanel.querySelector('button');
+    if (first) first.focus();
+  }
+  function closeA11y() {
+    if (a11yPanel.hidden) return;
+    a11yPanel.hidden = true;
+    a11yBtn.setAttribute('aria-expanded', 'false');
+  }
+  a11yBtn.addEventListener('click', () => {
+    a11yPanel.hidden ? openA11y() : closeA11y();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !a11yPanel.hidden) { closeA11y(); a11yBtn.focus(); }
+  });
+  document.addEventListener('pointerdown', e => {
+    if (a11yPanel.hidden) return;
+    if (!a11yPanel.contains(e.target) && !a11yBtn.contains(e.target)) closeA11y();
+  });
+
+  a11yPanel.addEventListener('click', e => {
+    const action = e.target.closest('[data-a11y]');
+    if (!action) return;
+    const kind = action.dataset.a11y;
+    if (kind === 'text-up' || kind === 'text-down') {
+      const i = SCALES.indexOf(prefs.scale);
+      const next = kind === 'text-up' ? Math.min(SCALES.length - 1, i + 1) : Math.max(0, i - 1);
+      prefs.scale = SCALES[next];
+    } else if (kind === 'reset') {
+      prefs = { scale: 100, contrast: false, links: false, nomotion: false };
+    } else if (kind in prefs) {
+      prefs[kind] = !prefs[kind];
+    }
+    applyPrefs();
+    savePrefs();
+  });
+
+  applyPrefs();
+
+
+  /* ===================== The order basket ===================== */
+  const ORDER_URL = 'https://order.plweb.online/wl/629438';
+  const CART_KEY = 'sisi-cart';
+  const cartFab = document.getElementById('cartFab');
+  const cartPanel = document.getElementById('cartPanel');
+  const cartList = document.getElementById('cartList');
+  const cartBadge = document.getElementById('cartBadge');
+  const cartEmpty = document.getElementById('cartEmpty');
+  const cartTotal = document.getElementById('cartTotal');
+  const cartNote = document.getElementById('cartNote');
+
+  let cart = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+    if (Array.isArray(saved)) cart = saved.filter(i => i && i.name && i.qty > 0);
+  } catch (e) { /* storage blocked: start empty */ }
+
+  const saveCart = () => {
+    try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* nothing to do */ }
+  };
+  const priceOf = item => {
+    const n = parseFloat(String(item.price).replace(/[^\d.]/g, ''));
+    return isFinite(n) ? n : null;
+  };
+  const countItems = () => cart.reduce((sum, i) => sum + i.qty, 0);
+
+  function renderCart() {
+    const count = countItems();
+    cartBadge.textContent = count;
+    cartFab.hidden = !(count > 0 || railsShown);
+    cartEmpty.hidden = count > 0;
+    cartList.textContent = '';
+
+    cart.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'cart-item';
+
+      const qty = document.createElement('div');
+      qty.className = 'qty';
+      const minus = document.createElement('button');
+      minus.type = 'button';
+      minus.textContent = '−';
+      minus.setAttribute('aria-label', 'הפחתת כמות של ' + item.name);
+      minus.addEventListener('click', () => changeQty(item.name, -1));
+      const out = document.createElement('output');
+      out.textContent = item.qty;
+      const plus = document.createElement('button');
+      plus.type = 'button';
+      plus.textContent = '+';
+      plus.setAttribute('aria-label', 'הוספת כמות של ' + item.name);
+      plus.addEventListener('click', () => changeQty(item.name, 1));
+      qty.append(minus, out, plus);
+
+      const name = document.createElement('span');
+      name.className = 'cart-item-name';
+      name.textContent = item.name;
+
+      const price = document.createElement('span');
+      price.className = 'cart-item-price';
+      const unit = priceOf(item);
+      price.textContent = unit === null ? 'בטלפון' : (unit * item.qty) + ' ₪';
+
+      li.append(qty, name, price);
+      cartList.appendChild(li);
+    });
+
+    const known = cart.filter(i => priceOf(i) !== null);
+    const sum = known.reduce((acc, i) => acc + priceOf(i) * i.qty, 0);
+    const missing = cart.length - known.length;
+    cartTotal.hidden = count === 0;
+    if (count > 0) {
+      cartTotal.textContent = '';
+      const label = document.createElement('span');
+      label.textContent = missing ? 'סכום ביניים' : 'סה״כ';
+      const value = document.createElement('span');
+      value.className = 'sum';
+      value.textContent = sum + ' ₪';
+      cartTotal.append(label, value);
+    }
+    cartNote.textContent = missing
+      ? 'מחיר של ' + missing + ' פריטים נמסר בטלפון. הרשימה מועתקת אליכם, ואז נפתח אתר ההזמנות של המסעדה.'
+      : 'הרשימה מועתקת אליכם, ואז נפתח אתר ההזמנות של המסעדה כדי להשלים שם את ההזמנה.';
+  }
+
+  function changeQty(name, delta) {
+    const item = cart.find(i => i.name === name);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(i => i.name !== name);
+    saveCart();
+    renderCart();
+  }
+
+  function addToCart(name, price, btn) {
+    const item = cart.find(i => i.name === name);
+    if (item) item.qty++;
+    else cart.push({ name, price, qty: 1 });
+    saveCart();
+    renderCart();
+    cartFab.classList.remove('bump');
+    void cartFab.offsetWidth;          // restart the bump animation
+    cartFab.classList.add('bump');
+    if (btn) {
+      btn.classList.add('added');
+      btn.firstElementChild.textContent = '✓';
+      setTimeout(() => {
+        btn.classList.remove('added');
+        btn.firstElementChild.textContent = '+';
+      }, 1100);
+    }
+  }
+
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', () => addToCart(btn.dataset.add, btn.dataset.price, btn));
+  });
+
+  function orderText() {
+    const lines = ['הזמנה מהתנור של סבתא סיסי', ''];
+    cart.forEach(i => {
+      const unit = priceOf(i);
+      lines.push(i.qty + ' × ' + i.name + (unit === null ? ' (מחיר בטלפון)' : ' (' + unit * i.qty + ' ₪)'));
+    });
+    const sum = cart.filter(i => priceOf(i) !== null).reduce((a, i) => a + priceOf(i) * i.qty, 0);
+    lines.push('', 'סה״כ למנות עם מחיר: ' + sum + ' ₪');
+    return lines.join('\n');
+  }
+
+  // the copy has to run inside the click itself, or Safari and Firefox drop the gesture
+  function copyOrderSync(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  function openCart() {
+    cartPanel.hidden = false;
+    cartFab.setAttribute('aria-expanded', 'true');
+    document.getElementById('cartClose').focus();
+  }
+  function closeCart() {
+    if (cartPanel.hidden) return;
+    cartPanel.hidden = true;
+    cartFab.setAttribute('aria-expanded', 'false');
+  }
+  cartFab.addEventListener('click', () => { cartPanel.hidden ? openCart() : closeCart(); });
+  document.getElementById('cartClose').addEventListener('click', () => { closeCart(); cartFab.focus(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !cartPanel.hidden) { closeCart(); cartFab.focus(); }
+  });
+  document.addEventListener('pointerdown', e => {
+    if (cartPanel.hidden) return;
+    if (!cartPanel.contains(e.target) && !cartFab.contains(e.target)) closeCart();
+  });
+
+  document.getElementById('cartOrder').addEventListener('click', () => {
+    if (!cart.length) { cartNote.textContent = 'קודם מוסיפים מנות מהתפריט, ואז אפשר להזמין.'; return; }
+    const text = orderText();
+    let copied = copyOrderSync(text);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        copied = true;
+        cartNote.textContent = 'ההזמנה הועתקה. אתר ההזמנות נפתח, אפשר להדביק שם או לבחור את המנות.';
+      }).catch(() => { /* the sync path already reported what happened */ });
+    }
+    window.open(ORDER_URL, '_blank', 'noopener');   // still inside the click
+    cartNote.textContent = copied
+      ? 'ההזמנה הועתקה. אתר ההזמנות נפתח, אפשר להדביק שם או לבחור את המנות.'
+      : 'אתר ההזמנות נפתח. אם ההעתקה לא נתפסה, אפשר לשלוח את ההזמנה בוואטסאפ.';
+  });
+
+  document.getElementById('cartWhatsapp').addEventListener('click', () => {
+    if (!cart.length) { cartNote.textContent = 'קודם מוסיפים מנות מהתפריט, ואז אפשר לשלוח.'; return; }
+    window.open('https://wa.me/972526299357?text=' + encodeURIComponent(orderText()), '_blank', 'noopener');
+  });
+
+  document.getElementById('cartClear').addEventListener('click', () => {
+    cart = [];
+    saveCart();
+    renderCart();
+    cartNote.textContent = 'ההזמנה נוקתה.';
+  });
+
+  onRailsToggle = renderCart;
+  renderCart();
 
   /* ===================== Oven door: press-and-hold interactive moment ===================== */
   const ovenDoor = document.getElementById('ovenDoor');

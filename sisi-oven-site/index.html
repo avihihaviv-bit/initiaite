@@ -69,8 +69,8 @@
 
       <div class="band band-3" data-range="0.48,0.755" data-entrance="punch">
         <p class="line">
-          <span class="sr-only">הכול צמחוני, הכול כשר, ומקום לכל אחד.</span>
-          <span aria-hidden="true" class="visual">הכול צמחוני. הכול כשר.<br><span class="em">מקום לכל אחד.</span></span>
+          <span class="sr-only">מטבח צמחוני, הכול כשר, ומקום לכל אחד.</span>
+          <span aria-hidden="true" class="visual">מטבח צמחוני. הכול כשר.<br><span class="em">מקום לכל אחד.</span></span>
         </p>
       </div>
 
@@ -100,7 +100,7 @@
       <div class="story-text reveal">
         <p class="kicker">הרעיון שלנו</p>
         <h2>התנור לא נסגר. הוא רק עבר כתובת.</h2>
-        <p class="lede">הכול אצלנו צמחוני וכשר, ומבושל כמו שבישלו בבית, בלי קיצורי דרך. יש יום עם קוסקוס עננים מהביל, יש יום עם מלבי קר, ותמיד יש משהו על האש שמזכיר לכם למי אתם מתגעגעים. השף צעיר, האוכל נקי, והמחיר נשאר כזה שאפשר לבוא גם באמצע השבוע.</p>
+        <p class="lede">המטבח שלנו צמחוני וכשר, ומבשל כמו שבישלו בבית, בלי קיצורי דרך. יש יום עם קוסקוס עננים מהביל, יש יום עם מלבי קר, ותמיד יש משהו על האש שמזכיר לכם למי אתם מתגעגעים. השף צעיר, האוכל נקי, והמחיר נשאר כזה שאפשר לבוא גם באמצע השבוע.</p>
       </div>
       <figure class="story-img reveal">
         <img src="assets/fire.jpg" alt="גחלים בוערות בתוך תנור חימר" loading="lazy" width="1280" height="720">
@@ -146,386 +146,554 @@
     <div class="wrap">
       <p class="kicker">התפריט</p>
       <h2>מה מבשלים היום</h2>
+      <div class="menu-tools">
+        <div class="menu-search">
+          <label class="sr-only" for="menuSearch">חיפוש מנה בתפריט</label>
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="search-icon">
+            <circle cx="11" cy="11" r="6.4" fill="none" stroke="currentColor" stroke-width="1.9"/>
+            <path d="m16 16 4.4 4.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          </svg>
+          <input type="search" id="menuSearch" placeholder="חיפוש מנה, למשל סביח או מרק" autocomplete="off">
+          <button type="button" class="search-clear" id="searchClear" aria-label="ניקוי החיפוש" hidden>×</button>
+        </div>
+        <div class="menu-chips" id="menuChips" role="group" aria-label="סינון התפריט">
+          <button type="button" class="chip is-on" data-filter="all" aria-pressed="true">הכול</button>
+          <button type="button" class="chip" data-filter="cat:פיתות" aria-pressed="false">פיתות</button>
+          <button type="button" class="chip" data-filter="cat:באגטים" aria-pressed="false">באגטים</button>
+          <button type="button" class="chip" data-filter="cat:התבשילים של סבתא סיסי" aria-pressed="false">תבשילים</button>
+          <button type="button" class="chip" data-filter="cat:סלטים ביתיים במשקל" aria-pressed="false">סלטים</button>
+          <button type="button" class="chip" data-filter="cat:נשנושים בצד" aria-pressed="false">נשנושים</button>
+          <button type="button" class="chip" data-filter="cat:מתוקים" aria-pressed="false">מתוקים</button>
+          <button type="button" class="chip" data-filter="cat:שתייה קלה" aria-pressed="false">שתייה</button>
+          <button type="button" class="chip chip-vegan" data-filter="tag:טבעוני" aria-pressed="false">טבעוני</button>
+          <button type="button" class="chip chip-hot" data-filter="tag:חריף" aria-pressed="false">חריף</button>
+          <button type="button" class="chip chip-top" data-filter="tag:פופולארי" aria-pressed="false">מומלץ</button>
+          <button type="button" class="chip chip-meat" data-filter="tag:מכיל בשר" aria-pressed="false">מכיל בשר</button>
+        </div>
+        <p class="menu-count" id="menuCount" aria-live="polite"></p>
+      </div>
+
       <div class="menu-cats">
 
-        <section class="menu-cat reveal" aria-labelledby="cat-0">
+        <section class="menu-cat reveal" data-cat="פיתות" aria-labelledby="cat-0">
           <h3 class="cat-title" id="cat-0">פיתות</h3>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="פיתות" data-tags="פופולארי" data-search="פיתה קציצות עירוק העירוק המפורסם של סבתא סיסי. 2 קציצות עירוק ביתיות עסיסיות עשויות תפוח אדמה, גזר, קישוא, פטרוזיליה ובצל. מוגש בפיתה עם ממרחים וסלטים לבחירה. פופולארי">
               <div class="dish-head">
                 <span class="dish-title">פיתה קציצות עירוק</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">30 ₪</span>
               </div>
               <p class="dish-note">העירוק המפורסם של סבתא סיסי. 2 קציצות עירוק ביתיות עסיסיות עשויות תפוח אדמה, גזר, קישוא, פטרוזיליה ובצל. מוגש בפיתה עם ממרחים וסלטים לבחירה.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+                <button type="button" class="add-btn" data-add="פיתה קציצות עירוק" data-price="30 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="פיתות" data-tags="" data-search="פיתה סביח הבית מנת סביח עם ביצה, חציל מטוגן ותפוח אדמה מבושל. מוגש בפיתה עם ממרחים וסלטים לבחירה.">
               <div class="dish-head">
                 <span class="dish-title">פיתה סביח הבית</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">29 ₪</span>
               </div>
               <p class="dish-note">מנת סביח עם ביצה, חציל מטוגן ותפוח אדמה מבושל. מוגש בפיתה עם ממרחים וסלטים לבחירה.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="פיתה סביח הבית" data-price="29 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="פיתות" data-tags="" data-search="פיתה פלאפל ירוק כדורי פלאפל פריכים עם עשבי תיבול. מוגש בפיתה עם ממרחים וסלטים לבחירה.">
               <div class="dish-head">
                 <span class="dish-title">פיתה פלאפל ירוק</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">26 ₪</span>
               </div>
               <p class="dish-note">כדורי פלאפל פריכים עם עשבי תיבול. מוגש בפיתה עם ממרחים וסלטים לבחירה.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="פיתה פלאפל ירוק" data-price="26 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="פיתות" data-tags="" data-search="פיתה קובה בורגול מטוגנת קובה בורגול מטוגנת במילוי פטריות ותפוח אדמה. מוגש בפיתה עם ממרחים וסלטים לבחירה.">
               <div class="dish-head">
                 <span class="dish-title">פיתה קובה בורגול מטוגנת</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">28 ₪</span>
               </div>
               <p class="dish-note">קובה בורגול מטוגנת במילוי פטריות ותפוח אדמה. מוגש בפיתה עם ממרחים וסלטים לבחירה.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="פיתה קובה בורגול מטוגנת" data-price="28 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
 
-        <section class="menu-cat reveal" aria-labelledby="cat-1">
+        <section class="menu-cat reveal" data-cat="באגטים" aria-labelledby="cat-1">
           <h3 class="cat-title" id="cat-1">באגטים</h3>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="באגטים" data-tags="פופולארי" data-search="באגט קציצות עירוק העירוק המפורסם של סבתא סיסי. 3 קציצות עירוק ביתיות עסיסיות עשויות תפוח אדמה, גזר, קישוא, פטרוזיליה ובצל. מוגש בבאגט עם ממרחים וסלטים לבחירה. פופולארי">
               <div class="dish-head">
                 <span class="dish-title">באגט קציצות עירוק</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">38 ₪</span>
               </div>
               <p class="dish-note">העירוק המפורסם של סבתא סיסי. 3 קציצות עירוק ביתיות עסיסיות עשויות תפוח אדמה, גזר, קישוא, פטרוזיליה ובצל. מוגש בבאגט עם ממרחים וסלטים לבחירה.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+                <button type="button" class="add-btn" data-add="באגט קציצות עירוק" data-price="38 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="באגטים" data-tags="" data-search="באגט סביח הבית מנת סביח עם 2 ביצים, חציל מטוגן ותפוח אדמה מבושל. מוגש בבאגט עם ממרחים וסלטים לבחירה.">
               <div class="dish-head">
                 <span class="dish-title">באגט סביח הבית</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">36 ₪</span>
               </div>
               <p class="dish-note">מנת סביח עם 2 ביצים, חציל מטוגן ותפוח אדמה מבושל. מוגש בבאגט עם ממרחים וסלטים לבחירה.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="באגט סביח הבית" data-price="36 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="באגטים" data-tags="" data-search="באגט פלאפל ירוק כדורי פלאפל פריכים עם עשבי תיבול. מוגש בבאגט עם ממרחים וסלטים לבחירה.">
               <div class="dish-head">
                 <span class="dish-title">באגט פלאפל ירוק</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">32 ₪</span>
               </div>
               <p class="dish-note">כדורי פלאפל פריכים עם עשבי תיבול. מוגש בבאגט עם ממרחים וסלטים לבחירה.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="באגט פלאפל ירוק" data-price="32 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="באגטים" data-tags="" data-search="באגט קובה בורגול מטוגנת קובה בורגול מטוגנת במילוי פטריות ותפוח אדמה. מוגש בבאגט עם ממרחים וסלטים לבחירה.">
               <div class="dish-head">
                 <span class="dish-title">באגט קובה בורגול מטוגנת</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">38 ₪</span>
               </div>
               <p class="dish-note">קובה בורגול מטוגנת במילוי פטריות ותפוח אדמה. מוגש בבאגט עם ממרחים וסלטים לבחירה.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="באגט קובה בורגול מטוגנת" data-price="38 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
 
-        <section class="menu-cat reveal" aria-labelledby="cat-2">
+        <section class="menu-cat reveal" data-cat="התבשילים של סבתא סיסי" aria-labelledby="cat-2">
           <h3 class="cat-title" id="cat-2">התבשילים של סבתא סיסי</h3>
           <p class="cat-note">הכול טבעוני, מתבשל אצלנו מהבוקר.</p>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="התבשילים של סבתא סיסי" data-tags="פופולארי|טבעוני" data-search="קוסקוס עננים עם מרק ירקות קוסקוס אוורירי מוגש עם מרק ירקות מעל. המרק מכיל תפוח אדמה, גזר, קישוא, דלעת, בטטה, חומוס גרגירים, בצל וסלרי. פופולארי טבעוני">
               <div class="dish-head">
                 <span class="dish-title">קוסקוס עננים עם מרק ירקות</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">בטלפון</span>
               </div>
               <p class="dish-note">קוסקוס אוורירי מוגש עם מרק ירקות מעל. המרק מכיל תפוח אדמה, גזר, קישוא, דלעת, בטטה, חומוס גרגירים, בצל וסלרי.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="קוסקוס עננים עם מרק ירקות" data-price="בטלפון"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="התבשילים של סבתא סיסי" data-tags="טבעוני" data-search="קוסקוס עננים קוסקוס אוורירי. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">קוסקוס עננים</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">בטלפון</span>
               </div>
               <p class="dish-note">קוסקוס אוורירי.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="קוסקוס עננים" data-price="בטלפון"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="התבשילים של סבתא סיסי" data-tags="פופולארי|טבעוני" data-search="מרק ירקות עשיר מרק ירקות עם תפוח אדמה, גזר, קישוא, דלעת, בטטה, חומוס גרגירים, בצל וסלרי. פופולארי טבעוני">
               <div class="dish-head">
                 <span class="dish-title">מרק ירקות עשיר</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">בטלפון</span>
               </div>
               <p class="dish-note">מרק ירקות עם תפוח אדמה, גזר, קישוא, דלעת, בטטה, חומוס גרגירים, בצל וסלרי.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="מרק ירקות עשיר" data-price="בטלפון"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="התבשילים של סבתא סיסי" data-tags="טבעוני" data-search="מרק שעועית מרוקאי מרק שעועית עם עגבניות, בצל, שום, כמון ופפריקה. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">מרק שעועית מרוקאי</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">בטלפון</span>
               </div>
               <p class="dish-note">מרק שעועית עם עגבניות, בצל, שום, כמון ופפריקה.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="מרק שעועית מרוקאי" data-price="בטלפון"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="התבשילים של סבתא סיסי" data-tags="טבעוני" data-search="אורז לבן עם שעועית אורז לבן מוגש עם תבשיל שעועית מעל. התבשיל מכיל שעועית ברוטב עגבניות, בצל ושום. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">אורז לבן עם שעועית</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">בטלפון</span>
               </div>
               <p class="dish-note">אורז לבן מוגש עם תבשיל שעועית מעל. התבשיל מכיל שעועית ברוטב עגבניות, בצל ושום.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="אורז לבן עם שעועית" data-price="בטלפון"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="התבשילים של סבתא סיסי" data-tags="טבעוני" data-search="אורז לבן אורז לבן. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">אורז לבן</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">בטלפון</span>
               </div>
               <p class="dish-note">אורז לבן.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="אורז לבן" data-price="בטלפון"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
 
-        <section class="menu-cat reveal" aria-labelledby="cat-3">
+        <section class="menu-cat reveal" data-cat="סלטים ביתיים במשקל" aria-labelledby="cat-3">
           <h3 class="cat-title" id="cat-3">סלטים ביתיים במשקל</h3>
           <p class="cat-note">סלטי הבית של סבתא סיסי בהכנה ביתית, 250 גרם.</p>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="טבעוני" data-search="מטבוחה מטבוחה עם עגבניות ושום. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">מטבוחה</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">24 ₪</span>
               </div>
               <p class="dish-note">מטבוחה עם עגבניות ושום.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="מטבוחה" data-price="24 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="טבעוני" data-search="טחינה טחינה ביתית. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">טחינה</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">20 ₪</span>
               </div>
               <p class="dish-note">טחינה ביתית.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="טחינה" data-price="20 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="טבעוני" data-search="חומוס חומוס ביתי. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">חומוס</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">18 ₪</span>
               </div>
               <p class="dish-note">חומוס ביתי.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="חומוס" data-price="18 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="טבעוני|חריף מאוד" data-search="סחוג אדום פלפל אדום חריף ושום. חריף מאוד. טבעוני חריף מאוד">
               <div class="dish-head">
                 <span class="dish-title">סחוג אדום</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">20 ₪</span>
               </div>
               <p class="dish-note">פלפל אדום חריף ושום. חריף מאוד.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span><span class="tag tag-hot">חריף מאוד</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span><span class="tag tag-hot">חריף מאוד</span></p>
+                <button type="button" class="add-btn" data-add="סחוג אדום" data-price="20 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="טבעוני|חריף" data-search="סחוג ירוק פלפל ירוק, שום ופטרוזיליה. חריף. טבעוני חריף">
               <div class="dish-head">
                 <span class="dish-title">סחוג ירוק</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">20 ₪</span>
               </div>
               <p class="dish-note">פלפל ירוק, שום ופטרוזיליה. חריף.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span><span class="tag tag-hot">חריף</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span><span class="tag tag-hot">חריף</span></p>
+                <button type="button" class="add-btn" data-add="סחוג ירוק" data-price="20 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="טבעוני" data-search="כרוב לבן כרוב לבן עם לימון, חומץ, מלח וסוכר. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">כרוב לבן</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">15 ₪</span>
               </div>
               <p class="dish-note">כרוב לבן עם לימון, חומץ, מלח וסוכר.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="כרוב לבן" data-price="15 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="" data-search="כרוב סגול במיונז כרוב סגול במיונז.">
               <div class="dish-head">
                 <span class="dish-title">כרוב סגול במיונז</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">17 ₪</span>
               </div>
               <p class="dish-note">כרוב סגול במיונז.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="כרוב סגול במיונז" data-price="17 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="" data-search="קולסלאו כרוב לבן, גזר ומיונז.">
               <div class="dish-head">
                 <span class="dish-title">קולסלאו</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">20 ₪</span>
               </div>
               <p class="dish-note">כרוב לבן, גזר ומיונז.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="קולסלאו" data-price="20 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="" data-search="חציל במיונז חציל על האש במיונז.">
               <div class="dish-head">
                 <span class="dish-title">חציל במיונז</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">20 ₪</span>
               </div>
               <p class="dish-note">חציל על האש במיונז.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="חציל במיונז" data-price="20 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="סלטים ביתיים במשקל" data-tags="" data-search="סלט סלק מבושל סלק, לימון ושום.">
               <div class="dish-head">
                 <span class="dish-title">סלט סלק מבושל</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">18 ₪</span>
               </div>
               <p class="dish-note">סלק, לימון ושום.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="סלט סלק מבושל" data-price="18 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
 
-        <section class="menu-cat reveal" aria-labelledby="cat-4">
+        <section class="menu-cat reveal" data-cat="נשנושים בצד" aria-labelledby="cat-4">
           <h3 class="cat-title" id="cat-4">נשנושים בצד</h3>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="נשנושים בצד" data-tags="פופולארי" data-search="קציצת עירוק יחידה אחת. קציצת עירוק עם בצל, גזר, תפוח אדמה, קישוא ופטרוזיליה. פופולארי">
               <div class="dish-head">
                 <span class="dish-title">קציצת עירוק</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">8 ₪</span>
               </div>
               <p class="dish-note">יחידה אחת. קציצת עירוק עם בצל, גזר, תפוח אדמה, קישוא ופטרוזיליה.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+                <button type="button" class="add-btn" data-add="קציצת עירוק" data-price="8 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="נשנושים בצד" data-tags="מכיל בשר" data-search="קובה בורגול יחידה אחת. קובה בורגול מטוגנת במילוי בשר. מכיל בשר">
               <div class="dish-head">
                 <span class="dish-title">קובה בורגול</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">8 ₪</span>
               </div>
-              <p class="dish-note">יחידה אחת. קובה בורגול מטוגנת במילוי פטריות ותפוח אדמה.</p>
+              <p class="dish-note">יחידה אחת. קובה בורגול מטוגנת במילוי בשר.</p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-meat">מכיל בשר</span></p>
+                <button type="button" class="add-btn" data-add="קובה בורגול" data-price="8 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="נשנושים בצד" data-tags="" data-search="כדורי פלאפל 5 יחידות.">
               <div class="dish-head">
                 <span class="dish-title">כדורי פלאפל</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">5 יחידות.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="כדורי פלאפל" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="נשנושים בצד" data-tags="" data-search="צ'יפס תפוחי אדמה ">
               <div class="dish-head">
                 <span class="dish-title">צ'יפס תפוחי אדמה</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">20 ₪</span>
               </div>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="צ'יפס תפוחי אדמה" data-price="20 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
 
-        <section class="menu-cat reveal" aria-labelledby="cat-5">
+        <section class="menu-cat reveal" data-cat="מתוקים" aria-labelledby="cat-5">
           <h3 class="cat-title" id="cat-5">מתוקים</h3>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="מתוקים" data-tags="טבעוני" data-search="מלבי קלאסי שמנת צמחית, סוכר, קורנפלור ותמצית מי ורדים. מוגש לצד שברי קוקוס ובוטנים קצוצים. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">מלבי קלאסי</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">14 ₪</span>
               </div>
               <p class="dish-note">שמנת צמחית, סוכר, קורנפלור ותמצית מי ורדים. מוגש לצד שברי קוקוס ובוטנים קצוצים.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="מלבי קלאסי" data-price="14 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="מתוקים" data-tags="טבעוני" data-search="קרם בווריה שמנת צמחית, קורנפלור וסוכר. מוגש לצד סירופ שוקולד ושברי ביסקוויטים. טבעוני">
               <div class="dish-head">
                 <span class="dish-title">קרם בווריה</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">14 ₪</span>
               </div>
               <p class="dish-note">שמנת צמחית, קורנפלור וסוכר. מוגש לצד סירופ שוקולד ושברי ביסקוויטים.</p>
-              <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-vegan">טבעוני</span></p>
+                <button type="button" class="add-btn" data-add="קרם בווריה" data-price="14 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
 
-        <section class="menu-cat reveal" aria-labelledby="cat-6">
+        <section class="menu-cat menu-cat-wide reveal" data-cat="שתייה קלה" aria-labelledby="cat-6">
           <h3 class="cat-title" id="cat-6">שתייה קלה</h3>
           <ul class="dish-list">
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="פופולארי" data-search="מים מינרליים עין גדי בקבוק 0.5 ליטר. פופולארי">
               <div class="dish-head">
                 <span class="dish-title">מים מינרליים עין גדי</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">9 ₪</span>
               </div>
               <p class="dish-note">בקבוק 0.5 ליטר.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+                <button type="button" class="add-btn" data-add="מים מינרליים עין גדי" data-price="9 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="סודה טמפו בקבוק זכוכית 275 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">סודה טמפו</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">9 ₪</span>
               </div>
               <p class="dish-note">בקבוק זכוכית 275 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="סודה טמפו" data-price="9 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="פופולארי" data-search="קוקה קולה פחית 330 מ"ל. פופולארי">
               <div class="dish-head">
                 <span class="dish-title">קוקה קולה</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
-              <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+              <div class="dish-foot">
+                <p class="dish-tags"><span class="tag tag-top">פופולארי</span></p>
+                <button type="button" class="add-btn" data-add="קוקה קולה" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="קוקה קולה זירו פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">קוקה קולה זירו</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="קוקה קולה זירו" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="פפסי פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">פפסי</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="פפסי" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="פפסי מקס פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">פפסי מקס</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="פפסי מקס" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="מירינדה פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">מירינדה</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="מירינדה" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="7UP זירו פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">7UP זירו</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="7UP זירו" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="שוופס תותית פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">שוופס תותית</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="שוופס תותית" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
-            <li class="dish-row">
+            <li class="dish-row" data-cat="שתייה קלה" data-tags="" data-search="מיץ פז ענבים פחית 330 מ"ל.">
               <div class="dish-head">
                 <span class="dish-title">מיץ פז ענבים</span>
                 <span class="leader" aria-hidden="true"></span>
                 <span class="dish-price">10 ₪</span>
               </div>
               <p class="dish-note">פחית 330 מ"ל.</p>
+              <div class="dish-foot">
+                <span></span>
+                <button type="button" class="add-btn" data-add="מיץ פז ענבים" data-price="10 ₪"><span aria-hidden="true">+</span> הוספה</button>
+              </div>
             </li>
           </ul>
         </section>
@@ -651,6 +819,91 @@
   </section>
 
 </main>
+
+
+<!-- Floating rails: quick actions top-left, accessibility and back-to-top bottom-left -->
+<div class="rail rail-top" id="railTop" hidden>
+  <a class="fab" href="https://order.plweb.online/wl/629438" target="_blank" rel="noopener" aria-label="הזמנת משלוח אונליין">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm10 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z"/>
+      <path d="M3 7h7l1.6 6M10 17h5M15.6 13H11M14 9h3.2l2.3 4.2V17h-1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="fab-tip">משלוחים</span>
+  </a>
+  <a class="fab" href="https://waze.com/ul?q=%D7%90%D7%99%D7%9C%D7%AA%2036%20%D7%97%D7%95%D7%9C%D7%95%D7%9F&amp;navigate=yes" target="_blank" rel="noopener" aria-label="ניווט בוויז לאילת 36, חולון">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 2.6a7.4 7.4 0 0 0-7.4 7.4c0 5.2 7.4 11.4 7.4 11.4s7.4-6.2 7.4-11.4A7.4 7.4 0 0 0 12 2.6Z" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <circle cx="12" cy="9.8" r="2.6"/>
+    </svg>
+    <span class="fab-tip">ניווט בוויז</span>
+  </a>
+  <a class="fab" href="https://wa.me/972526299357" target="_blank" rel="noopener" aria-label="שליחת הודעה בוואטסאפ">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 3.2a8.8 8.8 0 0 0-7.6 13.2L3.4 20.6l4.3-1.1A8.8 8.8 0 1 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M9.1 8.2c.5-.1.7.1.9.5l.6 1.3c.1.3.1.5-.1.7l-.4.5c-.2.2-.2.4-.1.6.5.9 1.3 1.6 2.2 2 .3.1.5.1.7-.1l.5-.5c.2-.2.4-.2.7-.1l1.3.6c.4.2.6.4.5.8-.1.9-.9 1.6-1.9 1.6-2.7-.1-5.6-3-5.7-5.7 0-1 .7-1.9 1.6-2.1Z"/>
+    </svg>
+    <span class="fab-tip">וואטסאפ</span>
+  </a>
+</div>
+
+<div class="rail rail-bottom" id="railBottom" hidden>
+  <button type="button" class="fab fab-a11y" id="a11yBtn" aria-expanded="false" aria-controls="a11yPanel" aria-label="הגדרות נגישות">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="4.6" r="1.9"/>
+      <path d="M4.6 8.2c2.4.8 4.9 1.2 7.4 1.2s5-.4 7.4-1.2M12 9.4v5m0 0-2.6 6m2.6-6 2.6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <span class="fab-tip">נגישות</span>
+  </button>
+  <button type="button" class="fab fab-top" id="toTop" aria-label="חזרה לראש העמוד">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="arrow-up">
+      <path d="M12 19V6m0 0-5.2 5.2M12 6l5.2 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="fab-tip">לראש העמוד</span>
+  </button>
+</div>
+
+<div class="a11y-panel" id="a11yPanel" hidden role="group" aria-labelledby="a11yTitle">
+  <p class="a11y-title" id="a11yTitle">הגדרות נגישות</p>
+  <div class="a11y-row">
+    <span class="a11y-label">גודל טקסט</span>
+    <div class="a11y-controls">
+      <button type="button" class="a11y-btn" data-a11y="text-down" aria-label="הקטנת טקסט">א−</button>
+      <span class="a11y-value" id="a11yScale">100%</span>
+      <button type="button" class="a11y-btn" data-a11y="text-up" aria-label="הגדלת טקסט">א+</button>
+    </div>
+  </div>
+  <button type="button" class="a11y-toggle" data-a11y="contrast" aria-pressed="false">ניגודיות גבוהה</button>
+  <button type="button" class="a11y-toggle" data-a11y="links" aria-pressed="false">הדגשת קישורים</button>
+  <button type="button" class="a11y-toggle" data-a11y="nomotion" aria-pressed="false">עצירת אנימציות</button>
+  <button type="button" class="a11y-reset" data-a11y="reset">איפוס הגדרות</button>
+</div>
+
+
+<!-- The order basket: collect dishes, then copy the list into the ordering site or WhatsApp -->
+<button type="button" class="cart-fab" id="cartFab" aria-expanded="false" aria-controls="cartPanel" hidden>
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 5h2.2l2.2 9.2h8.4l2-6.4H7.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="10" cy="18.6" r="1.5"/><circle cx="16.6" cy="18.6" r="1.5"/>
+  </svg>
+  <span class="cart-badge" id="cartBadge">0</span>
+  <span class="sr-only">פתיחת ההזמנה שלי</span>
+</button>
+
+<div class="cart-panel" id="cartPanel" hidden role="group" aria-labelledby="cartTitle">
+  <div class="cart-head">
+    <p class="cart-title" id="cartTitle">ההזמנה שלי</p>
+    <button type="button" class="cart-close" id="cartClose" aria-label="סגירה">×</button>
+  </div>
+  <ul class="cart-list" id="cartList"></ul>
+  <p class="cart-empty" id="cartEmpty">עוד לא הוספתם מנות. אפשר להוסיף מהתפריט למעלה.</p>
+  <div class="cart-total" id="cartTotal" hidden></div>
+  <div class="cart-actions">
+    <button type="button" class="btn btn-accent cart-go" id="cartOrder">העתקה ומעבר להזמנה</button>
+    <button type="button" class="btn btn-ghost cart-wa" id="cartWhatsapp">שליחה בוואטסאפ</button>
+    <button type="button" class="cart-clear" id="cartClear">ניקוי ההזמנה</button>
+  </div>
+  <p class="cart-note" id="cartNote" aria-live="polite">הרשימה מועתקת אליכם, ואז נפתח אתר ההזמנות של המסעדה כדי להשלים שם את ההזמנה.</p>
+</div>
 
 <footer class="site-footer">
   <p>התנור של סבתא סיסי · מסעדה צמחונית כשרה · אילת 36, חולון</p>
