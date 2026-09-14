@@ -489,6 +489,7 @@
     document.body.classList.toggle('a11y-contrast', prefs.contrast);
     document.body.classList.toggle('a11y-links', prefs.links);
     document.body.classList.toggle('a11y-nomotion', prefs.nomotion);
+    document.documentElement.classList.toggle('no-smooth', prefs.nomotion);
     const scaleOut = document.getElementById('a11yScale');
     if (scaleOut) scaleOut.textContent = prefs.scale + '%';
     a11yPanel.querySelectorAll('.a11y-toggle').forEach(btn => {
