@@ -402,6 +402,21 @@
     document.addEventListener('mouseleave', () => document.body.classList.remove('pointer-light'));
   }
 
+
+  /* ===================== One turn per review, per pointer entry ===================== */
+  const fineHover = () => matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.review').forEach(card => {
+    card.addEventListener('pointerenter', e => {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') return;
+      if (motionOff || !fineHover()) return;
+      if (card.classList.contains('turning')) return;
+      card.classList.add('turning');
+    });
+    card.addEventListener('animationend', e => {
+      if (e.animationName === 'reviewTurn') card.classList.remove('turning');
+    });
+  });
+
   /* ===================== Menu search and filters ===================== */
   const menuSearch = document.getElementById('menuSearch');
   const searchClear = document.getElementById('searchClear');

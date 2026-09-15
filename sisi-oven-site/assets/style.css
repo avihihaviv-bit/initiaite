@@ -354,7 +354,6 @@ body::before{
 .oven-icon{ font-size:1.9rem; }
 .oven-label{ font-family:var(--font-body); font-weight:600; font-size:.85rem; color:var(--text-secondary); letter-spacing:.06em; }
 .oven-door:hover .oven-label{ color:var(--text-primary); }
-.hint{ font-size:.85rem; color:var(--text-secondary); opacity:.8; }
 
 /* ===== Menu ===== */
 .menu{ background:var(--panel); }
@@ -1014,10 +1013,12 @@ body.pointer-light .cursor-glow{ opacity:1; }
 @media (hover:hover) and (pointer:fine){
   .review{ transform-style:preserve-3d; }
   .review:hover{
-    animation:reviewTurn .95s var(--ease-inout);
     border-color:var(--accent);
     box-shadow:0 0 34px rgba(217,123,63,.3);
   }
+  /* one turn per entry: the card rotates out from under the cursor, so hover
+     alone would drop and re-fire it */
+  .review.turning{ animation:reviewTurn .95s var(--ease-inout); }
   .review:hover::before{ opacity:.9; animation:frameSpin 2.6s linear infinite; }
 }
 @keyframes reviewTurn{
