@@ -880,3 +880,81 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
 }
 .footer-bottom p{ margin:0 0 .4em; }
 .site-footer .fine{ font-size:.8rem; opacity:.75; max-width:62ch; margin-inline:auto; }
+
+/* ===== Bigger touch controls on phones ===== */
+@media (max-width:640px){
+  .fab{ width:56px; height:56px; }
+  .fab svg{ width:58%; height:58%; }
+  .rail{ gap:.85rem; }
+
+  .cart-fab{ width:64px; height:64px; }
+  .cart-badge{ min-width:1.7rem; height:1.7rem; font-size:.82rem; }
+
+  .btn{ min-height:54px; font-size:1rem; padding:.9em 1.7em; }
+  .settle-cta{ gap:.7rem; width:100%; }
+  .settle-cta .btn{ flex:1 1 9rem; }
+
+  .add-btn{ min-height:48px; font-size:.9rem; padding:.7em 1.3em; }
+  .chip{ min-height:48px; font-size:.92rem; padding:.7em 1.25em; }
+  .info-action{ min-height:50px; font-size:.9rem; padding:.75em 1.3em; }
+
+  .menu-search{ padding:.25rem 1rem; }
+  .menu-search input{ font-size:1.05rem; padding:.9em 0; }
+  .search-clear{ width:2.4rem; height:2.4rem; font-size:1.3rem; }
+
+  .qty button{ min-width:46px; min-height:46px; font-size:1.15rem; }
+  .cart-close{ width:2.6rem; height:2.6rem; font-size:1.3rem; }
+  .cart-actions .btn{ min-height:54px; }
+
+  .a11y-btn{ width:2.9rem; height:2.9rem; font-size:1rem; }
+  .a11y-toggle, .a11y-reset{ min-height:50px; font-size:.95rem; }
+  .a11y-panel{ width:min(19rem, calc(100vw - 1.6rem)); }
+
+  .faq-item summary, .legal-list summary{ min-height:48px; display:flex; align-items:center; }
+  .nav-cta{ padding:.62em 1em; }
+  .site-nav nav a{ padding-block:.5em; }
+}
+@media (max-width:370px){
+  .fab{ width:52px; height:52px; }
+  .cart-fab{ width:58px; height:58px; }
+  .nav-cta{ padding:.55em .8em; }
+}
+
+/* every tappable thing on a phone gets a real finger-sized target */
+@media (max-width:640px){
+  /* fewer items in the bar, so the ones that stay are comfortably tappable;
+     reviews stay reachable from the footer */
+  .nav-reviews{ display:none; }
+  .brand-mark{ min-width:46px; min-height:46px; justify-content:center; }
+  .brand-mark svg{ width:27px; height:27px; }
+  .site-nav nav a:not(.nav-cta){ min-height:44px; display:inline-flex; align-items:center; }
+  .nav-cta{ min-height:44px; display:inline-flex; align-items:center; justify-content:center; }
+  .nav-inner{ padding:.3rem .4rem .3rem .55rem; }
+  .info-card .link{ min-height:44px; display:inline-flex; align-items:center; }
+  .footer-col a{ min-height:44px; display:inline-flex; align-items:center; }
+  .footer-col p{ margin-bottom:.1em; }
+  .cart-clear{ min-height:44px; display:inline-flex; align-items:center; }
+  .skip-link{ min-height:48px; display:inline-flex; align-items:center; }
+}
+@media (max-width:370px){
+  .site-nav nav a{ font-size:.74rem; }
+  .site-nav nav{ gap:.4rem; }
+  .brand-mark{ min-width:40px; }
+  .brand-mark svg{ width:24px; height:24px; }
+}
+
+/* the sizing rule above outranked the plain .nav-home / .nav-reviews hide,
+   so state it with matching weight: on phones these two step out of the bar */
+@media (max-width:640px){
+  .site-nav nav a.nav-home,
+  .site-nav nav a.nav-reviews{ display:none; }
+}
+
+/* the floating buttons are larger on phones, so content keeps clear of them */
+@media (max-width:640px){
+  .section .wrap,
+  .site-footer .footer-inner,
+  .site-footer .footer-bottom{ padding-inline-end:4.4rem; }
+  .site-footer{ padding-bottom:6.5rem; }
+  .final-cta .wrap{ padding-inline:4.4rem 4.4rem; }
+}
