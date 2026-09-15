@@ -375,6 +375,33 @@
   const yearOut = document.getElementById('year');
   if (yearOut) yearOut.textContent = new Date().getFullYear();
 
+
+  /* ===================== A light that follows the pointer ===================== */
+  const glowLayer = document.querySelector('.cursor-glow');
+  if (glowLayer) {   // CSS decides whether the light shows; the listener just tracks the pointer
+    let px = 0, py = 0, glowQueued = false, currentCard = null;
+    const paintGlow = () => {
+      glowQueued = false;
+      document.body.style.setProperty('--mx', px + 'px');
+      document.body.style.setProperty('--my', py + 'px');
+      if (currentCard) {
+        const r = currentCard.getBoundingClientRect();
+        currentCard.style.setProperty('--cx', (px - r.left) + 'px');
+        currentCard.style.setProperty('--cy', (py - r.top) + 'px');
+      }
+    };
+    addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') return;
+      px = e.clientX; py = e.clientY;
+      const card = e.target.closest ? e.target.closest('.glow-card') : null;
+      if (card !== currentCard) currentCard = card;
+      document.body.classList.add('pointer-light');
+      if (!glowQueued) { glowQueued = true; requestAnimationFrame(paintGlow); }
+    }, { passive: true });
+    addEventListener('pointerleave', () => document.body.classList.remove('pointer-light'));
+    document.addEventListener('mouseleave', () => document.body.classList.remove('pointer-light'));
+  }
+
   /* ===================== Menu search and filters ===================== */
   const menuSearch = document.getElementById('menuSearch');
   const searchClear = document.getElementById('searchClear');
