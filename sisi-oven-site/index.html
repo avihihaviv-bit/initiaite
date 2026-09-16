@@ -36,6 +36,7 @@
 <body>
 
 <a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
+<button type="button" class="skip-link skip-a11y" id="skipA11y">הגדרות נגישות</button>
 
 <div class="cursor-glow" aria-hidden="true"></div>
 
@@ -900,7 +901,7 @@
             <p>האתר נבדק בהגדלת טקסט ובזום עד פי ארבעה, בלי חיתוך תוכן ובלי גלילה לצדדים, ברוחבי מסך של 320 עד 1440 פיקסלים. במסכי מגע כפתורים קטנים הוגדלו לאזור נגיעה נוח.</p>
             <p>העדפת מערכת להפחתת תנועה מכובדת במלואה: מי שהגדיר אותה מקבל תמונה סטטית במקום הסרטון, וללא אנימציות.</p>
 
-            <p><b>כלי הנגישות שבאתר.</b> בכפתור שבפינה השמאלית התחתונה אפשר להגדיל ולהקטין טקסט בארבע מדרגות, להפעיל ניגודיות גבוהה, להדגיש קישורים ולעצור אנימציות. כל אפשרות משנה את האתר עצמו בפועל, והבחירה נשמרת לביקור הבא. הכלי אינו תחליף להנגשת הקוד, אלא תוספת לה.</p>
+            <p><b>כלי הנגישות שבאתר.</b> הכפתור שבפינה השמאלית התחתונה זמין מרגע טעינת העמוד, עוד לפני האנימציה הפותחת, ופותח חלונית עם עשר אפשרויות: הגדלת טקסט בחמש מדרגות עד 160 אחוז, ריווח טקסט מוגדל לפי הדרישה של WCAG 1.4.12, גופן קריא, ניגודיות גבוהה, גווני אפור, הדגשת קישורים, הדגשת כותרות, סימון מיקוד מודגש, סמן עכבר גדול ועצירת אנימציות. כל אפשרות משנה את האתר עצמו בפועל, ולא מדובר בשכבת תצוגה. כל שינוי מוכרז לקוראי מסך, החלונית נסגרת ב‑Esc, המיקוד נשמר בתוכה כל עוד היא פתוחה, והבחירות נשמרות בדפדפן לביקור הבא. אפשר להגיע לחלונית גם בלחיצת Tab אחת מתחילת העמוד. הכלי אינו תחליף להנגשת הקוד, אלא תוספת לה.</p>
 
             <p><b>איך נבדק.</b> בדיקה אוטומטית בכלי axe-core מול כללי WCAG 2.0 ו‑2.1 ברמות A ו‑AA, שהוחזרה בלי חריגות; מדידת ניגודיות ידנית, כולל דגימה של הפריימים הבהירים ביותר של הסרטון מתחת לכתוביות; ומעבר ידני עם מקלדת בלבד על כל רכיבי האתר.</p>
 
@@ -932,8 +933,7 @@
 
 
 
-<!-- Floating tools. On a phone these become one bottom dock; see the mobile block in style.css -->
-<aside class="site-tools" aria-label="כלי נגישות וההזמנה שלי">
+<!-- Floating rails: quick actions top-left, accessibility and back-to-top bottom-left -->
 <nav class="rail rail-top" id="railTop" aria-label="פעולות מהירות" hidden>
   <a class="fab" href="https://order.plweb.online/wl/629438" target="_blank" rel="noopener" aria-label="הזמנת משלוח אונליין">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -957,6 +957,8 @@
     <span class="fab-tip">וואטסאפ</span>
   </a>
 </nav>
+
+<aside class="site-tools" aria-label="כלי נגישות וההזמנה שלי">
 <div class="rail rail-bottom" id="railBottom" hidden>
   <button type="button" class="fab fab-a11y" id="a11yBtn" aria-expanded="false" aria-controls="a11yPanel" aria-label="הגדרות נגישות">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -973,20 +975,50 @@
   </button>
 </div>
 
-<div class="a11y-panel" id="a11yPanel" hidden role="group" aria-labelledby="a11yTitle">
-  <p class="a11y-title" id="a11yTitle">הגדרות נגישות</p>
-  <div class="a11y-row">
-    <span class="a11y-label">גודל טקסט</span>
-    <div class="a11y-controls">
-      <button type="button" class="a11y-btn" data-a11y="text-down" aria-label="הקטנת טקסט">א−</button>
-      <span class="a11y-value" id="a11yScale">100%</span>
-      <button type="button" class="a11y-btn" data-a11y="text-up" aria-label="הגדלת טקסט">א+</button>
+<div class="a11y-panel" id="a11yPanel" hidden role="dialog" aria-labelledby="a11yTitle">
+  <div class="a11y-head">
+    <p class="a11y-title" id="a11yTitle">הגדרות נגישות</p>
+    <button type="button" class="a11y-close" id="a11yClose" aria-label="סגירת הגדרות הנגישות">×</button>
+  </div>
+
+  <div class="a11y-scroll">
+    <div class="a11y-group" role="group" aria-labelledby="a11yGroupText">
+      <p class="a11y-group-title" id="a11yGroupText">טקסט</p>
+      <div class="a11y-row">
+        <span class="a11y-label">גודל טקסט</span>
+        <div class="a11y-controls">
+          <button type="button" class="a11y-btn" data-a11y="text-down" aria-label="הקטנת טקסט">א−</button>
+          <span class="a11y-value" id="a11yScale">100%</span>
+          <button type="button" class="a11y-btn" data-a11y="text-up" aria-label="הגדלת טקסט">א+</button>
+        </div>
+      </div>
+      <button type="button" class="a11y-toggle" data-a11y="spacing" aria-pressed="false">ריווח טקסט מוגדל</button>
+      <button type="button" class="a11y-toggle" data-a11y="readable" aria-pressed="false">גופן קריא</button>
+    </div>
+
+    <div class="a11y-group" role="group" aria-labelledby="a11yGroupColor">
+      <p class="a11y-group-title" id="a11yGroupColor">צבע וניגודיות</p>
+      <button type="button" class="a11y-toggle" data-a11y="contrast" aria-pressed="false">ניגודיות גבוהה</button>
+      <button type="button" class="a11y-toggle" data-a11y="mono" aria-pressed="false">גווני אפור</button>
+    </div>
+
+    <div class="a11y-group" role="group" aria-labelledby="a11yGroupNav">
+      <p class="a11y-group-title" id="a11yGroupNav">ניווט וסימון</p>
+      <button type="button" class="a11y-toggle" data-a11y="links" aria-pressed="false">הדגשת קישורים</button>
+      <button type="button" class="a11y-toggle" data-a11y="headings" aria-pressed="false">הדגשת כותרות</button>
+      <button type="button" class="a11y-toggle" data-a11y="focus" aria-pressed="false">סימון מיקוד מודגש</button>
+      <button type="button" class="a11y-toggle" data-a11y="cursor" aria-pressed="false">סמן עכבר גדול</button>
+    </div>
+
+    <div class="a11y-group" role="group" aria-labelledby="a11yGroupMotion">
+      <p class="a11y-group-title" id="a11yGroupMotion">תנועה</p>
+      <button type="button" class="a11y-toggle" data-a11y="nomotion" aria-pressed="false">עצירת אנימציות</button>
     </div>
   </div>
-  <button type="button" class="a11y-toggle" data-a11y="contrast" aria-pressed="false">ניגודיות גבוהה</button>
-  <button type="button" class="a11y-toggle" data-a11y="links" aria-pressed="false">הדגשת קישורים</button>
-  <button type="button" class="a11y-toggle" data-a11y="nomotion" aria-pressed="false">עצירת אנימציות</button>
-  <button type="button" class="a11y-reset" data-a11y="reset">איפוס הגדרות</button>
+
+  <button type="button" class="a11y-reset" data-a11y="reset">איפוס כל ההגדרות</button>
+  <p class="a11y-note">ההגדרות נשמרות בדפדפן הזה בלבד, ויחכו לכם גם בביקור הבא.</p>
+  <p class="sr-only" id="a11yStatus" role="status" aria-live="polite"></p>
 </div>
 
 

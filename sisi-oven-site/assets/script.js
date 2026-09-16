@@ -494,22 +494,22 @@
     const show = window.scrollY > hero.offsetHeight * 0.88;   // once the opening journey has played
     if (show === railsShown) return;
     railsShown = show;
-    [railTop, railBottom].forEach(rail => {
-      if (show) {
-        rail.hidden = false;
-        requestAnimationFrame(() => rail.classList.add('visible'));
-      } else {
-        rail.classList.remove('visible');
-        setTimeout(() => { if (!railsShown) rail.hidden = true; }, 500);
-      }
-    });
-    document.body.classList.toggle('tools-on', show);   // the phone dock rides in on this
-    if (!show) closeA11y();
+    if (show) {
+      railTop.hidden = false;
+      requestAnimationFrame(() => railTop.classList.add('visible'));
+    } else {
+      railTop.classList.remove('visible');
+      setTimeout(() => { if (!railsShown) railTop.hidden = true; }, 500);
+    }
+    // back to top only earns its place once there is something to go back from
+    toTop.hidden = !show;
     if (onRailsToggle) onRailsToggle();
   }
   addEventListener('scroll', () => {
     if (!railTick) { railTick = true; requestAnimationFrame(updateRails); }
   }, { passive: true });
+  railBottom.hidden = false;
+  requestAnimationFrame(() => railBottom.classList.add('visible'));
   updateRails();
 
   const stillPrefersMotion = () => !motionOff && !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -518,9 +518,18 @@
   });
 
   /* the accessibility panel */
-  const SCALES = [100, 112, 125, 140];
+  const SCALES = [100, 112, 125, 140, 160];
   const PREFS_KEY = 'sisi-a11y';
-  let prefs = { scale: 100, contrast: false, links: false, nomotion: false };
+  const DEFAULTS = {
+    scale: 100, spacing: false, readable: false, contrast: false, mono: false,
+    links: false, headings: false, focus: false, cursor: false, nomotion: false
+  };
+  const LABELS = {
+    spacing: 'ריווח טקסט מוגדל', readable: 'גופן קריא', contrast: 'ניגודיות גבוהה',
+    mono: 'גווני אפור', links: 'הדגשת קישורים', headings: 'הדגשת כותרות',
+    focus: 'סימון מיקוד מודגש', cursor: 'סמן עכבר גדול', nomotion: 'עצירת אנימציות'
+  };
+  let prefs = Object.assign({}, DEFAULTS);
 
   try {
     const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null');
@@ -531,17 +540,26 @@
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* nothing to do */ }
   }
 
+  const a11yStatus = document.getElementById('a11yStatus');
+  function announce(msg) { if (a11yStatus) a11yStatus.textContent = msg; }
+
   function applyPrefs() {
     document.documentElement.style.fontSize = prefs.scale + '%';
-    document.body.classList.toggle('a11y-contrast', prefs.contrast);
-    document.body.classList.toggle('a11y-links', prefs.links);
-    document.body.classList.toggle('a11y-nomotion', prefs.nomotion);
+    Object.keys(LABELS).forEach(key => {
+      document.body.classList.toggle('a11y-' + key, !!prefs[key]);
+    });
     document.documentElement.classList.toggle('no-smooth', prefs.nomotion);
     const scaleOut = document.getElementById('a11yScale');
     if (scaleOut) scaleOut.textContent = prefs.scale + '%';
     a11yPanel.querySelectorAll('.a11y-toggle').forEach(btn => {
       btn.setAttribute('aria-pressed', String(!!prefs[btn.dataset.a11y]));
     });
+    // the size buttons stop responding at the ends, so say so rather than going quiet
+    const lo = prefs.scale === SCALES[0], hi = prefs.scale === SCALES[SCALES.length - 1];
+    const down = a11yPanel.querySelector('[data-a11y="text-down"]');
+    const up = a11yPanel.querySelector('[data-a11y="text-up"]');
+    if (down) down.disabled = lo;
+    if (up) up.disabled = hi;
     if (prefs.nomotion !== motionOff) {
       motionOff = prefs.nomotion;
       applyHeroMode();
@@ -549,11 +567,22 @@
     }
   }
 
+  const focusablesIn = el => [...el.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(n => n.offsetParent !== null || n === document.activeElement);
+
   function openA11y() {
     a11yPanel.hidden = false;
+    // sit just above the button itself, which moves depending on whether
+    // back-to-top is in the rail yet
+    const r = a11yBtn.getBoundingClientRect();
+    a11yPanel.style.bottom = Math.round(window.innerHeight - r.top + 10) + 'px';
+    // use the real room above the button instead of guessing in rem
+    a11yPanel.style.maxHeight = Math.max(260, Math.round(r.top - 22)) + 'px';
     a11yBtn.setAttribute('aria-expanded', 'true');
-    const first = a11yPanel.querySelector('button');
+    // the first control can be disabled (text-down at 100%), so take the first live one
+    const first = focusablesIn(a11yPanel)[0];
     if (first) first.focus();
+    markScrollEnd();
   }
   function closeA11y() {
     if (a11yPanel.hidden) return;
@@ -563,8 +592,32 @@
   a11yBtn.addEventListener('click', () => {
     a11yPanel.hidden ? openA11y() : closeA11y();
   });
+  document.getElementById('a11yClose').addEventListener('click', () => { closeA11y(); a11yBtn.focus(); });
+
+  // reachable on the first Tab, without walking the whole page first
+  // drop the fade once the list is scrolled to its end
+  const a11yScroll = a11yPanel.querySelector('.a11y-scroll');
+  const markScrollEnd = () => {
+    if (!a11yScroll) return;
+    const done = a11yScroll.scrollTop + a11yScroll.clientHeight >= a11yScroll.scrollHeight - 2;
+    a11yScroll.classList.toggle('at-end', done);
+  };
+  if (a11yScroll) a11yScroll.addEventListener('scroll', markScrollEnd, { passive: true });
+
+  const skipA11y = document.getElementById('skipA11y');
+  if (skipA11y) skipA11y.addEventListener('click', () => { if (a11yPanel.hidden) openA11y(); else a11yPanel.querySelector('.a11y-btn').focus(); });
+
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !a11yPanel.hidden) { closeA11y(); a11yBtn.focus(); }
+    if (e.key === 'Escape' && !a11yPanel.hidden) { closeA11y(); a11yBtn.focus(); return; }
+    // while it is open, Tab stays inside it
+    if (e.key === 'Tab' && !a11yPanel.hidden) {
+      const items = focusablesIn(a11yPanel);
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      else if (!a11yPanel.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    }
   });
   document.addEventListener('pointerdown', e => {
     if (a11yPanel.hidden) return;
@@ -579,13 +632,21 @@
       const i = SCALES.indexOf(prefs.scale);
       const next = kind === 'text-up' ? Math.min(SCALES.length - 1, i + 1) : Math.max(0, i - 1);
       prefs.scale = SCALES[next];
-    } else if (kind === 'reset') {
-      prefs = { scale: 100, contrast: false, links: false, nomotion: false };
-    } else if (kind in prefs) {
-      prefs[kind] = !prefs[kind];
+      applyPrefs(); savePrefs();
+      announce('גודל טקסט ' + prefs.scale + ' אחוז');
+      return;
     }
-    applyPrefs();
-    savePrefs();
+    if (kind === 'reset') {
+      prefs = Object.assign({}, DEFAULTS);
+      applyPrefs(); savePrefs();
+      announce('כל הגדרות הנגישות אופסו');
+      return;
+    }
+    if (kind in prefs) {
+      prefs[kind] = !prefs[kind];
+      applyPrefs(); savePrefs();
+      announce(LABELS[kind] + (prefs[kind] ? ' פועל' : ' כבוי'));
+    }
   });
 
   applyPrefs();

@@ -71,6 +71,8 @@ body::before{
   font-weight:600;
 }
 .skip-link:focus{ top:1rem; }
+.skip-a11y{ right:11.5rem; font-family:inherit; border:0; cursor:pointer; font-size:1rem; }
+@media (max-width:480px){ .skip-a11y{ right:1rem; }  .skip-a11y:focus{ top:4.2rem; } }
 
 :focus-visible{
   outline:3px solid #fff3e4;          /* light core, readable on the accent */
@@ -598,7 +600,7 @@ body.paused *, body.paused *::before, body.paused *::after{
 .cat-note{ color:var(--text-secondary); font-size:.86rem; margin:-.4rem 0 1rem; }
 
 /* ===== Floating rails ===== */
-.rail[hidden], .a11y-panel[hidden]{ display:none; }
+.rail[hidden], .a11y-panel[hidden], .fab[hidden]{ display:none; }
 .rail{
   position:fixed; left:clamp(.7rem,2vw,1.2rem); z-index:90;
   display:flex; flex-direction:column; gap:.7rem;
@@ -657,17 +659,44 @@ body.paused *, body.paused *::before, body.paused *::after{
 
 /* ===== Accessibility panel ===== */
 .a11y-panel{
-  position:fixed; z-index:95;
+  position:fixed; z-index:120;      /* above the nav pill, which is 100 */
   left:clamp(.7rem,2vw,1.2rem); bottom:calc(clamp(.9rem,3vh,1.6rem) + 2 * clamp(44px,5.4vw,52px) + 1.4rem);
-  width:min(17rem, calc(100vw - 1.8rem));
+  width:min(19rem, calc(100vw - 1.8rem));
   padding:1rem 1.1rem 1.1rem;
   border-radius:16px; border:1px solid rgba(217,123,63,.3);
   background:rgba(30,20,14,.96);
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   box-shadow:0 22px 50px rgba(0,0,0,.55);
   display:flex; flex-direction:column; gap:.55rem;
+  overflow:hidden;            /* the list inside does the scrolling */
 }
-.a11y-title{ margin:0 0 .2rem; font-weight:800; font-size:.95rem; color:var(--accent); }
+.a11y-head{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.a11y-title{ margin:0; font-weight:800; font-size:.95rem; color:var(--accent); }
+.a11y-close{
+  flex:none; width:1.9rem; height:1.9rem; border-radius:50%; cursor:pointer;
+  border:1px solid var(--line); background:transparent; color:var(--text-primary);
+  font-size:1.15rem; line-height:1; font-family:inherit;
+}
+.a11y-close:hover{ background:rgba(217,123,63,.22); }
+.a11y-scroll{
+  display:flex; flex-direction:column; gap:.9rem;
+  flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding-inline-end:.25rem;
+  /* the list can outrun the panel, so the bottom edge fades to say "there is more" */
+  -webkit-mask-image:linear-gradient(to bottom, #000 calc(100% - 22px), transparent 100%);
+          mask-image:linear-gradient(to bottom, #000 calc(100% - 22px), transparent 100%);
+  scrollbar-width:thin; scrollbar-color:rgba(217,123,63,.5) transparent;
+}
+/* once it is scrolled to the end there is nothing left to hint at */
+.a11y-scroll.at-end{ -webkit-mask-image:none; mask-image:none; }
+.a11y-scroll::-webkit-scrollbar{ width:6px; }
+.a11y-scroll::-webkit-scrollbar-thumb{ background:rgba(217,123,63,.5); border-radius:100px; }
+.a11y-group{ display:flex; flex-direction:column; gap:.4rem; }
+.a11y-group-title{
+  margin:0 0 .1rem; font-size:.72rem; font-weight:700; letter-spacing:.14em;
+  color:var(--text-secondary); text-transform:none;
+}
+.a11y-note{ margin:0; font-size:.72rem; color:var(--text-secondary); line-height:1.5; }
 .a11y-row{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
 .a11y-label{ font-size:.88rem; color:var(--text-secondary); }
 .a11y-controls{ display:flex; align-items:center; gap:.35rem; }
@@ -681,9 +710,70 @@ body.paused *, body.paused *::before, body.paused *::after{
 .a11y-toggle, .a11y-reset{ padding:.6em .9em; font-size:.88rem; font-weight:600; text-align:start; }
 .a11y-toggle[aria-pressed="true"]{ background:var(--accent); color:#1a1108; border-color:var(--accent); font-weight:800; }
 .a11y-btn:hover, .a11y-toggle:hover, .a11y-reset:hover{ background:rgba(217,123,63,.28); transform:translateY(-1px); }
+.a11y-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.a11y-btn:disabled:hover{ background:rgba(217,123,63,.14); transform:none; }
 .a11y-reset{ background:transparent; color:var(--text-secondary); }
 
 /* ===== Accessibility modes ===== */
+
+/* Text spacing, to WCAG 1.4.12. Scoped to running text so the layout holds. */
+body.a11y-spacing p, body.a11y-spacing li, body.a11y-spacing .lede,
+body.a11y-spacing .dish-note, body.a11y-spacing .review-text,
+body.a11y-spacing .legal-body, body.a11y-spacing .faq-answer{
+  line-height:1.85;
+  letter-spacing:.075em;
+  word-spacing:.16em;
+}
+body.a11y-spacing .legal-body p, body.a11y-spacing .faq-answer p{ margin-bottom:1.6em; }
+
+/* One plain, evenly weighted face instead of the display cut */
+body.a11y-readable{ --font-display:var(--font-body); }
+body.a11y-readable h1, body.a11y-readable h2, body.a11y-readable h3,
+body.a11y-readable .dish-title, body.a11y-readable .cart-title,
+body.a11y-readable .line, body.a11y-readable .rating-score{
+  font-weight:700; letter-spacing:.005em;
+}
+
+/* Grey: the palette goes neutral and the media desaturates. No filter on a
+   wrapper, which would trap every position:fixed control on the page. */
+body.a11y-mono{
+  --accent:#d8d1ca;
+  --accent-muted:#a49c95;
+  --open:#e4e0db;
+  --closed:#c3bbb4;
+  --line:rgba(216,209,202,.3);
+}
+body.a11y-mono img, body.a11y-mono video, body.a11y-mono .poster,
+body.a11y-mono .story-media, body.a11y-mono .oven-icon{ filter:grayscale(1); }
+body.a11y-mono .btn-accent, body.a11y-mono .chip.is-on,
+body.a11y-mono .cart-fab, body.a11y-mono .nav-cta{ color:#14100d; }
+
+/* Headings get a visible frame */
+body.a11y-headings h1, body.a11y-headings h2, body.a11y-headings h3,
+body.a11y-headings .cat-title{
+  outline:2px dashed var(--accent);
+  outline-offset:5px;
+  border-radius:4px;
+}
+
+/* A focus ring nobody can miss, on any background */
+body.a11y-focus :focus-visible{
+  outline:4px solid #fff3e4 !important;
+  outline-offset:3px !important;
+  box-shadow:0 0 0 8px rgba(0,0,0,.9) !important;
+  border-radius:4px;
+}
+
+/* A larger pointer, drawn inline so it needs no extra request */
+body.a11y-cursor,
+body.a11y-cursor *{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M5 2.5 19 12l-6.4 1.3L9.9 20Z' fill='%23fff' stroke='%23111' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") 4 3, auto !important;
+}
+body.a11y-cursor a, body.a11y-cursor button, body.a11y-cursor summary,
+body.a11y-cursor [role="button"], body.a11y-cursor input, body.a11y-cursor label{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M9 2.6c.9 0 1.6.7 1.6 1.6v6.2l1-.1c.6 0 1.2.2 1.7.5l4.2 2.6c.8.5 1.1 1.5.8 2.3l-1.3 3.6c-.3.9-1.1 1.4-2 1.4H11c-.7 0-1.3-.3-1.8-.8l-4.4-4.9c-.5-.6-.5-1.6.1-2.2.6-.5 1.5-.5 2.1 0l.4.4V4.2c0-.9.7-1.6 1.6-1.6Z' fill='%23fff' stroke='%23111' stroke-width='1.3' stroke-linejoin='round'/%3E%3C/svg%3E") 10 3, pointer !important;
+}
+
 body.a11y-contrast{
   --text-primary:#ffffff;
   --text-secondary:#ecdfd2;
@@ -802,7 +892,7 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
 }
 
 .cart-panel{
-  position:fixed; z-index:97;
+  position:fixed; z-index:118;      /* above the nav pill, which is 100 */
   right:clamp(.7rem,2vw,1.2rem);
   bottom:calc(clamp(.9rem,3vh,1.6rem) + clamp(52px,6vw,60px) + .8rem);
   width:min(22rem, calc(100vw - 1.8rem));
@@ -948,73 +1038,29 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
   .nav-cta{ padding:.45em .65em; }
 }
 
-/* ===================== Phones: the tools become one bottom dock =====================
-   Floating side rails cost a phone both gutters and still landed on top of the
-   content. Below 640px the six controls collapse into a single dock pinned to the
-   bottom, and the page gets its full width back. */
+/* ===================== Phones: the floating buttons keep their places =====================
+   Larger targets on a small screen, and the content keeps clear of the side rail. */
 @media (max-width:640px){
-  .site-tools{
-    position:fixed; inset-inline:0; bottom:0; z-index:96;
-    display:flex; align-items:center; justify-content:center;
-    gap:.4rem;
-    padding:.45rem .5rem calc(.45rem + env(safe-area-inset-bottom, 0px));
-    background:rgba(24,16,11,.94);
-    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-    border-top:1px solid rgba(217,123,63,.22);
-    box-shadow:0 -10px 30px rgba(0,0,0,.45);
-    opacity:0; transform:translateY(102%); pointer-events:none;
-    transition:opacity .45s var(--ease-out), transform .45s var(--ease-out);
-  }
-  body.tools-on .site-tools{ opacity:1; transform:none; pointer-events:auto; }
+  .fab{ width:52px; height:52px; }
+  .fab svg{ width:56%; height:56%; }
+  .rail{ gap:.8rem; }
+  .fab-tip{ display:none; }              /* no hover on a phone, so the label never shows */
 
-  /* the rails stop being rails and become groups inside the dock */
-  .rail{
-    position:static; flex-direction:row; gap:.4rem;
-    opacity:1; transform:none; transition:none;
-  }
-  .rail-top, .rail-bottom{ top:auto; bottom:auto; }
+  .cart-fab{ width:58px; height:58px; }
+  .cart-badge{ min-width:1.6rem; height:1.6rem; font-size:.8rem; }
 
-  /* one calm row: no bobbing, no pulsing halo, no hover tooltips */
-  .fab, .cart-fab{ animation:none; }
-  .fab::after{ display:none; }
-  .fab-tip{ display:none; }
-
-  .fab{
-    width:46px; height:46px;
-    background:rgba(52,34,24,.9); border-color:rgba(217,123,63,.3);
-    box-shadow:none;
-  }
-  .fab svg{ width:54%; height:54%; }
-  .fab:active{ transform:scale(.94); background:var(--accent); color:#1a1108; }
-
-  .cart-fab{
-    /* relative, not static: the count badge anchors to the button, not to the dock */
-    position:relative; inset:auto; width:52px; height:52px;
-    box-shadow:0 6px 18px rgba(217,123,63,.35);
-  }
-  .cart-fab:active{ transform:scale(.94); }
-  .cart-badge{ top:-4px; left:auto; right:-4px; min-width:1.35rem; height:1.35rem; font-size:.74rem; }
-
-  /* nothing sits under the dock */
-  .site-footer{ padding-bottom:calc(5.5rem + env(safe-area-inset-bottom, 0px)); }
-
-  /* both panels become bottom sheets that meet the dock */
-  .a11y-panel, .cart-panel{
-    left:0; right:0;
-    bottom:calc(4.45rem + env(safe-area-inset-bottom, 0px));   /* clears the 67px dock */
-    width:auto; max-width:none;
-    background:rgba(28,19,13,.99);
-    border-radius:20px 20px 0 0;
-    border-inline:0; border-bottom:0;
-    max-height:min(68vh, 30rem); overflow:auto;
-    padding:1.1rem 1.15rem 1.4rem;
-  }
+  .section .wrap,
+  .site-footer .footer-inner,
+  .site-footer .footer-bottom{ padding-inline-end:4rem; }
+  .site-footer{ padding-bottom:6.5rem; }
+  .final-cta .wrap{ padding-inline:4rem; }
 }
 @media (max-width:370px){
-  .site-tools{ gap:.3rem; padding-inline:.35rem; }
-  .rail{ gap:.3rem; }
-  .fab{ width:42px; height:42px; }
-  .cart-fab{ width:48px; height:48px; }
+  .fab{ width:48px; height:48px; }
+  .cart-fab{ width:54px; height:54px; }
+  .section .wrap,
+  .site-footer .footer-inner,
+  .site-footer .footer-bottom{ padding-inline-end:3.6rem; }
 }
 
 /* ===================== Phones: reading width and rhythm ===================== */
@@ -1041,6 +1087,7 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
     scrollbar-width:none; -webkit-overflow-scrolling:touch;
     margin-inline:-1.15rem; padding:.15rem 1.15rem .35rem;
     scroll-padding-inline-start:1.15rem;
+    max-width:none;
     -webkit-mask-image:linear-gradient(to left, #000 88%, transparent 100%);
             mask-image:linear-gradient(to left, #000 88%, transparent 100%);
   }
@@ -1136,3 +1183,15 @@ body.a11y-nomotion .cursor-glow{ display:none; }
   .lost .lede{ margin-inline:auto; margin-bottom:2rem; }
   .lost .settle-cta{ justify-content:center; }
   .lost-code{ font-family:var(--font-mono); color:var(--accent); letter-spacing:.3em; font-size:.85rem; margin-bottom:1rem; }
+
+/* ===== The accessibility panel on a phone ===== */
+@media (max-width:640px){
+  .a11y-panel{
+    left:.7rem; right:.7rem; width:auto; max-width:none;
+    padding:.9rem 1rem 1.05rem;
+  }
+  .a11y-scroll{ gap:.75rem; }
+  .a11y-toggle, .a11y-reset{ min-height:46px; padding:.55em .9em; font-size:.92rem; }
+  .a11y-btn{ width:2.6rem; height:2.6rem; }
+  .a11y-close{ width:2.4rem; height:2.4rem; font-size:1.25rem; }
+}
