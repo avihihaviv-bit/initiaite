@@ -885,20 +885,9 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
 
 /* ===== Bigger touch controls on phones ===== */
 @media (max-width:640px){
-  .fab{ width:56px; height:56px; }
-  .fab svg{ width:58%; height:58%; }
-  .rail{ gap:.85rem; }
-
-  .cart-fab{ width:64px; height:64px; }
-  .cart-badge{ min-width:1.7rem; height:1.7rem; font-size:.82rem; }
-
-  .btn{ min-height:54px; font-size:1rem; padding:.9em 1.7em; }
   .settle-cta{ gap:.7rem; width:100%; }
   .settle-cta .btn{ flex:1 1 9rem; }
 
-  .add-btn{ min-height:48px; font-size:.9rem; padding:.7em 1.3em; }
-  .chip{ min-height:48px; font-size:.92rem; padding:.7em 1.25em; }
-  .info-action{ min-height:50px; font-size:.9rem; padding:.75em 1.3em; }
 
   .menu-search{ padding:.25rem 1rem; }
   .menu-search input{ font-size:1.05rem; padding:.9em 0; }
@@ -910,15 +899,12 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
 
   .a11y-btn{ width:2.9rem; height:2.9rem; font-size:1rem; }
   .a11y-toggle, .a11y-reset{ min-height:50px; font-size:.95rem; }
-  .a11y-panel{ width:min(19rem, calc(100vw - 1.6rem)); }
 
   .faq-item summary, .legal-list summary{ min-height:48px; display:flex; align-items:center; }
   .nav-cta{ padding:.62em 1em; }
   .site-nav nav a{ padding-block:.5em; }
 }
 @media (max-width:370px){
-  .fab{ width:52px; height:52px; }
-  .cart-fab{ width:58px; height:58px; }
   .nav-cta{ padding:.55em .8em; }
 }
 
@@ -962,13 +948,119 @@ body.a11y-nomotion *, body.a11y-nomotion *::before, body.a11y-nomotion *::after{
   .nav-cta{ padding:.45em .65em; }
 }
 
-/* the floating buttons are larger on phones, so content keeps clear of them */
+/* ===================== Phones: the tools become one bottom dock =====================
+   Floating side rails cost a phone both gutters and still landed on top of the
+   content. Below 640px the six controls collapse into a single dock pinned to the
+   bottom, and the page gets its full width back. */
 @media (max-width:640px){
-  .section .wrap,
-  .site-footer .footer-inner,
-  .site-footer .footer-bottom{ padding-inline-end:4.4rem; }
-  .site-footer{ padding-bottom:6.5rem; }
-  .final-cta .wrap{ padding-inline:4.4rem 4.4rem; }
+  .site-tools{
+    position:fixed; inset-inline:0; bottom:0; z-index:96;
+    display:flex; align-items:center; justify-content:center;
+    gap:.4rem;
+    padding:.45rem .5rem calc(.45rem + env(safe-area-inset-bottom, 0px));
+    background:rgba(24,16,11,.94);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-top:1px solid rgba(217,123,63,.22);
+    box-shadow:0 -10px 30px rgba(0,0,0,.45);
+    opacity:0; transform:translateY(102%); pointer-events:none;
+    transition:opacity .45s var(--ease-out), transform .45s var(--ease-out);
+  }
+  body.tools-on .site-tools{ opacity:1; transform:none; pointer-events:auto; }
+
+  /* the rails stop being rails and become groups inside the dock */
+  .rail{
+    position:static; flex-direction:row; gap:.4rem;
+    opacity:1; transform:none; transition:none;
+  }
+  .rail-top, .rail-bottom{ top:auto; bottom:auto; }
+
+  /* one calm row: no bobbing, no pulsing halo, no hover tooltips */
+  .fab, .cart-fab{ animation:none; }
+  .fab::after{ display:none; }
+  .fab-tip{ display:none; }
+
+  .fab{
+    width:46px; height:46px;
+    background:rgba(52,34,24,.9); border-color:rgba(217,123,63,.3);
+    box-shadow:none;
+  }
+  .fab svg{ width:54%; height:54%; }
+  .fab:active{ transform:scale(.94); background:var(--accent); color:#1a1108; }
+
+  .cart-fab{
+    /* relative, not static: the count badge anchors to the button, not to the dock */
+    position:relative; inset:auto; width:52px; height:52px;
+    box-shadow:0 6px 18px rgba(217,123,63,.35);
+  }
+  .cart-fab:active{ transform:scale(.94); }
+  .cart-badge{ top:-4px; left:auto; right:-4px; min-width:1.35rem; height:1.35rem; font-size:.74rem; }
+
+  /* nothing sits under the dock */
+  .site-footer{ padding-bottom:calc(5.5rem + env(safe-area-inset-bottom, 0px)); }
+
+  /* both panels become bottom sheets that meet the dock */
+  .a11y-panel, .cart-panel{
+    left:0; right:0;
+    bottom:calc(4.45rem + env(safe-area-inset-bottom, 0px));   /* clears the 67px dock */
+    width:auto; max-width:none;
+    background:rgba(28,19,13,.99);
+    border-radius:20px 20px 0 0;
+    border-inline:0; border-bottom:0;
+    max-height:min(68vh, 30rem); overflow:auto;
+    padding:1.1rem 1.15rem 1.4rem;
+  }
+}
+@media (max-width:370px){
+  .site-tools{ gap:.3rem; padding-inline:.35rem; }
+  .rail{ gap:.3rem; }
+  .fab{ width:42px; height:42px; }
+  .cart-fab{ width:48px; height:48px; }
+}
+
+/* ===================== Phones: reading width and rhythm ===================== */
+@media (max-width:640px){
+  .section{ padding:clamp(3.2rem,9vw,4.5rem) 1.15rem; }
+
+  /* the nav pill floats over the page, so give the text beneath it somewhere to go */
+  .site-nav::before{
+    content:""; position:absolute; inset-inline:0; top:calc(-1 * clamp(.6rem,1.6vh,1.1rem));
+    height:5.6rem; pointer-events:none; z-index:-1;
+    background:linear-gradient(to bottom,
+      rgba(24,16,11,.97) 0%, rgba(24,16,11,.9) 40%, rgba(24,16,11,0) 100%);
+  }
+  /* on a small screen the pill sits over busy frames, so it carries its own ground */
+  .nav-inner{ background:rgba(27,18,13,.93); }
+
+  h2{ font-size:clamp(1.55rem,7vw,2rem); }
+  .lede{ font-size:1.02rem; }
+  .section-note{ font-size:.9rem; }
+
+  /* filters: one swipeable row instead of five stacked ones */
+  .menu-chips{
+    flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+    margin-inline:-1.15rem; padding:.15rem 1.15rem .35rem;
+    scroll-padding-inline-start:1.15rem;
+    -webkit-mask-image:linear-gradient(to left, #000 88%, transparent 100%);
+            mask-image:linear-gradient(to left, #000 88%, transparent 100%);
+  }
+  .menu-chips::-webkit-scrollbar{ display:none; }
+  .chip{ flex:none; scroll-snap-align:start; min-height:44px; font-size:.88rem; padding:.55em 1.05em; }
+
+  .menu-cats{ grid-template-columns:1fr; gap:2.2rem; margin-top:1.8rem; }
+  .dish-list{ gap:1.15rem; }
+  .dish-note{ font-size:.9rem; }
+  .dish-foot{ justify-content:flex-start; gap:.6rem; }
+  .add-btn{ order:-1; min-height:44px; font-size:.85rem; padding:.55em 1.1em; }
+
+  .review{ padding:1.15rem; border-radius:14px; }
+  .review-text{ font-size:.97rem; }
+  .rating-score{ font-size:2rem; }
+
+  .info-card{ padding:1.2rem; }
+  .info-action{ min-height:46px; font-size:.86rem; padding:.6em 1.1em; }
+
+  .btn{ min-height:50px; font-size:.96rem; padding:.8em 1.4em; }
 }
 
 /* ===== A light that follows the pointer ===== */

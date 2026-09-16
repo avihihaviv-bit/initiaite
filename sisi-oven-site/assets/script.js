@@ -503,6 +503,7 @@
         setTimeout(() => { if (!railsShown) rail.hidden = true; }, 500);
       }
     });
+    document.body.classList.toggle('tools-on', show);   // the phone dock rides in on this
     if (!show) closeA11y();
     if (onRailsToggle) onRailsToggle();
   }
