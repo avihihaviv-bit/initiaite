@@ -663,18 +663,33 @@
   const cartTotal = document.getElementById('cartTotal');
   const cartNote = document.getElementById('cartNote');
 
+  const MAX_QTY = 99;
+  // stored state is not to be trusted: a string qty turned "5" + 1 into "51",
+  // and nothing stopped a fractional or nine-digit quantity
+  const cleanQty = v => {
+    const n = Math.floor(Number(v));
+    return Number.isFinite(n) && n > 0 ? Math.min(n, MAX_QTY) : 0;
+  };
+
   let cart = [];
   try {
     const saved = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
-    if (Array.isArray(saved)) cart = saved.filter(i => i && i.name && i.qty > 0);
+    if (Array.isArray(saved)) {
+      cart = saved
+        .filter(i => i && typeof i.name === 'string' && i.name)
+        .map(i => ({ name: i.name, price: typeof i.price === 'string' ? i.price : '', qty: cleanQty(i.qty) }))
+        .filter(i => i.qty > 0);
+    }
   } catch (e) { /* storage blocked: start empty */ }
 
   const saveCart = () => {
     try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* nothing to do */ }
   };
   const priceOf = item => {
-    const n = parseFloat(String(item.price).replace(/[^\d.]/g, ''));
-    return isFinite(n) ? n : null;
+    const raw = String(item.price);
+    if (/-/.test(raw)) return null;            // a negative price is not a price
+    const n = parseFloat(raw.replace(/[^\d.]/g, ''));
+    return Number.isFinite(n) && n >= 0 ? n : null;
   };
   const countItems = () => cart.reduce((sum, i) => sum + i.qty, 0);
 
@@ -702,6 +717,7 @@
       plus.type = 'button';
       plus.textContent = '+';
       plus.setAttribute('aria-label', 'הוספת כמות של ' + item.name);
+      plus.disabled = item.qty >= MAX_QTY;
       plus.addEventListener('click', () => changeQty(item.name, 1));
       qty.append(minus, out, plus);
 
@@ -739,7 +755,7 @@
   function changeQty(name, delta) {
     const item = cart.find(i => i.name === name);
     if (!item) return;
-    item.qty += delta;
+    item.qty = cleanQty(cleanQty(item.qty) + delta);
     if (item.qty <= 0) cart = cart.filter(i => i.name !== name);
     saveCart();
     renderCart();
@@ -747,7 +763,7 @@
 
   function addToCart(name, price, btn) {
     const item = cart.find(i => i.name === name);
-    if (item) item.qty++;
+    if (item) item.qty = cleanQty(cleanQty(item.qty) + 1);
     else cart.push({ name, price, qty: 1 });
     saveCart();
     renderCart();
@@ -820,12 +836,12 @@
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
         copied = true;
-        cartNote.textContent = 'ההזמנה הועתקה. אתר ההזמנות נפתח, אפשר להדביק שם או לבחור את המנות.';
+        cartNote.textContent = 'ההזמנה הועתקה ללוח. אתר ההזמנות נפתח בלשונית חדשה, ושם משלימים את ההזמנה.';
       }).catch(() => { /* the sync path already reported what happened */ });
     }
     window.open(ORDER_URL, '_blank', 'noopener');   // still inside the click
     cartNote.textContent = copied
-      ? 'ההזמנה הועתקה. אתר ההזמנות נפתח, אפשר להדביק שם או לבחור את המנות.'
+      ? 'ההזמנה הועתקה ללוח. אתר ההזמנות נפתח בלשונית חדשה, ושם משלימים את ההזמנה.'
       : 'אתר ההזמנות נפתח. אם ההעתקה לא נתפסה, אפשר לשלוח את ההזמנה בוואטסאפ.';
   });
 
