@@ -576,8 +576,11 @@
     // back-to-top is in the rail yet
     const r = a11yBtn.getBoundingClientRect();
     a11yPanel.style.bottom = Math.round(window.innerHeight - r.top + 10) + 'px';
-    // use the real room above the button instead of guessing in rem
-    a11yPanel.style.maxHeight = Math.max(260, Math.round(r.top - 22)) + 'px';
+    // the room above the button, but never so much of the screen that the page
+    // disappears behind the panel
+    const room = r.top - 22;
+    const cap = window.innerHeight * (window.innerWidth <= 640 ? 0.55 : 0.7);
+    a11yPanel.style.maxHeight = Math.round(Math.max(260, Math.min(room, cap))) + 'px';
     a11yBtn.setAttribute('aria-expanded', 'true');
     // the first control can be disabled (text-down at 100%), so take the first live one
     const first = focusablesIn(a11yPanel)[0];

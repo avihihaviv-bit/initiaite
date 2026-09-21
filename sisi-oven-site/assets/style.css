@@ -1190,8 +1190,12 @@ body.a11y-nomotion .cursor-glow{ display:none; }
     left:.7rem; right:.7rem; width:auto; max-width:none;
     padding:.9rem 1rem 1.05rem;
   }
-  .a11y-scroll{ gap:.75rem; }
-  .a11y-toggle, .a11y-reset{ min-height:46px; padding:.55em .9em; font-size:.92rem; }
+  .a11y-scroll{ gap:.7rem; }
+  /* two per row: the same ten controls in roughly half the height */
+  .a11y-group{ display:grid; grid-template-columns:1fr 1fr; gap:.4rem; align-items:stretch; }
+  .a11y-group-title, .a11y-group .a11y-row{ grid-column:1 / -1; }
+  .a11y-toggle{ min-height:46px; padding:.5em .6em; font-size:.85rem; text-align:center; line-height:1.25; }
+  .a11y-reset{ min-height:46px; padding:.55em .9em; font-size:.92rem; }
   .a11y-btn{ width:2.6rem; height:2.6rem; }
   .a11y-close{ width:2.4rem; height:2.4rem; font-size:1.25rem; }
 }
