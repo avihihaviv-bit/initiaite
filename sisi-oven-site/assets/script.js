@@ -225,6 +225,17 @@
 
   /* ===================== Static-hero gates (must match CSS exactly) ===================== */
   const GATES = ['(prefers-reduced-motion: reduce)'];
+
+  /* The hero is a 4.4MB download. That is a fair trade on wifi and an unfair one
+     on a metered or 2G connection, so those visitors get the static hero — the
+     same page, the same words, no video fetched at all. */
+  function meteredConnection() {
+    const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return false;
+    if (c.saveData === true) return true;
+    return c.effectiveType === '2g' || c.effectiveType === 'slow-2g';
+  }
+
   let scrubOn = false;
   let motionOff = false;   // set by the accessibility panel
   function pinToFinalStates() {
@@ -256,7 +267,10 @@
     pinToFinalStates();
   }
   function applyHeroMode() {
-    if (motionOff || GATES.some(q => matchMedia(q).matches)) {
+    const metered = meteredConnection();
+    // the media query already styles the reduced-motion case; this covers the rest
+    hero.classList.toggle('hero-static', metered);
+    if (motionOff || metered || GATES.some(q => matchMedia(q).matches)) {
       disableScrub();
       pinToFinalStates();   // also on a first load that never armed the scrub
     } else {
@@ -265,6 +279,9 @@
   }
   const MQLS = GATES.map(q => matchMedia(q));
   MQLS.forEach(m => m.addEventListener('change', applyHeroMode));
+  // if the connection improves, the hero can come alive without a reload
+  const conn = navigator.connection;
+  if (conn && conn.addEventListener) conn.addEventListener('change', applyHeroMode);
   applyHeroMode();
 
   matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', e => {
