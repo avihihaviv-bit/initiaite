@@ -79,7 +79,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  /* static assets: cache first, and fill the cache on the way past */
+  /* CSS and JS change whenever the site is edited, and there are no content
+     hashes in the filenames to tell a new one from an old one. Cache-first
+     would keep serving last week's file to anyone who has visited before, so
+     these are stale-while-revalidate: the cached copy answers immediately and
+     a fresh copy is fetched in the background for the next load. */
+  if (/\.(css|js)$/.test(url.pathname)) {
+    event.respondWith(
+      caches.open(SHELL).then(cache => cache.match(req).then(hit => {
+        const fresh = fetch(req).then(res => {
+          if (res.ok && res.type === 'basic') cache.put(req, res.clone());
+          return res;
+        }).catch(() => hit);
+        return hit || fresh;
+      }))
+    );
+    return;
+  }
+
+  /* fonts and images never change without changing name: cache first */
   event.respondWith(
     caches.match(req).then(hit => hit || fetch(req).then(res => {
       if (res.ok && res.type === 'basic') {

@@ -1,6 +1,45 @@
 (() => {
   'use strict';
 
+  /* ===================== Analytics =====================
+     Vercel Web Analytics. Chosen because the script and the beacon are both
+     same-origin (/_vercel/...), so the strict CSP needs no relaxing, and because
+     it is cookieless: no identifier is stored on the device and nothing is sent
+     to a third party. Until it is switched on in the Vercel dashboard the script
+     404s, the queue below simply never drains, and nothing on the page notices. */
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  (function () {
+    // the endpoint only exists on Vercel, so asking for it anywhere else is a
+    // guaranteed 404 in the console for no benefit
+    const local = /^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname) || location.protocol === 'file:';
+    if (local) return;
+    const tag = document.createElement('script');
+    tag.defer = true;
+    tag.src = '/_vercel/insights/script.js';   // same origin: allowed by script-src 'self'
+    document.head.appendChild(tag);
+  })();
+
+  /* One helper for every conversion event. Never send a name, a phone number,
+     an address or a cart total: only what was clicked, and which dish. */
+  function track(name, data) {
+    try { window.va('event', data ? { name: name, data: data } : { name: name }); }
+    catch (e) { /* analytics must never break the page */ }
+  }
+
+  addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (a) {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('tel:')) track('phone_click');
+      else if (href.includes('wa.me')) track('whatsapp_click');
+      else if (href.includes('waze.com') || href.includes('google.com/maps')) track('directions_click');
+      else if (href.includes('plweb.online')) track('order_site_click');
+      return;
+    }
+    const add = e.target.closest('.add-btn');
+    if (add) track('add_to_cart', { dish: add.dataset.add });
+  }, { passive: true });
+
   /* ===================== Installable app, and honest offline =====================
      The worker keeps the shell so the page opens without a connection. HTML is
      always fetched network-first, so nobody reads a stale price while online;
@@ -870,7 +909,10 @@
     cartPanel.hidden = true;
     cartFab.setAttribute('aria-expanded', 'false');
   }
-  cartFab.addEventListener('click', () => { cartPanel.hidden ? openCart() : closeCart(); });
+  cartFab.addEventListener('click', () => {
+    if (cartPanel.hidden) track('begin_checkout', { items: countItems() });
+    cartPanel.hidden ? openCart() : closeCart();
+  });
   document.getElementById('cartClose').addEventListener('click', () => { closeCart(); cartFab.focus(); });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !cartPanel.hidden) { closeCart(); cartFab.focus(); }
@@ -890,6 +932,7 @@
         cartNote.textContent = 'ההזמנה הועתקה ללוח. אתר ההזמנות נפתח בלשונית חדשה, ושם משלימים את ההזמנה.';
       }).catch(() => { /* the sync path already reported what happened */ });
     }
+    track('order_handoff', { items: countItems() });
     window.open(ORDER_URL, '_blank', 'noopener');   // still inside the click
     cartNote.textContent = copied
       ? 'ההזמנה הועתקה ללוח. אתר ההזמנות נפתח בלשונית חדשה, ושם משלימים את ההזמנה.'
@@ -898,6 +941,7 @@
 
   document.getElementById('cartWhatsapp').addEventListener('click', () => {
     if (!cart.length) { cartNote.textContent = 'קודם מוסיפים מנות מהתפריט, ואז אפשר לשלוח.'; return; }
+    track('whatsapp_order', { items: countItems() });
     window.open('https://wa.me/972526299357?text=' + encodeURIComponent(orderText()), '_blank', 'noopener');
   });
 
