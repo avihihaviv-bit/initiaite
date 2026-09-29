@@ -1,6 +1,37 @@
 (() => {
   'use strict';
 
+  /* ===================== Installable app, and honest offline =====================
+     The worker keeps the shell so the page opens without a connection. HTML is
+     always fetched network-first, so nobody reads a stale price while online;
+     when a cached copy is served offline the bar below says so out loud. */
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then(reg => {
+        // a new version installs in the background; take it on the next visit
+        reg.addEventListener('updatefound', () => {
+          const sw = reg.installing;
+          if (!sw) return;
+          sw.addEventListener('statechange', () => {
+            if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+              sw.postMessage('skip-waiting');
+            }
+          });
+        });
+      }).catch(() => { /* no worker is not a failure the visitor should see */ });
+    });
+  }
+
+  const offlineBar = document.getElementById('offlineBar');
+  function paintOnline() {
+    const off = !navigator.onLine;
+    if (offlineBar) offlineBar.hidden = !off;
+    document.body.classList.toggle('is-offline', off);
+  }
+  addEventListener('online', paintOnline);
+  addEventListener('offline', paintOnline);
+  paintOnline();
+
   /* ===================== Hero scrub ===================== */
   const hero = document.getElementById('hero');
   const stage = document.querySelector('.hero-stage');

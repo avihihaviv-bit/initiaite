@@ -1222,3 +1222,15 @@ body.a11y-nomotion .cursor-glow{ display:none; }
   .a11y-btn{ width:2.6rem; height:2.6rem; }
   .a11y-close{ width:2.4rem; height:2.4rem; font-size:1.25rem; }
 }
+
+/* ===== Offline notice =====
+   Only ever visible when the page is being read without a connection, so the
+   visitor is never shown a cached menu as if it were live. */
+.offline-bar{
+  position:fixed; inset-inline:0; top:0; z-index:200; margin:0;
+  padding:.55em 1rem calc(.55em + env(safe-area-inset-top, 0px));
+  background:var(--closed); color:#2a0f0a;
+  font-size:.85rem; font-weight:700; text-align:center;
+}
+.offline-bar[hidden]{ display:none; }
+body.is-offline .site-nav{ top:calc(clamp(.6rem,1.6vh,1.1rem) + 2.4rem); }
