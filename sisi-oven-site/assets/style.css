@@ -81,6 +81,7 @@ body::before{
   border-radius:6px;
 }
 @media (forced-colors:active){
+  .star-half{ background:none; color:CanvasText; -webkit-text-fill-color:CanvasText; }
   :focus-visible{ outline:3px solid Highlight; box-shadow:none; }
 }
 
@@ -402,6 +403,16 @@ body::before{
 .rating-row{ display:flex; align-items:baseline; gap:.8rem; flex-wrap:wrap; margin-bottom:2rem; }
 .rating-score{ font-family:var(--font-display); font-size:2.5rem; font-weight:400; }
 .stars{ color:var(--accent); font-size:1.2rem; letter-spacing:.1em; }
+
+/* A real half star: the glyph is painted by a hard-edged gradient clipped to the
+   text, so the fill stops dead in the middle instead of fading the whole star.
+   'to left' is physical, so the filled half stays on the side the row starts
+   from in RTL. */
+.star-half{
+  background:linear-gradient(to left, var(--accent) 50%, rgba(217,123,63,.3) 50%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+}
 .rating-count{ color:var(--text-secondary); font-size:.9rem; }
 .review-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr)); gap:1.3rem; }
 .review{
@@ -422,7 +433,7 @@ body::before{
 .review-name{ margin:0; font-weight:700; font-size:1rem; }
 .review-sub{ margin:0; font-size:.8rem; color:var(--text-secondary); }
 .review-stars{ margin:0; color:var(--accent); font-size:1.05rem; letter-spacing:.12em; }
-.review-stars .half{ opacity:.45; }
+.review-stars .star-half{ font-size:inherit; }
 .review-text{ margin:0; font-size:1rem; line-height:1.65; flex:1 1 auto; }
 .review-scores{
   list-style:none; margin:0; padding:.7rem 0 0; display:flex; flex-wrap:wrap; gap:.5rem .9rem;
