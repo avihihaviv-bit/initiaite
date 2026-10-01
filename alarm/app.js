@@ -281,6 +281,9 @@ function render() {
     document.querySelectorAll('[data-nav-link]').forEach(a => a.classList.toggle('active', a.dataset.navLink === path));
     const view = document.getElementById('view');
     view.innerHTML = renderView(path, params);
+    view.classList.remove('view-enter');
+    void view.offsetWidth; // force a reflow so the entrance animation replays every navigation
+    view.classList.add('view-enter');
     bindViewEvents(path);
     renderRing();
     renderModal();
@@ -352,10 +355,10 @@ function viewHome() {
 
     <div class="section-title">${t('statsTitle')}</div>
     <div class="stat-grid">
-      <div class="card stat-tile"><div class="value">🔥 ${streak.current}</div><div class="label">${t('streak')}</div></div>
-      <div class="card stat-tile"><div class="value">${rate == null ? '—' : rate + '%'}</div><div class="label">${t('successRate')}</div></div>
-      <div class="card stat-tile"><div class="value">${snoozeTotal}</div><div class="label">${t('snoozeCount')}</div></div>
-      <div class="card stat-tile"><div class="value">${alarms.filter(a => a.enabled).length}</div><div class="label">${t('navAlarms')}</div></div>
+      <div class="card stat-tile fade-stagger" style="animation-delay:0ms"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>
+      <div class="card stat-tile fade-stagger" style="animation-delay:40ms"><div class="value">${rate == null ? '—' : rate + '%'}</div><div class="label">${t('successRate')}</div></div>
+      <div class="card stat-tile fade-stagger" style="animation-delay:80ms"><div class="value">${snoozeTotal}</div><div class="label">${t('snoozeCount')}</div></div>
+      <div class="card stat-tile fade-stagger" style="animation-delay:120ms"><div class="value">${alarms.filter(a => a.enabled).length}</div><div class="label">${t('navAlarms')}</div></div>
     </div>
 
     ${insights.length ? `
@@ -391,8 +394,8 @@ function viewAlarms() {
     return `
     <div class="section-title">${t('navAlarms')}</div>
     <div class="card" style="padding:4px 16px">
-      ${alarms.map(a => `
-        <div class="alarm-item">
+      ${alarms.map((a, i) => `
+        <div class="alarm-item fade-stagger" style="animation-delay:${Math.min(i, 8) * 35}ms">
           <div class="time ${a.enabled ? '' : 'off'}" role="button" tabindex="0" onclick="goEditAlarm('${a.id}')">${L.formatTime(hhmmDate(a.time), settings.timeFormat === '24h')}</div>
           <div class="meta" onclick="goEditAlarm('${a.id}')">
             <div class="label">${esc(a.label || t('alarm'))}</div>
@@ -410,6 +413,7 @@ function viewAlarms() {
     <button class="fab" onclick="goCreateAlarm()" aria-label="${esc(t('createAlarm'))}">${icon('plus')}</button>
   `;
 }
+function flame() { return '<span class="flame">🔥</span>'; }
 function challengeEmoji(type) {
     return { math: '🧮', situps: '➕', sport: '🏃', memory: '🧠', qr: '📱', song: '🎵', swipe: '👉', tap: '👆' }[type] || '❓';
 }
@@ -724,17 +728,19 @@ function soundRowHTML(id, name, favs, custom) {
     const selected = State.draftAlarm.soundId === id;
     const sub = custom && custom.durationSec ? `${formatSeconds(custom.durationSec)}${custom.startOffsetSec ? ' · ' + t('startPoint').toLowerCase() + ' ' + formatSeconds(custom.startOffsetSec) : ''}` : '';
     return `<div class="sound-row ${selected ? 'selected' : ''}">
-    <button class="play-btn" onclick="previewSound('${id}')" aria-label="${esc(t('preview'))}">▶</button>
+    <button class="play-btn" onclick="previewSound('${id}', this)" aria-label="${esc(t('preview'))}">▶</button>
     <div class="name" onclick="selectSound('${id}')">${esc(name)}${sub ? `<div class="row-sub" style="margin-top:2px">${esc(sub)}</div>` : ''}</div>
     <button class="star ${favs.has(id) ? 'fav' : ''}" onclick="event.stopPropagation(); toggleFav('${id}')">★</button>
     ${custom ? `<button class="star" onclick="event.stopPropagation(); openTrimSoundModal('${id}')" aria-label="${esc(t('setStartPoint'))}">✂️</button>` : ''}
     ${custom ? `<button class="star" onclick="event.stopPropagation(); DB.deleteCustomSound('${id}'); openSoundPicker()">${icon('trash')}</button>` : ''}
   </div>`;
 }
-async function previewSound(id) {
+async function previewSound(id, btnEl) {
     const custom = DB.listCustomSounds().find(s => s.id === id);
     if (custom) {
+        if (btnEl) btnEl.innerHTML = '<span class="spinner"></span>';
         const blob = await DB.getCustomSoundBlob(id);
+        if (btnEl) btnEl.textContent = '▶';
         if (!blob) { toast(t('couldNotSaveFile')); return; }
         const url = URL.createObjectURL(blob);
         const el = new Audio(url);
@@ -1071,7 +1077,7 @@ function viewStats() {
 
     <div class="section-title">${t('streak')}</div>
     <div class="stat-grid">
-      <div class="card stat-tile"><div class="value">🔥 ${streak.current}</div><div class="label">${t('streak')}</div></div>
+      <div class="card stat-tile"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>
       <div class="card stat-tile"><div class="value">🏆 ${streak.best}</div><div class="label">${t('bestStreak')}</div></div>
     </div>
 
@@ -1274,7 +1280,11 @@ function renderRing() {
     if (!State.activeRing && !State.celebrate) { overlay.classList.add('hidden'); overlay.innerHTML = ''; stopQrStream(); return; }
     overlay.classList.remove('hidden');
     if (State.celebrate) {
-        overlay.innerHTML = `<div class="ring-screen"><div class="celebrate" style="margin:auto"><div class="emoji">🎉</div><h2>${t('youreAwake')}</h2></div></div>`;
+        const colors = ['#ffd166', '#06d6a0', '#ef476f', '#118ab2', '#ffffff'];
+        const confetti = Array.from({ length: 16 }).map((_, i) =>
+            `<span class="confetti-piece" style="left:${Math.round(Math.random() * 96)}%;background:${colors[i % colors.length]};animation-delay:${Math.round(Math.random() * 300)}ms"></span>`
+        ).join('');
+        overlay.innerHTML = `<div class="ring-screen" style="overflow:hidden">${confetti}<div class="celebrate" style="margin:auto;position:relative"><div class="emoji">🎉</div><h2>${t('youreAwake')}</h2></div></div>`;
         return;
     }
     const ring = State.activeRing;
@@ -1331,6 +1341,10 @@ function submitMathAnswer(value) {
     haptic(res.correct ? 20 : [40, 40, 40]);
     if (res.taskDone && State.activeRing.runner.isComplete()) return finishChallenge();
     renderRing();
+    if (!res.correct) {
+        const display = document.querySelector('.math-display');
+        if (display) { display.classList.remove('shake'); void display.offsetWidth; display.classList.add('shake'); }
+    }
     const el = document.getElementById('mathAnswerInput'); if (el) el.focus();
 }
 let mathTimerHandle = null;
@@ -1545,7 +1559,7 @@ function showMorningReport(ring, wakeDate) {
       <div class="card stat-tile"><div class="value">${L.formatTime(wakeDate, DB.getSettings().timeFormat === '24h')}</div><div class="label">${t('wakeTime')}</div></div>
       <div class="card stat-tile"><div class="value">${ring.alarm.time}</div><div class="label">${t('target')}</div></div>
       <div class="card stat-tile"><div class="value">${ring.snoozeCount}</div><div class="label">${t('snoozes')}</div></div>
-      <div class="card stat-tile"><div class="value">🔥 ${streak.current}</div><div class="label">${t('streak')}</div></div>
+      <div class="card stat-tile"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>
     </div>
   `);
 }

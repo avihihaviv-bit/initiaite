@@ -393,6 +393,63 @@ h1, h2, h3, p { margin: 0; }
     .btn-primary { outline: 2px solid var(--text); }
 }
 
+/* ===========================================================================
+   Motion system — shared keyframes + the utility classes/component hooks
+   that use them. Everything here is already covered by the global
+   reduced-motion override above (animation-duration/transition-duration
+   forced to ~0), so nothing needs its own reduced-motion guard.
+=========================================================================== */
+@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUpSheet { from { opacity: .4; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-10px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-5px); } 40%, 60% { transform: translateX(5px); } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+@keyframes tickPop { 0% { transform: scale(1); } 45% { transform: scale(1.22); } 100% { transform: scale(1); } }
+@keyframes flicker { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.1) rotate(-4deg); } 75% { transform: scale(.94) rotate(4deg); } }
+@keyframes bounceIn { 0% { opacity: 0; transform: scale(.3); } 55% { opacity: 1; transform: scale(1.1); } 75% { transform: scale(.94); } 100% { transform: scale(1); } }
+@keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(160px) rotate(360deg); opacity: 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.view-container.view-enter { animation: fadeSlideUp .32s var(--ease) both; }
+.fade-stagger { animation: fadeSlideUp .36s var(--ease) both; }
+.shake { animation: shake .4s var(--ease); }
+.flame { display: inline-block; animation: flicker 1.8s ease-in-out infinite; transform-origin: 60% 85%; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; }
+
+.modal-backdrop { animation: fadeIn .18s var(--ease) both; }
+.modal-sheet { animation: slideUpSheet .28s var(--ease) both; }
+.toast { animation: toastIn .25s var(--ease) both; }
+.fab { animation: popIn .3s var(--ease) both; }
+
+.icon-btn { transition: transform .1s var(--ease), background .15s var(--ease); }
+.icon-btn:active { transform: scale(.92); }
+.day-picker button, .preset-row button, .tp-period button, .challenge-card {
+    transition: background .15s var(--ease), color .15s var(--ease), border-color .15s var(--ease), transform .1s var(--ease);
+}
+.day-picker button:active, .preset-row button:active, .challenge-card:active { transform: scale(.93); }
+.sound-row .play-btn, .sound-row .star { transition: transform .1s var(--ease), color .15s var(--ease); }
+.sound-row .play-btn:active, .sound-row .star:active { transform: scale(.88); }
+.alarm-item .switch, .row .switch { transition: transform .1s var(--ease); }
+.achievement-tile { transition: opacity .35s var(--ease), filter .35s var(--ease); }
+.big-tap-target { transition: transform .1s var(--ease); }
+.big-tap-target:active { transform: scale(.97); }
+.rep-counter .n { animation: tickPop .25s var(--ease); }
+.rep-dots span { transition: background .2s var(--ease); }
+.memory-tile { transition: opacity var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease), box-shadow .15s var(--ease); }
+.memory-tile.lit { box-shadow: 0 0 0 4px rgba(255, 255, 255, .35); }
+.bottom-nav a .nav-icon-wrap, .sidebar a { transition: background .18s var(--ease), color .18s var(--ease); }
+.bottom-nav a { transition: color .18s var(--ease); }
+.calendar-day { transition: border-color .15s var(--ease), transform .1s var(--ease); }
+.calendar-day:active { transform: scale(.94); }
+
+.ring-screen .ring-time { animation: breathe 2.4s ease-in-out infinite; }
+.ring-screen .challenge-panel { animation: fadeSlideUp .4s var(--ease) both; }
+.celebrate .emoji { animation: bounceIn .55s var(--ease) both; }
+.celebrate h2 { animation: fadeSlideUp .4s var(--ease) .15s both; }
+.confetti-piece { position: absolute; top: 0; width: 8px; height: 8px; border-radius: 2px; animation: confettiFall 1.2s ease-in forwards; pointer-events: none; }
+
 .icon { width: 20px; height: 20px; flex-shrink: 0; }
 .icon.rot-90 { transform: rotate(90deg); }
 .bottom-nav a svg.icon, .sidebar a svg.icon { width: 22px; height: 22px; }
