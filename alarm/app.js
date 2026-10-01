@@ -10,6 +10,7 @@ const L = window.AlarmLogic;
 const DB = window.AlarmStorage;
 const Sounds = window.AlarmSounds;
 const Ch = window.AlarmChallenges;
+const Pose = window.AlarmPose;
 const t = window.I18N.t;
 
 const State = {
@@ -585,8 +586,20 @@ function toggleChallengeType(type) {
     if (type === 'qr') { openQrTaskPicker(); return; }
     if (type === 'math') { tasks.push({ type: 'math', difficulty: 'medium', count: 5 }); rerenderEditor(); return; }
     if (type === 'memory') { tasks.push({ type: 'memory', level: 'medium' }); rerenderEditor(); return; }
-    if (type === 'situps') { tasks.push({ type: 'situps', count: 20 }); rerenderEditor(); return; }
-    if (type === 'sport') { tasks.push({ type: 'sport', activity: 'squats', count: 10 }); rerenderEditor(); return; }
+    if (type === 'situps') { tasks.push({ type: 'situps', count: 20, situpMode: 'full', useCamera: Pose.supportsPoseCamera() }); rerenderEditor(); return; }
+    if (type === 'sport') { tasks.push({ type: 'sport', activity: 'squats', count: 10, useCamera: Pose.supportsPoseCamera() }); rerenderEditor(); return; }
+}
+
+/** Which pose.js exercise id (if any) a sport/situps task maps to. null = no camera tracking implemented for this activity. */
+function exerciseIdForTask(tsk) {
+    if (tsk.type === 'situps') return tsk.situpMode === 'crunch' ? 'situp_crunch' : 'situp_full';
+    if (tsk.type === 'sport') {
+        if (tsk.activity === 'squats') return 'squat';
+        if (tsk.activity === 'pushups') return 'pushup';
+        if (tsk.activity === 'pullups') return 'pullup';
+        return null; // jumpingjacks/walk have no joint-angle rep pattern implemented
+    }
+    return null;
 }
 
 function applyPreset(presetId) {
@@ -620,8 +633,8 @@ function builderStepSub(tsk) {
         return `${diffLabel} · ${tsk.count} ${t('questionsCount').toLowerCase()}`;
     }
     if (tsk.type === 'memory') return t(tsk.level);
-    if (tsk.type === 'situps') return `${tsk.count} reps`;
-    if (tsk.type === 'sport') return `${tsk.count} ${tsk.activity}`;
+    if (tsk.type === 'situps') return `${tsk.count} ${tsk.situpMode === 'crunch' ? t('situpModeCrunch') : t('situpModeFull')}${exerciseIdForTask(tsk) && tsk.useCamera !== false ? ' 📷' : ''}`;
+    if (tsk.type === 'sport') return `${tsk.count} ${tsk.activity === 'pullups' ? t('activityPullups') : tsk.activity}${exerciseIdForTask(tsk) && tsk.useCamera !== false ? ' 📷' : ''}`;
     if (tsk.type === 'qr') return tsk.qrName || 'Choose a tag';
     return '';
 }
@@ -652,17 +665,24 @@ function configureTask(i) {
       <div class="field"><label>${t('difficulty')}</label><div class="preset-row">${['easy', 'medium', 'hard', 'extreme'].map(d => `<button class="${tsk.level === d ? 'active' : ''}" onclick="setTaskField(${i},'level','${d}')">${t(d)}</button>`).join('')}</div></div>
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'situps') {
+        if (!tsk.situpMode) tsk.situpMode = 'full';
         openModal(() => `
       <div class="modal-header"><h2>${t('dismissSitups')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
+      <div class="field"><label>${t('dismissSitups')}</label><div class="preset-row">
+        <button class="${tsk.situpMode !== 'crunch' ? 'active' : ''}" onclick="setTaskField(${i},'situpMode','full')">${t('situpModeFull')}</button>
+        <button class="${tsk.situpMode === 'crunch' ? 'active' : ''}" onclick="setTaskField(${i},'situpMode','crunch')">${t('situpModeCrunch')}</button>
+      </div></div>
       <div class="field"><label>${t('reps')}</label><div class="preset-row">${Ch.SITUP_COUNTS.map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div>
         ${customCountInputHTML(i, tsk.count)}</div>
+      ${cameraToggleHTML(i, tsk)}
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'sport') {
         openModal(() => `
       <div class="modal-header"><h2>${t('dismissSport')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
-      <div class="field"><label>Activity</label><div class="preset-row">${['squats', 'pushups', 'jumpingjacks', 'walk'].map(act => `<button class="${tsk.activity === act ? 'active' : ''}" onclick="setTaskField(${i},'activity','${act}')">${act}</button>`).join('')}</div></div>
+      <div class="field"><label>Activity</label><div class="preset-row">${['squats', 'pushups', 'pullups', 'jumpingjacks', 'walk'].map(act => `<button class="${tsk.activity === act ? 'active' : ''}" onclick="setTaskField(${i},'activity','${act}')">${act === 'pullups' ? t('activityPullups') : act}</button>`).join('')}</div></div>
       <div class="field"><label>${t('reps')}</label><div class="preset-row">${[5, 10, 15, 20, 30].map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div>
         ${customCountInputHTML(i, tsk.count)}</div>
+      ${cameraToggleHTML(i, tsk)}
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'qr') {
         openQrTaskPicker(i);
@@ -677,6 +697,16 @@ function customCountInputHTML(i, currentCount) {
 function setCustomCount(i, value) {
     const n = Math.max(1, Math.min(500, Math.round(+value) || 1));
     setTaskField(i, 'count', n);
+}
+function cameraToggleHTML(i, tsk) {
+    const exerciseId = exerciseIdForTask(tsk);
+    if (!exerciseId) return `<p class="row-sub">${esc(tsk.activity || '')} ${t('useCameraVerify')}: ${t('cameraErrorUnsupported')}</p>`;
+    if (!Pose.supportsPoseCamera()) return `<p class="row-sub">${t('cameraErrorUnsupported')}</p>`;
+    return `<div class="row" style="margin-top:6px"><div><div class="row-label">${t('useCameraVerify')}</div><div class="row-sub">${t('useCameraVerifyHint')}</div></div>${switchHTML(tsk.useCamera !== false, 'setTaskFieldBool', i + ':useCamera')}</div>`;
+}
+function setTaskFieldBool(encoded, value) {
+    const [iStr, field] = encoded.split(':');
+    setTaskField(+iStr, field, value);
 }
 function toggleMathOperator(i, op) {
     const tsk = State.draftAlarm.challenge.tasks[i];
@@ -1277,6 +1307,12 @@ function confirmDeleteAllData() {
 // ---------------------------------------------------------------------- //
 function renderRing() {
     const overlay = document.getElementById('ring-overlay');
+    // Defensive: renderRing() always replaces #ring-overlay's innerHTML,
+    // which would silently detach any live camera stream still playing
+    // inside it. Every controlled path already stops the session first
+    // (and never calls renderRing() again until it has); this is the
+    // catch-all so a future caller can never leak an open camera.
+    stopPoseSession();
     if (!State.activeRing && !State.celebrate) { overlay.classList.add('hidden'); overlay.innerHTML = ''; stopQrStream(); return; }
     overlay.classList.remove('hidden');
     if (State.celebrate) {
@@ -1395,8 +1431,17 @@ function tapMemoryColor(color) {
     renderRing();
 }
 function repTaskHTML(taskState, kind) {
-    const label = kind === 'situps' ? t('dismissSitups') : `${taskState.activity}`;
+    const exerciseId = exerciseIdForTask(taskState.config);
+    const camReady = exerciseId && taskState.config.useCamera !== false && Pose.supportsPoseCamera() && !taskState.manualMode;
+    if (camReady) { taskState._exerciseId = exerciseId; return cameraWorkoutHTML(taskState); }
+    return manualRepHTML(taskState, kind);
+}
+
+function manualRepHTML(taskState, kind) {
+    const label = kind === 'situps' ? t('dismissSitups') : `${taskState.activity === 'pullups' ? t('activityPullups') : taskState.activity}`;
+    const wasCamera = taskState.config.useCamera !== false && exerciseIdForTask(taskState.config);
     return `
+    ${wasCamera ? `<div class="row-sub" style="text-align:center;color:#ffd166;margin-bottom:8px">${t('manualNotVerified')}</div>` : ''}
     <div class="rep-counter"><div class="n">${t('situpsProgress', { cur: taskState.reps, total: taskState.target })}</div><div class="row-sub">${t('tapEachRep')} — ${esc(label)}</div></div>
     <div class="rep-dots">${Array.from({ length: taskState.target }).map((_, i) => `<span class="${i < taskState.reps ? 'filled' : ''}"></span>`).join('')}</div>
     <button class="big-tap-target" onclick="addRep()">+1</button>
@@ -1407,6 +1452,119 @@ function addRep() {
     haptic(20);
     if (done && State.activeRing.runner.isComplete()) return finishChallenge();
     renderRing();
+}
+
+// --- Camera-verified exercise workout ----------------------------------
+// The video/canvas elements below are mounted ONCE by this template, then
+// the PoseSession updates everything in place via direct DOM writes
+// (rep count, gauge, cues) — never through renderRing(), which would tear
+// down and recreate the <video>, killing the live camera stream. renderRing()
+// only runs again once the task actually finishes (see startPoseWorkout).
+function cameraWorkoutHTML(taskState) {
+    const exerciseId = taskState._exerciseId;
+    return `
+    <div class="pose-workout" id="poseWorkout" data-phase="calibrating">
+      <div class="pose-video-wrap">
+        <video id="poseVideo" playsinline autoplay muted></video>
+        <canvas id="poseCanvas"></canvas>
+        <div class="pose-gauge"><div class="pose-gauge-fill" id="poseGaugeFill" style="height:${Math.round((taskState.reps / taskState.target) * 100)}%"></div></div>
+      </div>
+      <div class="pose-calibrate-panel" id="poseCalibratePanel">
+        <h3>${Pose.EXERCISES[exerciseId].label}</h3>
+        <p class="row-sub">${t('techniqueTip_' + exerciseId)}</p>
+        <ul class="pose-checklist" id="poseChecklist">
+          <li data-check="body">🧍 ${t('checkBodyInFrame')}</li>
+          <li data-check="joints">🔗 ${t('checkJoints')}</li>
+        </ul>
+        <div class="row-sub" id="poseCalibrateStatus" style="margin-top:8px">${t('calibrateHint')}</div>
+      </div>
+      <div class="pose-hud" id="poseHud" hidden>
+        <div class="pose-rep-count" id="poseRepCount"><span id="poseRepNum">${taskState.reps}</span><span class="pose-rep-target"> / ${taskState.target}</span></div>
+        <div class="pose-cue" id="poseCue"></div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="switchToManualRep()">${t('useManualCount')}</button>
+  `;
+}
+
+let activePoseSession = null;
+function stopPoseSession() { if (activePoseSession) { activePoseSession.stop(); activePoseSession = null; } }
+
+function switchToManualRep() {
+    stopPoseSession();
+    const ring = State.activeRing;
+    if (!ring || !ring.runner) return;
+    ring.runner.currentTask().manualMode = true;
+    renderRing();
+}
+
+async function startPoseWorkout(taskState) {
+    const video = document.getElementById('poseVideo');
+    const canvas = document.getElementById('poseCanvas');
+    if (!video || !canvas) return;
+    stopPoseSession();
+    let goodFrames = 0;
+    const lang = window.I18N.getLang();
+    activePoseSession = new Pose.PoseSession({
+        video, canvas, exerciseId: taskState._exerciseId, lang, facingMode: 'user',
+        onLandmarks(lm, canvasEl, videoEl) {
+            if (!canvasEl.width && videoEl.videoWidth) { canvasEl.width = videoEl.videoWidth; canvasEl.height = videoEl.videoHeight; }
+            if (!canvasEl.width) return;
+            const ctx = canvasEl.getContext('2d');
+            ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            Pose.drawSkeleton(ctx, lm, canvasEl.width, canvasEl.height, true);
+        },
+        onQuality(quality) {
+            const panel = document.getElementById('poseWorkout');
+            if (!panel) return; // task moved on — session will be stopped by the caller
+            if (quality === 'tracking') goodFrames++;
+            if (panel.dataset.phase === 'calibrating') {
+                const checklist = document.getElementById('poseChecklist');
+                if (checklist && quality === 'tracking') checklist.querySelectorAll('li').forEach(li => li.classList.add('ok'));
+                const status = document.getElementById('poseCalibrateStatus');
+                if (goodFrames >= 20) {
+                    panel.dataset.phase = 'workout';
+                    const cp = document.getElementById('poseCalibratePanel'); if (cp) cp.hidden = true;
+                    const hud = document.getElementById('poseHud'); if (hud) hud.hidden = false;
+                } else if (status) {
+                    status.textContent = quality === 'unreliable' ? t('calibrateStruggling') : t('calibrateHint');
+                }
+            } else if (quality === 'unreliable') {
+                const cue = document.getElementById('poseCue');
+                if (cue) cue.textContent = t('trackingLost');
+            }
+        },
+        onCue(text) {
+            const panel = document.getElementById('poseWorkout');
+            if (panel && panel.dataset.phase === 'workout') {
+                const cue = document.getElementById('poseCue');
+                if (cue) cue.textContent = text || '';
+            }
+        },
+        onRep(reps) {
+            while (taskState.reps < reps) {
+                const done = State.activeRing.runner.addRep();
+                haptic(20);
+                if (done) {
+                    stopPoseSession();
+                    if (State.activeRing.runner.isComplete()) { finishChallenge(); return; }
+                    renderRing();
+                    return;
+                }
+            }
+            const numEl = document.getElementById('poseRepNum');
+            if (numEl) { numEl.textContent = taskState.reps; const wrap = document.getElementById('poseRepCount'); if (wrap) { wrap.classList.remove('tick-pop-replay'); void wrap.offsetWidth; wrap.classList.add('tick-pop-replay'); } }
+            const gauge = document.getElementById('poseGaugeFill');
+            if (gauge) gauge.style.height = Math.round((taskState.reps / taskState.target) * 100) + '%';
+        },
+        onError(reason) {
+            const status = document.getElementById('poseCalibrateStatus');
+            const key = { permissionDenied: 'cameraErrorPermissionDenied', unsupported: 'cameraErrorUnsupported', loadFailed: 'cameraErrorLoadFailed' }[reason] || 'cameraErrorGeneric';
+            if (status) status.textContent = t(key);
+            setTimeout(() => { if (State.activeRing) switchToManualRep(); }, 1800);
+        }
+    });
+    activePoseSession.start();
 }
 function songTaskHTML(taskState) {
     if (!taskState._options) {
@@ -1479,7 +1637,12 @@ function finishChallenge() { dismissRing('challenge'); }
 
 function bindRingEvents() {
     const ring = State.activeRing;
-    if (ring.runner && ring.runner.currentTask().config.type === 'qr' && Ch.supportsBarcodeDetector() && Ch.supportsCamera()) startRingQrScanner();
+    const currentTask = ring.runner && ring.runner.currentTask();
+    if (currentTask && currentTask.config.type === 'qr' && Ch.supportsBarcodeDetector() && Ch.supportsCamera()) startRingQrScanner();
+    if (document.getElementById('poseWorkout') && currentTask && !currentTask._cameraStarted) {
+        currentTask._cameraStarted = true;
+        startPoseWorkout(currentTask);
+    }
     const mathInput = document.getElementById('mathAnswerInput');
     if (mathInput) mathInput.addEventListener('keyup', e => { if (e.key === 'Enter') submitMathAnswer(); });
     startMathTimerIfNeeded();
@@ -1517,6 +1680,7 @@ function snoozeRing() {
     const durationMin = ring.alarm.snooze.antiSnooze ? L.antiSnoozeDuration(ring.alarm.snooze.durationMin, ring.snoozeCount) : ring.alarm.snooze.durationMin;
     Sounds.engine.stop();
     stopQrStream();
+    stopPoseSession();
     clearMathTimer();
     const fireAt = L.nextSnoozeTime(new Date(), durationMin);
     State.pendingSnoozes.push({ alarmId: ring.alarm.id, fireAt, scheduledAt: ring.scheduledAt, snoozeCount: ring.snoozeCount + 1 });
@@ -1531,6 +1695,7 @@ function dismissRing(method) {
     if (!ring) return;
     Sounds.engine.stop();
     stopQrStream();
+    stopPoseSession();
     clearMathTimer();
     if (State.wakeLock) { State.wakeLock.release(); State.wakeLock = null; }
     const now = new Date();
