@@ -20,7 +20,6 @@ const State = {
     celebrate: null,
     calendarMonth: new Date(),
     calendarSelected: null,
-    pendingSnoozes: [],
     wakeLock: null,
     qrStream: null,
     modal: null, // { render: fn }
@@ -183,7 +182,6 @@ function tick() {
         return;
     }
     checkAlarmsDue(65000);
-    checkSnoozes(now);
     checkReminders(now);
     maybeManageWakeLock(now);
 }
@@ -201,15 +199,6 @@ function checkAlarmsDue(lookbackMs) {
         fireAlarm(alarm, prev);
         return;
     }
-}
-
-function checkSnoozes(now) {
-    if (State.activeRing) return;
-    const due = State.pendingSnoozes.find(s => s.fireAt <= now);
-    if (!due) return;
-    State.pendingSnoozes = State.pendingSnoozes.filter(s => s !== due);
-    const alarm = DB.getAlarm(due.alarmId);
-    if (alarm && alarm.enabled) fireAlarm(alarm, due.scheduledAt, due.snoozeCount);
 }
 
 const remindersFired = new Set();
@@ -404,7 +393,6 @@ function viewAlarms() {
             <div class="chips">
               ${a.challenge && a.challenge.tasks && a.challenge.tasks.length ? `<span class="pill on">${a.challenge.tasks.map(tsk => challengeEmoji(tsk.type)).join(' ')}</span>` : ''}
               ${a.smartWindow && a.smartWindow.enabled ? `<span class="pill">🪟 ${t('smartAlarm')}</span>` : ''}
-              ${a.snooze && a.snooze.antiSnooze ? `<span class="pill">⚡ Anti-snooze</span>` : ''}
             </div>
           </div>
           <label class="switch"><input type="checkbox" ${a.enabled ? 'checked' : ''} onchange="toggleAlarmEnabled('${a.id}', this.checked)"><span class="track"><span class="thumb"></span></span></label>
@@ -416,7 +404,7 @@ function viewAlarms() {
 }
 function flame() { return '<span class="flame">🔥</span>'; }
 function challengeEmoji(type) {
-    return { math: '🧮', situps: '➕', sport: '🏃', memory: '🧠', qr: '📱', song: '🎵', swipe: '👉', tap: '👆' }[type] || '❓';
+    return { math: '🧮', situps: '➕', sport: '🏃', memory: '🧠', qr: '📱', song: '🎵', swipe: '👉', tap: '👆', photo: '📸', typeSentence: '⌨️', typeSequence: '🔢' }[type] || '❓';
 }
 function toggleAlarmEnabled(id, enabled) { DB.updateAlarm(id, { enabled }); haptic(); render(); }
 
@@ -427,7 +415,6 @@ function newDraftAlarm() {
     const s = DB.getSettings();
     return { time: '07:00', days: L.daysArrayFromPreset('everyday'), onceDate: null, label: '', enabled: true,
         soundId: s.defaultSound, volume: 80, gradualVolume: true, vibration: s.defaultVibration,
-        snooze: { enabled: true, durationMin: s.defaultSnoozeMin, maxSnoozes: 3, antiSnooze: false },
         challenge: { tasks: [] }, smartWindow: { enabled: false, windowMinutes: 20 } };
 }
 
@@ -512,22 +499,6 @@ function viewAlarmEdit() {
       <div class="row"><div class="row-label">${t('vibration')}</div>${switchHTML(a.vibration, 'toggleDraft', 'vibration')}</div>
     </div>
 
-    <div class="section-title">${t('snooze')}</div>
-    <div class="card">
-      <div class="row"><div class="row-label">${t('snooze')}</div>${switchHTML(a.snooze.enabled, 'toggleDraftSnooze', 'enabled')}</div>
-      ${a.snooze.enabled ? `
-      <div class="field" style="margin-top:12px"><label>${t('snooze')} (min)</label>
-        <div class="preset-row">${[1, 5, 10, 15, 20, 30].map(n => `<button class="${a.snooze.durationMin === n ? 'active' : ''}" onclick="setSnoozeDuration(${n})">${n}</button>`).join('')}</div>
-      </div>
-      <div class="field"><label>Max snoozes</label>
-        <div class="preset-row">
-          ${[1, 2, 3, 5].map(n => `<button class="${a.snooze.maxSnoozes === n ? 'active' : ''}" onclick="setMaxSnoozes(${n})">${n}</button>`).join('')}
-          <button class="${a.snooze.maxSnoozes == null ? 'active' : ''}" onclick="setMaxSnoozes(null)">∞</button>
-        </div>
-      </div>
-      <div class="row"><div><div class="row-label">Anti-snooze mode</div><div class="row-sub">Each snooze gets shorter</div></div>${switchHTML(a.snooze.antiSnooze, 'toggleDraftSnooze', 'antiSnooze')}</div>` : ''}
-    </div>
-
     <div class="section-title">${t('smartAlarm')}</div>
     <div class="card">
       <div class="row"><div class="row-label">${t('smartAlarm')}</div>${switchHTML(a.smartWindow.enabled, 'toggleDraftSmart', 'enabled')}</div>
@@ -553,18 +524,16 @@ function switchHTML(checked, fnName, field) {
     return `<label class="switch"><input type="checkbox" ${checked ? 'checked' : ''} onchange="${fnName}('${field}', this.checked)"><span class="track"><span class="thumb"></span></span></label>`;
 }
 function toggleDraft(field, val) { State.draftAlarm[field] = val; rerenderEditor(); }
-function toggleDraftSnooze(field, val) { State.draftAlarm.snooze[field] = val; rerenderEditor(); }
 function toggleDraftSmart(field, val) { State.draftAlarm.smartWindow[field] = val; rerenderEditor(); }
-function setSnoozeDuration(n) { State.draftAlarm.snooze.durationMin = n; rerenderEditor(); }
-function setMaxSnoozes(n) { State.draftAlarm.snooze.maxSnoozes = n; rerenderEditor(); }
 
 function challengeTypeCards(a) {
     const active = new Set(a.challenge.tasks.map(tsk => tsk.type));
-    const order = ['tap', 'sport', 'situps', 'math', 'music', 'memory', 'qr', 'swipe'];
+    const order = ['tap', 'sport', 'situps', 'math', 'music', 'memory', 'qr', 'swipe', 'photo', 'typeSentence', 'typeSequence'];
     const meta = {
         tap: ['👆', 'dismissNormal'], sport: ['🏃', 'dismissSport'], situps: ['➕', 'dismissSitups'],
         math: ['🧮', 'dismissMath'], music: ['🎵', 'dismissMusic'], memory: ['🧠', 'dismissMemory'],
-        qr: ['📱', 'dismissQr'], swipe: ['👉', 'dismissSwipe']
+        qr: ['📱', 'dismissQr'], swipe: ['👉', 'dismissSwipe'],
+        photo: ['📸', 'dismissPhoto'], typeSentence: ['⌨️', 'dismissTypeSentence'], typeSequence: ['🔢', 'dismissTypeSequence']
     };
     return order.map(type => {
         const realType = type === 'music' ? 'song' : type;
@@ -584,10 +553,13 @@ function toggleChallengeType(type) {
     if (type === 'swipe') { tasks.push({ type: 'swipe' }); rerenderEditor(); return; }
     if (type === 'song') { tasks.push({ type: 'song' }); rerenderEditor(); return; }
     if (type === 'qr') { openQrTaskPicker(); return; }
-    if (type === 'math') { tasks.push({ type: 'math', difficulty: 'medium', count: 5 }); rerenderEditor(); return; }
+    if (type === 'math') { tasks.push({ type: 'math', difficulty: 2, count: 5 }); rerenderEditor(); return; }
     if (type === 'memory') { tasks.push({ type: 'memory', level: 'medium' }); rerenderEditor(); return; }
     if (type === 'situps') { tasks.push({ type: 'situps', count: 20, situpMode: 'full', useCamera: Pose.supportsPoseCamera() }); rerenderEditor(); return; }
     if (type === 'sport') { tasks.push({ type: 'sport', activity: 'squats', count: 10, useCamera: Pose.supportsPoseCamera() }); rerenderEditor(); return; }
+    if (type === 'photo') { tasks.push({ type: 'photo', instructions: '' }); rerenderEditor(); configureTask(tasks.length - 1); return; }
+    if (type === 'typeSentence') { tasks.push({ type: 'typeSentence', sentence: '' }); rerenderEditor(); configureTask(tasks.length - 1); return; }
+    if (type === 'typeSequence') { tasks.push({ type: 'typeSequence', length: 6, charset: 'digits' }); rerenderEditor(); return; }
 }
 
 /** Which pose.js exercise id (if any) a sport/situps task maps to. null = no camera tracking implemented for this activity. */
@@ -617,7 +589,7 @@ function builderStepHTML(tsk, i, total) {
     return `<div class="builder-step">
     <div class="num">${i + 1}</div>
     <div style="font-size:20px">${emoji}</div>
-    <div style="flex:1"><div class="title">${t(({ math: 'dismissMath', memory: 'dismissMemory', situps: 'dismissSitups', sport: 'dismissSport', song: 'dismissMusic', qr: 'dismissQr', swipe: 'dismissSwipe', tap: 'dismissNormal' })[tsk.type])}</div><div class="sub">${esc(sub)}</div></div>
+    <div style="flex:1"><div class="title">${t(({ math: 'dismissMath', memory: 'dismissMemory', situps: 'dismissSitups', sport: 'dismissSport', song: 'dismissMusic', qr: 'dismissQr', swipe: 'dismissSwipe', tap: 'dismissNormal', photo: 'dismissPhoto', typeSentence: 'dismissTypeSentence', typeSequence: 'dismissTypeSequence' })[tsk.type])}</div><div class="sub">${esc(sub)}</div></div>
     <div class="actions">
       ${needsConfig(tsk.type) ? `<button onclick="configureTask(${i})" aria-label="${esc(t('edit'))}">${icon('edit')}</button>` : ''}
       <button onclick="moveTask(${i},-1)" ${i === 0 ? 'disabled' : ''} aria-label="up">${icon('chevronUp')}</button>
@@ -626,16 +598,25 @@ function builderStepHTML(tsk, i, total) {
     </div>
   </div>`;
 }
-function needsConfig(type) { return ['math', 'memory', 'situps', 'sport', 'qr'].includes(type); }
+function needsConfig(type) { return ['math', 'memory', 'situps', 'sport', 'qr', 'photo', 'typeSentence', 'typeSequence'].includes(type); }
+function mathLevelLabel(difficulty) {
+    if (difficulty === 'custom') return t('custom');
+    if (typeof difficulty === 'number' || /^[1-5]$/.test(String(difficulty))) return `${t('level')} ${difficulty}`;
+    return t(difficulty); // legacy easy/medium/hard
+}
 function builderStepSub(tsk) {
+    const backupSuffix = tsk.backup ? ` · ${t('backupConfigured')}` : '';
     if (tsk.type === 'math') {
-        const diffLabel = tsk.difficulty === 'custom' ? `${t('custom')} (${(tsk.operators || []).join(' ')})` : t(tsk.difficulty);
+        const diffLabel = tsk.difficulty === 'custom' ? `${t('custom')} (${(tsk.operators || []).join(' ')})` : mathLevelLabel(tsk.difficulty);
         return `${diffLabel} · ${tsk.count} ${t('questionsCount').toLowerCase()}`;
     }
     if (tsk.type === 'memory') return t(tsk.level);
-    if (tsk.type === 'situps') return `${tsk.count} ${tsk.situpMode === 'crunch' ? t('situpModeCrunch') : t('situpModeFull')}${exerciseIdForTask(tsk) && tsk.useCamera !== false ? ' 📷' : ''}`;
-    if (tsk.type === 'sport') return `${tsk.count} ${tsk.activity === 'pullups' ? t('activityPullups') : tsk.activity}${exerciseIdForTask(tsk) && tsk.useCamera !== false ? ' 📷' : ''}`;
+    if (tsk.type === 'situps') return `${tsk.count} ${tsk.situpMode === 'crunch' ? t('situpModeCrunch') : t('situpModeFull')}${exerciseIdForTask(tsk) && tsk.useCamera !== false ? ' 📷' : ''}${backupSuffix}`;
+    if (tsk.type === 'sport') return `${tsk.count} ${tsk.activity === 'pullups' ? t('activityPullups') : tsk.activity}${exerciseIdForTask(tsk) && tsk.useCamera !== false ? ' 📷' : ''}${backupSuffix}`;
     if (tsk.type === 'qr') return tsk.qrName || 'Choose a tag';
+    if (tsk.type === 'photo') return `${tsk.instructions ? esc(tsk.instructions) : t('photoNoInstructions')}${backupSuffix}`;
+    if (tsk.type === 'typeSentence') return tsk.sentence ? `"${tsk.sentence.slice(0, 40)}${tsk.sentence.length > 40 ? '…' : ''}"` : t('typeSentenceNoText');
+    if (tsk.type === 'typeSequence') return `${tsk.length || 6} ${t('characters')} · ${tsk.charset === 'alnum' ? t('charsetAlnum') : t('charsetDigits')}`;
     return '';
 }
 function moveTask(i, dir) {
@@ -653,11 +634,14 @@ function configureTask(i) {
         if (!tsk.operators || !tsk.operators.length) tsk.operators = ['+', '-'];
         openModal(() => `
       <div class="modal-header"><h2>${t('dismissMath')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
-      <div class="field"><label>${t('difficulty')}</label><div class="preset-row">${['easy', 'medium', 'hard', 'custom'].map(d => `<button class="${tsk.difficulty === d ? 'active' : ''}" onclick="setTaskField(${i},'difficulty','${d}')">${d === 'custom' ? t('custom') : t(d)}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('difficulty')}</label><div class="preset-row">${[1, 2, 3, 4, 5, 'custom'].map(d => `<button class="${tsk.difficulty === d ? 'active' : ''}" onclick="setTaskField(${i},'difficulty',${d === 'custom' ? "'custom'" : d})">${d === 'custom' ? t('custom') : `${t('level')} ${d}`}</button>`).join('')}</div>
+        ${tsk.difficulty !== 'custom' ? `<div class="row-sub" style="margin-top:6px">${t('mathLevelDesc_' + (tsk.difficulty || 1))}</div>` : ''}</div>
       ${tsk.difficulty === 'custom' ? `<div class="field"><label>+ − × ÷</label><div class="preset-row">${['+', '-', '×', '÷'].map(op => `<button class="${tsk.operators.includes(op) ? 'active' : ''}" onclick="toggleMathOperator(${i},'${op}')">${op}</button>`).join('')}</div></div>` : ''}
       <div class="field"><label>${t('questionsCount')}</label><div class="preset-row">${[1, 3, 5, 10, 20].map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div></div>
       <div class="field"><label>${t('maxMistakes')}</label><div class="preset-row">${[null, 1, 2, 3, 5].map(n => `<button class="${(tsk.maxMistakes || null) === n ? 'active' : ''}" onclick="setTaskField(${i},'maxMistakes',${n === null ? 'null' : n})">${n === null ? '∞' : n}</button>`).join('')}</div></div>
-      <div class="field"><label>Time per question</label><div class="preset-row">${[null, 10, 20, 30].map(n => `<button class="${(tsk.timeLimitSec || null) === n ? 'active' : ''}" onclick="setTaskField(${i},'timeLimitSec',${n === null ? 'null' : n})">${n === null ? '∞' : n + 's'}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('timePerQuestion')}</label><div class="preset-row">${[null, 10, 20, 30].map(n => `<button class="${(tsk.timeLimitSec || null) === n ? 'active' : ''}" onclick="setTaskField(${i},'timeLimitSec',${n === null ? 'null' : n})">${n === null ? '∞' : n + 's'}</button>`).join('')}</div></div>
+      <div class="row"><div><div class="row-label">${t('allowHints')}</div><div class="row-sub">${t('allowHintsHint')}</div></div>${switchHTML(!!tsk.allowHints, 'setTaskFieldBool', i + ':allowHints')}</div>
+      <div class="row"><div><div class="row-label">${t('repeatWrongQuestion')}</div><div class="row-sub">${t('repeatWrongQuestionHint')}</div></div>${switchHTML(!!tsk.repeatWrongQuestion, 'setTaskFieldBool', i + ':repeatWrongQuestion')}</div>
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'memory') {
         openModal(() => `
@@ -675,6 +659,7 @@ function configureTask(i) {
       <div class="field"><label>${t('reps')}</label><div class="preset-row">${Ch.SITUP_COUNTS.map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div>
         ${customCountInputHTML(i, tsk.count)}</div>
       ${cameraToggleHTML(i, tsk)}
+      ${backupTaskHTML(i, tsk)}
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'sport') {
         openModal(() => `
@@ -683,10 +668,52 @@ function configureTask(i) {
       <div class="field"><label>${t('reps')}</label><div class="preset-row">${[5, 10, 15, 20, 30].map(n => `<button class="${tsk.count === n ? 'active' : ''}" onclick="setTaskField(${i},'count',${n})">${n}</button>`).join('')}</div>
         ${customCountInputHTML(i, tsk.count)}</div>
       ${cameraToggleHTML(i, tsk)}
+      ${backupTaskHTML(i, tsk)}
       <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     } else if (tsk.type === 'qr') {
         openQrTaskPicker(i);
+    } else if (tsk.type === 'photo') {
+        openModal(() => `
+      <div class="modal-header"><h2>${t('dismissPhoto')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
+      <p class="row-sub">${t('photoInstructionsHint')}</p>
+      <div class="field"><label>${t('instructions')}</label>
+        <input type="text" value="${esc(tsk.instructions || '')}" placeholder="${esc(t('photoInstructionsPlaceholder'))}"
+        style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px"
+        onchange="setTaskField(${i},'instructions', this.value)"></div>
+      <div class="safety-notice" style="margin-top:4px">⚠️ ${t('photoLivenessOnly')}</div>
+      ${backupTaskHTML(i, tsk)}
+      <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
+    } else if (tsk.type === 'typeSentence') {
+        openModal(() => `
+      <div class="modal-header"><h2>${t('dismissTypeSentence')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
+      <div class="field"><label>${t('sentenceToType')}</label>
+        <textarea rows="3" placeholder="${esc(t('sentenceToTypePlaceholder'))}"
+        style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;resize:vertical"
+        onchange="setTaskField(${i},'sentence', this.value)">${esc(tsk.sentence || '')}</textarea></div>
+      <button class="btn btn-primary btn-block" onclick="closeModal()" ${tsk.sentence ? '' : 'disabled'}>${t('done')}</button>`);
+    } else if (tsk.type === 'typeSequence') {
+        openModal(() => `
+      <div class="modal-header"><h2>${t('dismissTypeSequence')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
+      <div class="field"><label>${t('sequenceLength')}</label><div class="preset-row">${[4, 6, 8, 10].map(n => `<button class="${(tsk.length || 6) === n ? 'active' : ''}" onclick="setTaskField(${i},'length',${n})">${n}</button>`).join('')}</div></div>
+      <div class="field"><label>${t('characters')}</label><div class="preset-row">
+        <button class="${(tsk.charset || 'digits') === 'digits' ? 'active' : ''}" onclick="setTaskField(${i},'charset','digits')">${t('charsetDigits')}</button>
+        <button class="${tsk.charset === 'alnum' ? 'active' : ''}" onclick="setTaskField(${i},'charset','alnum')">${t('charsetAlnum')}</button>
+      </div></div>
+      <button class="btn btn-primary btn-block" onclick="closeModal()">${t('done')}</button>`);
     }
+}
+function backupTaskHTML(i, tsk) {
+    const kind = !tsk.backup ? 'none' : (tsk.backup.type === 'math' ? 'math' : 'tap');
+    return `<div class="field"><label>${t('backupChallenge')}</label><div class="row-sub" style="margin-bottom:8px">${t('backupChallengeHint')}</div>
+      <div class="preset-row">
+        <button class="${kind === 'none' ? 'active' : ''}" onclick="setTaskBackup(${i},'none')">${t('none')}</button>
+        <button class="${kind === 'math' ? 'active' : ''}" onclick="setTaskBackup(${i},'math')">${t('dismissMath')}</button>
+        <button class="${kind === 'tap' ? 'active' : ''}" onclick="setTaskBackup(${i},'tap')">${t('dismissNormal')}</button>
+      </div></div>`;
+}
+function setTaskBackup(i, kind) {
+    const backups = { none: null, math: { type: 'math', difficulty: 1, count: 3 }, tap: { type: 'tap' } };
+    setTaskField(i, 'backup', backups[kind]);
 }
 function setTaskField(i, field, value) { State.draftAlarm.challenge.tasks[i][field] = value; rerenderEditor(); openModal(currentModalRenderer); }
 function customCountInputHTML(i, currentCount) {
@@ -1237,7 +1264,6 @@ function viewSettings() {
 
     <div class="section-title">${t('sectionAlarm')}</div>
     <div class="card">
-      <div class="field"><label>${t('defaultSnooze')}</label><div class="preset-row">${[5, 10, 15, 20].map(n => `<button class="${s.defaultSnoozeMin === n ? 'active' : ''}" onclick="updateSetting('defaultSnoozeMin',${n})">${n}</button>`).join('')}</div></div>
       <div class="row"><div class="row-label">${t('defaultVibrationLabel')}</div>${switchHTML(s.defaultVibration, 'updateSettingBool', 'defaultVibration')}</div>
     </div>
 
@@ -1313,6 +1339,7 @@ function renderRing() {
     // (and never calls renderRing() again until it has); this is the
     // catch-all so a future caller can never leak an open camera.
     stopPoseSession();
+    stopPhotoStream();
     if (!State.activeRing && !State.celebrate) { overlay.classList.add('hidden'); overlay.innerHTML = ''; stopQrStream(); return; }
     overlay.classList.remove('hidden');
     if (State.celebrate) {
@@ -1326,7 +1353,6 @@ function renderRing() {
     const ring = State.activeRing;
     const settings = DB.getSettings();
     const hasChallenge = !!ring.runner;
-    const snoozeAllowed = L.snoozeAllowed(ring.alarm.snooze, ring.snoozeCount);
     overlay.innerHTML = `
     <div class="ring-screen">
       <div class="ring-time" id="ringTime">${L.formatTime(new Date(), settings.timeFormat === '24h')}</div>
@@ -1339,7 +1365,6 @@ function renderRing() {
       </div>` : ''}
       <div class="ring-actions">
         ${!hasChallenge ? `<button class="btn btn-lg ring-btn-dismiss" onclick="dismissRing('normal')">${t('dismiss')}</button>` : ''}
-        ${snoozeAllowed ? `<button class="btn ring-btn-snooze" onclick="snoozeRing()">${t('snoozeFor', { n: ring.alarm.snooze.antiSnooze ? L.antiSnoozeDuration(ring.alarm.snooze.durationMin, ring.snoozeCount) : ring.alarm.snooze.durationMin })}</button>` : ''}
         <button class="emergency-hold" id="emergencyBtn"><span class="fill" id="emergencyFill"></span><span>🛑 ${t('emergencyStop')} — ${t('holdToStop')}</span></button>
       </div>
     </div>`;
@@ -1356,6 +1381,9 @@ function renderChallengeTask(runner) {
         case 'song': return songTaskHTML(t2);
         case 'qr': return qrTaskHTML(t2);
         case 'swipe': return swipeTaskHTML(t2);
+        case 'photo': return photoTaskHTML(t2);
+        case 'typeSentence': return typeSentenceTaskHTML(t2);
+        case 'typeSequence': return typeSequenceTaskHTML(t2);
         default: return tapTaskHTML(t2);
     }
 }
@@ -1365,11 +1393,15 @@ function mathTaskHTML(taskState) {
     <div class="challenge-progress">${t('mathQuestionOf', { cur: taskState.index + 1, total: taskState.questions.length })}</div>
     ${taskState.timeLimitSec ? `<div class="row-sub" style="text-align:center;color:#fff;font-weight:800" id="mathTimerLabel">${taskState.timeLimitSec}s</div>` : ''}
     <div class="math-display">${q.question} = ?</div>
+    ${taskState.opts.allowHints && q.hintText ? (taskState.hintUsed
+      ? `<div class="row-sub" style="text-align:center;color:#fff;margin-bottom:8px">💡 ${esc(q.hintText)}</div>`
+      : `<button class="btn btn-ghost btn-block" style="margin-bottom:8px" onclick="useMathHint()">💡 ${t('showHint')}</button>`) : ''}
     <input type="number" inputmode="numeric" class="math-input" id="mathAnswerInput" autofocus>
     ${taskState.mistakes ? `<div class="row-sub" style="text-align:center;color:#ffb4b4;margin-bottom:8px">${t('tryAgain')}</div>` : ''}
     <button class="btn btn-primary btn-block btn-lg" onclick="submitMathAnswer()">${t('done')}</button>
   `;
 }
+function useMathHint() { State.activeRing.runner.useMathHint(); renderRing(); }
 function submitMathAnswer(value) {
     clearMathTimer();
     const input = document.getElementById('mathAnswerInput');
@@ -1483,6 +1515,7 @@ function cameraWorkoutHTML(taskState) {
         <div class="pose-cue" id="poseCue"></div>
       </div>
     </div>
+    ${taskState.config.backup ? `<button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="handleCameraFailure()">${t('useBackupChallenge')}</button>` : ''}
     <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="switchToManualRep()">${t('useManualCount')}</button>
   `;
 }
@@ -1495,6 +1528,21 @@ function switchToManualRep() {
     const ring = State.activeRing;
     if (!ring || !ring.runner) return;
     ring.runner.currentTask().manualMode = true;
+    renderRing();
+}
+
+// Used when the CAMERA ITSELF fails (permission denied, model/CDN load
+// failure, or the calibration timeout gives up) — as opposed to the user
+// explicitly tapping "count manually" above. A configured backup challenge
+// (task.config.backup) takes priority over the generic manual tap-counter,
+// since it's a real alternative task rather than an unverified fallback.
+function handleCameraFailure() {
+    stopPoseSession();
+    const ring = State.activeRing;
+    if (!ring || !ring.runner) return;
+    const task = ring.runner.currentTask();
+    if (task.config.backup && ring.runner.switchToBackup()) { renderRing(); return; }
+    task.manualMode = true;
     renderRing();
 }
 
@@ -1561,7 +1609,7 @@ async function startPoseWorkout(taskState) {
             const status = document.getElementById('poseCalibrateStatus');
             const key = { permissionDenied: 'cameraErrorPermissionDenied', unsupported: 'cameraErrorUnsupported', loadFailed: 'cameraErrorLoadFailed' }[reason] || 'cameraErrorGeneric';
             if (status) status.textContent = t(key);
-            setTimeout(() => { if (State.activeRing) switchToManualRep(); }, 1800);
+            setTimeout(() => { if (State.activeRing) handleCameraFailure(); }, 1800);
         }
     });
     activePoseSession.start();
@@ -1633,12 +1681,97 @@ async function startRingQrScanner() {
     }
 }
 
+// --- Photo challenge ----------------------------------------------------
+// Capture is a LIVENESS check only (Logic.imageLivenessCheck — real pixel
+// variation, not a blank/frozen frame), never object/content recognition.
+// The captured frame is read into memory for one getImageData() call and
+// then thrown away — never saved to disk, IndexedDB, or sent anywhere.
+function photoTaskHTML(taskState) {
+    if (!Ch.supportsCamera() || taskState.cameraFailed) {
+        return `<p class="row-sub" style="color:#fff">${t('cameraErrorUnsupported')}</p>
+      ${taskState.config.backup ? `<button class="btn btn-primary btn-block btn-lg" onclick="handleCameraFailure()">${t('useBackupChallenge')}</button>` : `<p class="row-sub" style="color:#fff">${t('photoNoBackupStuck')}</p>`}`;
+    }
+    return `
+    <div class="challenge-progress">${t('photoChallengeTitle')}</div>
+    ${taskState.config.instructions ? `<div class="row-sub" style="text-align:center;color:#fff;margin-bottom:8px">${esc(taskState.config.instructions)}</div>` : ''}
+    <div class="qr-video-wrap"><video id="photoVideo" playsinline autoplay muted></video></div>
+    <canvas id="photoCanvas" hidden></canvas>
+    ${taskState.mistakes ? `<div class="row-sub" style="text-align:center;color:#ffb4b4;margin-top:8px">${t('photoRetry')}</div>` : ''}
+    <div class="row-sub" style="text-align:center;margin-top:8px">${t('photoLivenessOnly')}</div>
+    <button class="btn btn-primary btn-block btn-lg" style="margin-top:10px" onclick="capturePhoto()">${t('takePhoto')}</button>
+  `;
+}
+async function startPhotoCamera() {
+    const video = document.getElementById('photoVideo');
+    if (!video) return;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        State.photoStream = stream;
+        video.srcObject = stream;
+    } catch (e) {
+        const taskState = State.activeRing && State.activeRing.runner && State.activeRing.runner.currentTask();
+        if (taskState) { taskState.cameraFailed = true; renderRing(); }
+    }
+}
+function stopPhotoStream() { if (State.photoStream) { State.photoStream.getTracks().forEach(tr => tr.stop()); State.photoStream = null; } }
+function capturePhoto() {
+    const video = document.getElementById('photoVideo');
+    const canvas = document.getElementById('photoCanvas');
+    if (!video || !canvas || !video.videoWidth) return;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // never keep the frame around
+    const accepted = State.activeRing.runner.submitPhoto(pixels);
+    haptic(accepted ? 20 : [40, 40, 40]);
+    if (accepted) {
+        stopPhotoStream();
+        if (State.activeRing.runner.isComplete()) return finishChallenge();
+    }
+    renderRing();
+}
+
+// --- Type-a-sentence / typing-sequence challenges ------------------------
+function typeSentenceTaskHTML(taskState) {
+    return `
+    <div class="challenge-progress">${t('typeSentencePrompt')}</div>
+    <div class="row-sub" style="text-align:center;color:#fff;font-size:17px;font-weight:700;margin:10px 0" dir="auto">${esc(taskState.sentence)}</div>
+    <textarea id="typeSentenceInput" rows="3" dir="auto" autofocus
+      style="width:100%;padding:13px 14px;border-radius:12px;border:none;font-size:16px;margin-bottom:10px"></textarea>
+    ${taskState.mistakes ? `<div class="row-sub" style="text-align:center;color:#ffb4b4">${t('tryAgain')}</div>` : ''}
+    <button class="btn btn-primary btn-block btn-lg" onclick="submitTypedSentence()">${t('done')}</button>`;
+}
+function submitTypedSentence() {
+    const input = document.getElementById('typeSentenceInput');
+    const correct = State.activeRing.runner.submitTypedSentence(input ? input.value : '');
+    haptic(correct ? 20 : [40, 40, 40]);
+    if (correct && State.activeRing.runner.isComplete()) return finishChallenge();
+    renderRing();
+}
+function typeSequenceTaskHTML(taskState) {
+    return `
+    <div class="challenge-progress">${t('typeSequencePrompt')}</div>
+    <div class="math-display" style="font-size:34px;letter-spacing:0.12em" dir="ltr">${esc(taskState.sequence)}</div>
+    <input type="text" id="typeSequenceInput" class="math-input" dir="ltr" autofocus autocomplete="off" autocapitalize="characters">
+    ${taskState.mistakes ? `<div class="row-sub" style="text-align:center;color:#ffb4b4">${t('typeSequenceRetry')}</div>` : ''}
+    <button class="btn btn-primary btn-block btn-lg" onclick="submitTypedSequence()">${t('done')}</button>`;
+}
+function submitTypedSequence() {
+    const input = document.getElementById('typeSequenceInput');
+    const correct = State.activeRing.runner.submitTypedSequence(input ? input.value : '');
+    haptic(correct ? 20 : [40, 40, 40]);
+    if (correct && State.activeRing.runner.isComplete()) return finishChallenge();
+    renderRing();
+}
+
 function finishChallenge() { dismissRing('challenge'); }
 
 function bindRingEvents() {
     const ring = State.activeRing;
     const currentTask = ring.runner && ring.runner.currentTask();
     if (currentTask && currentTask.config.type === 'qr' && Ch.supportsBarcodeDetector() && Ch.supportsCamera()) startRingQrScanner();
+    if (currentTask && currentTask.config.type === 'photo' && Ch.supportsCamera() && !currentTask.cameraFailed) startPhotoCamera();
     if (document.getElementById('poseWorkout') && currentTask && !currentTask._cameraStarted) {
         currentTask._cameraStarted = true;
         startPoseWorkout(currentTask);
@@ -1673,21 +1806,6 @@ function bindRingEvents() {
         eb.addEventListener('pointerdown', start);
         ['pointerup', 'pointerleave', 'pointercancel'].forEach(evt => eb.addEventListener(evt, cancel));
     }
-}
-
-function snoozeRing() {
-    const ring = State.activeRing;
-    const durationMin = ring.alarm.snooze.antiSnooze ? L.antiSnoozeDuration(ring.alarm.snooze.durationMin, ring.snoozeCount) : ring.alarm.snooze.durationMin;
-    Sounds.engine.stop();
-    stopQrStream();
-    stopPoseSession();
-    clearMathTimer();
-    const fireAt = L.nextSnoozeTime(new Date(), durationMin);
-    State.pendingSnoozes.push({ alarmId: ring.alarm.id, fireAt, scheduledAt: ring.scheduledAt, snoozeCount: ring.snoozeCount + 1 });
-    State.activeRing = null;
-    haptic(10);
-    toast(t('snoozeFor', { n: durationMin }));
-    render();
 }
 
 function dismissRing(method) {

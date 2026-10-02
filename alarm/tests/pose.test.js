@@ -196,6 +196,52 @@ test('pullup exercise: chin never clearing the wrists is rejected even at full e
     assert.notEqual(r2.phase, 'bottom');
 });
 
+test('squat exercise: knees clipped at the frame edge gives "move away from camera", not the generic low-confidence cue', () => {
+    const tracker = Pose.buildExerciseTracker('squat');
+    const lm = emptyLandmarks();
+    // Standing pose first, well-tracked, so the tracker isn't just cold.
+    const hip = pt(0.5, 0.3), knee = pt(0.5, 0.5);
+    lm[Pose.LM.leftHip] = hip; lm[Pose.LM.rightHip] = hip;
+    lm[Pose.LM.leftKnee] = knee; lm[Pose.LM.rightKnee] = knee;
+    lm[Pose.LM.leftAnkle] = pointAtAngle(knee, hip, 178, 0.2);
+    lm[Pose.LM.rightAnkle] = lm[Pose.LM.leftAnkle];
+    tracker.feed(lm, 0);
+
+    // Now the user steps too close: visibility on all required joints drops
+    // below the tracking threshold AND the knees sit right at the frame edge.
+    for (const name of ['leftHip', 'rightHip', 'leftKnee', 'rightKnee', 'leftAnkle', 'rightAnkle']) {
+        lm[Pose.LM[name]] = { ...lm[Pose.LM[name]], visibility: 0.2 };
+    }
+    lm[Pose.LM.leftKnee] = Object.assign({}, lm[Pose.LM.leftKnee], { x: 0.01 });
+    lm[Pose.LM.rightKnee] = Object.assign({}, lm[Pose.LM.rightKnee], { x: 0.01 });
+    const r = tracker.feed(lm, 1);
+    assert.equal(r.tracked, false);
+    assert.equal(r.cue, 'moveAwayFromCamera');
+});
+
+test('squat exercise: knees specifically undetected (not an edge issue) gives a knee-specific cue', () => {
+    const tracker = Pose.buildExerciseTracker('squat');
+    const lm = emptyLandmarks();
+    const hip = pt(0.5, 0.3), knee = pt(0.5, 0.5);
+    lm[Pose.LM.leftHip] = hip; lm[Pose.LM.rightHip] = hip;
+    lm[Pose.LM.leftKnee] = knee; lm[Pose.LM.rightKnee] = knee;
+    lm[Pose.LM.leftAnkle] = pointAtAngle(knee, hip, 178, 0.2);
+    lm[Pose.LM.rightAnkle] = lm[Pose.LM.leftAnkle];
+    tracker.feed(lm, 0);
+
+    // Hips/ankles stay reasonably visible, but the knees specifically drop
+    // out (occluded, say, by a table edge) — nowhere near the frame border.
+    lm[Pose.LM.leftHip] = Object.assign({}, lm[Pose.LM.leftHip], { visibility: 0.3 });
+    lm[Pose.LM.rightHip] = Object.assign({}, lm[Pose.LM.rightHip], { visibility: 0.3 });
+    lm[Pose.LM.leftKnee] = Object.assign({}, lm[Pose.LM.leftKnee], { visibility: 0.05 });
+    lm[Pose.LM.rightKnee] = Object.assign({}, lm[Pose.LM.rightKnee], { visibility: 0.05 });
+    lm[Pose.LM.leftAnkle] = Object.assign({}, lm[Pose.LM.leftAnkle], { visibility: 0.3 });
+    lm[Pose.LM.rightAnkle] = Object.assign({}, lm[Pose.LM.rightAnkle], { visibility: 0.3 });
+    const r = tracker.feed(lm, 1);
+    assert.equal(r.tracked, false);
+    assert.equal(r.cue, 'cantSeeKnees');
+});
+
 test('cueText: known keys resolve in both languages, unknown resolves to null', () => {
     assert.equal(typeof Pose.cueText('goLower', 'en'), 'string');
     assert.equal(typeof Pose.cueText('goLower', 'he'), 'string');

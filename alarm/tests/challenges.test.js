@@ -106,3 +106,92 @@ test('capability detection functions degrade to false outside a browser', () => 
     assert.equal(Ch.supportsBarcodeDetector(), false);
     assert.equal(Ch.supportsCamera(), false);
 });
+
+test('ChallengeRunner: math task works with numeric levels 1-5, not just legacy names', () => {
+    for (let level = 1; level <= 5; level++) {
+        const runner = new Ch.ChallengeRunner([{ type: 'math', difficulty: level, count: 1 }], L.mulberry32(level));
+        const q = runner.currentTask().questions[0];
+        const right = runner.submitMathAnswer(q.answer);
+        assert.equal(right.correct, true, `level ${level} answer ${q.answer} for "${q.question}" should be accepted`);
+    }
+});
+
+test('ChallengeRunner: repeatWrongQuestion keeps the SAME question instead of swapping it', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'math', difficulty: 1, count: 1, repeatWrongQuestion: true }], L.mulberry32(5));
+    const original = runner.currentTask().questions[0];
+    runner.submitMathAnswer(original.answer + 1000);
+    const stillSame = runner.currentTask().questions[0];
+    assert.deepEqual(stillSame, original);
+    const right = runner.submitMathAnswer(original.answer);
+    assert.equal(right.correct, true);
+});
+
+test('ChallengeRunner: math hints are opt-in and track usage', () => {
+    const runnerNoHints = new Ch.ChallengeRunner([{ type: 'math', difficulty: 4, count: 1, allowHints: false }], L.mulberry32(4));
+    assert.equal(runnerNoHints.useMathHint(), null); // not allowed, even if a hint exists for this question
+
+    const runnerHints = new Ch.ChallengeRunner([{ type: 'math', difficulty: 4, count: 1, allowHints: true }], L.mulberry32(4));
+    const hint = runnerHints.useMathHint();
+    if (runnerHints.currentTask().questions[0].hintText) {
+        assert.equal(typeof hint, 'string');
+        assert.equal(runnerHints.currentTask().hintUsed, true);
+    }
+});
+
+test('ChallengeRunner: photo task rejects a blank/frozen frame, accepts a real one, never stores the image', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'photo' }]);
+    const blank = new Uint8ClampedArray(400).fill(5);
+    assert.equal(runner.submitPhoto(blank), false);
+    assert.equal(runner.currentTask().captured, false);
+    assert.equal(runner.currentTask().lastRejectReason, 'tooUniform');
+    assert.equal(runner.isComplete(), false);
+
+    const varied = new Uint8ClampedArray(400);
+    for (let i = 0; i < varied.length; i++) varied[i] = (i * 53) % 256;
+    assert.equal(runner.submitPhoto(varied), true);
+    assert.equal(runner.isComplete(), true);
+    // The task state never holds the pixel buffer itself, only a boolean.
+    assert.equal('dataUrl' in runner.tasks[0] && runner.tasks[0].dataUrl != null, false);
+});
+
+test('ChallengeRunner: type-a-sentence task matches exact content, ignores case/whitespace, supports Hebrew', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'typeSentence', sentence: 'אני קם עכשיו' }]);
+    assert.equal(runner.submitTypedSentence('אני קם מחר'), false); // wrong content
+    assert.equal(runner.isComplete(), false);
+    assert.equal(runner.submitTypedSentence('  אני   קם עכשיו '), true); // whitespace-tolerant
+    assert.equal(runner.isComplete(), true);
+});
+
+test('ChallengeRunner: typing-sequence task requires an exact match and issues a FRESH sequence on a miss', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'typeSequence', length: 6 }], L.mulberry32(2));
+    const original = runner.currentTask().sequence;
+    assert.equal(runner.submitTypedSequence('000000' === original ? '111111' : '000000'), false);
+    const afterMiss = runner.currentTask().sequence;
+    assert.notEqual(afterMiss, original, 'a fresh sequence must be issued after a miss, not the same one shown again');
+    assert.equal(runner.submitTypedSequence(afterMiss), true);
+    assert.equal(runner.isComplete(), true);
+});
+
+test('ChallengeRunner: switchToBackup replaces the current step with its backup task, in place (does not skip it)', () => {
+    const runner = new Ch.ChallengeRunner([
+        { type: 'sport', activity: 'pullups', count: 10, backup: { type: 'math', difficulty: 1, count: 1 } },
+        { type: 'tap' }
+    ], L.mulberry32(6));
+    assert.equal(runner.currentTask().config.type, 'sport');
+    assert.equal(runner.current, 0);
+    const switched = runner.switchToBackup();
+    assert.equal(switched, true);
+    assert.equal(runner.current, 0); // still the first step, not skipped ahead
+    assert.equal(runner.currentTask().config.type, 'math');
+    assert.equal(runner.currentTask().isBackup, true);
+    const q = runner.currentTask().questions[0];
+    const r = runner.submitMathAnswer(q.answer);
+    assert.equal(r.taskDone, true);
+    assert.equal(runner.currentTask().config.type, 'tap'); // advanced to the NEXT real step
+});
+
+test('ChallengeRunner: switchToBackup is a no-op when no backup is configured', () => {
+    const runner = new Ch.ChallengeRunner([{ type: 'sport', activity: 'squats', count: 5 }]);
+    assert.equal(runner.switchToBackup(), false);
+    assert.equal(runner.currentTask().config.type, 'sport');
+});

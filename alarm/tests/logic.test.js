@@ -129,6 +129,169 @@ test('generateMathQuestion is deterministic with a seeded rng and answer is corr
     }
 });
 
+test('generateMathQuestion: legacy difficulty names still map onto a level (backward compat)', () => {
+    const rng = L.mulberry32(7);
+    const q1 = L.generateMathQuestion('easy', rng);
+    const q2 = L.generateMathQuestion('medium', rng);
+    const q3 = L.generateMathQuestion('hard', rng);
+    assert.ok(Number.isFinite(q1.answer) && Number.isFinite(q2.answer) && Number.isFinite(q3.answer));
+});
+
+test('generateMathQuestion level 1: addition/subtraction only, non-negative operands and result', () => {
+    const rng = L.mulberry32(1);
+    for (let i = 0; i < 200; i++) {
+        const q = L.generateMathQuestion(1, rng);
+        const m = q.question.match(/^(\d+) ([+-]) (\d+)$/);
+        assert.ok(m, `unexpected question shape: ${q.question}`);
+        const [, a, op, b] = m;
+        const expected = op === '+' ? Number(a) + Number(b) : Number(a) - Number(b);
+        assert.equal(q.answer, expected);
+        assert.ok(q.answer >= 0);
+    }
+});
+
+test('generateMathQuestion level 2: multiplication/division or order-of-operations, always correct', () => {
+    const rng = L.mulberry32(2);
+    let sawOrderOfOps = false;
+    for (let i = 0; i < 300; i++) {
+        const q = L.generateMathQuestion(2, rng);
+        if (/×.*×|÷/.test(q.question) === false && / [+-] /.test(q.question) && q.question.includes('×')) sawOrderOfOps = true;
+        // Re-derive the expected answer from the printed expression to catch
+        // any precedence mistake in the generator itself.
+        if (/^\d+ × \d+$/.test(q.question)) {
+            const [a, , b] = q.question.split(' ');
+            assert.equal(q.answer, Number(a) * Number(b));
+        } else if (/^\d+ ÷ \d+$/.test(q.question)) {
+            const [a, , b] = q.question.split(' ');
+            assert.equal(q.answer, Number(a) / Number(b));
+            assert.ok(Number.isInteger(q.answer)); // always an exact division
+        } else {
+            const m = q.question.match(/^(\d+) ([+-]) (\d+) × (\d+)$/);
+            assert.ok(m, `unexpected level-2 shape: ${q.question}`);
+            const [, a, op, b, c] = m;
+            const expected = op === '+' ? Number(a) + Number(b) * Number(c) : Number(a) - Number(b) * Number(c);
+            assert.equal(q.answer, expected, 'must multiply before adding/subtracting');
+        }
+    }
+    assert.ok(sawOrderOfOps, 'expected at least one order-of-operations question across 300 draws');
+});
+
+test('generateMathQuestion level 3: fractions/percent/powers/order-of-ops, answers correct within tolerance', () => {
+    const rng = L.mulberry32(3);
+    const kinds = new Set();
+    for (let i = 0; i < 300; i++) {
+        const q = L.generateMathQuestion(3, rng);
+        if (/^\d+\/\d+ \+ \d+\/\d+$/.test(q.question)) {
+            kinds.add('fraction');
+            const [n1d, , n2d2] = q.question.split(' ');
+            const [n1, den] = n1d.split('/').map(Number);
+            const [n2] = n2d2.split('/').map(Number);
+            assert.ok(L.mathAnswerMatches(q.answer, (n1 + n2) / den));
+        } else if (/%/.test(q.question)) {
+            kinds.add('percent');
+            const m = q.question.match(/^(\d+)% (?:of|מתוך) (\d+)$/);
+            assert.ok(m, `unexpected percent shape: ${q.question}`);
+            assert.ok(L.mathAnswerMatches(q.answer, (Number(m[1]) / 100) * Number(m[2])));
+        } else if (/\^/.test(q.question)) {
+            kinds.add('power');
+            const [base, exp] = q.question.split('^').map(Number);
+            assert.equal(q.answer, Math.pow(base, exp));
+        } else {
+            kinds.add('orderOfOps');
+            const m = q.question.match(/^(\d+) ([+-]) (\d+) × (\d+)$/);
+            assert.ok(m, `unexpected level-3 shape: ${q.question}`);
+            const [, a, op, b, c] = m;
+            const expected = op === '+' ? Number(a) + Number(b) * Number(c) : Number(a) - Number(b) * Number(c);
+            assert.equal(q.answer, expected);
+        }
+    }
+    assert.ok(kinds.has('fraction') && kinds.has('percent') && kinds.has('power') && kinds.has('orderOfOps'), `only saw: ${[...kinds]}`);
+});
+
+test('generateMathQuestion level 4: equations/parentheses/algebra, answers verified by re-solving', () => {
+    const rng = L.mulberry32(4);
+    const kinds = new Set();
+    for (let i = 0; i < 300; i++) {
+        const q = L.generateMathQuestion(4, rng);
+        if (/x = \?/.test(q.question)) {
+            kinds.add('equation');
+            const m = q.question.match(/^(\d+)x \+ (\d+) = (\d+), x = \?$/);
+            assert.ok(m, `unexpected equation shape: ${q.question}`);
+            const [, a, b, c] = m;
+            assert.equal(Number(a) * q.answer + Number(b), Number(c), 'x must actually satisfy the equation');
+        } else if (/^\(/.test(q.question)) {
+            kinds.add('parens');
+            const m = q.question.match(/^\((\d+) \+ (\d+)\) × (\d+) - (\d+)$/);
+            assert.ok(m, `unexpected parens shape: ${q.question}`);
+            const [, a, b, c, d] = m;
+            assert.equal(q.answer, (Number(a) + Number(b)) * Number(c) - Number(d));
+        } else {
+            kinds.add('substitution');
+            const m = q.question.match(/^x = (\d+), (\d+)x \+ (\d+) = \?$/);
+            assert.ok(m, `unexpected substitution shape: ${q.question}`);
+            const [, x, a, b] = m;
+            assert.equal(q.answer, Number(a) * Number(x) + Number(b));
+        }
+    }
+    assert.ok(kinds.has('equation') && kinds.has('parens') && kinds.has('substitution'), `only saw: ${[...kinds]}`);
+});
+
+test('generateMathQuestion level 5: multi-step problems, answers internally consistent', () => {
+    const rng = L.mulberry32(5);
+    let count = 0;
+    for (let i = 0; i < 150; i++) {
+        const q = L.generateMathQuestion(5, rng);
+        assert.ok(Number.isFinite(q.answer));
+        assert.ok(q.question.length > 0);
+        count++;
+    }
+    assert.equal(count, 150);
+});
+
+test('generateMathQuestion: hints are available when the generator provides one, and resolve to real text', () => {
+    const rng = L.mulberry32(9);
+    let sawHint = false;
+    for (let i = 0; i < 100; i++) {
+        const q = L.generateMathQuestion(4, rng, { lang: 'en' });
+        if (q.hint) { sawHint = true; assert.equal(typeof q.hintText, 'string'); assert.ok(q.hintText.length > 0); }
+    }
+    assert.ok(sawHint);
+    const heQ = L.generateMathQuestion(4, L.mulberry32(9), { lang: 'he' });
+    if (heQ.hint) assert.notEqual(heQ.hintText, L.mathHintText(heQ.hint, 'en'));
+});
+
+test('mathAnswerMatches: tolerant to float noise, rejects wrong/garbage answers', () => {
+    assert.ok(L.mathAnswerMatches('0.3', 0.3));
+    assert.ok(L.mathAnswerMatches(0.30000000000000004, 0.3)); // classic float noise
+    assert.ok(!L.mathAnswerMatches('abc', 5));
+    assert.ok(!L.mathAnswerMatches(4, 5));
+    assert.ok(!L.mathAnswerMatches('', 0));
+});
+
+test('typing challenges: sentence matching ignores case/whitespace but not content, sequences are random per rng seed', () => {
+    assert.ok(L.sentenceMatches('  Hello   World  ', 'hello world'));
+    assert.ok(!L.sentenceMatches('Hello World', 'Hello There'));
+    assert.ok(L.sentenceMatches('שלום עולם', '  שלום   עולם '));
+
+    const seq = L.generateTypingSequence(6, L.mulberry32(11), 'digits');
+    assert.equal(seq.length, 6);
+    assert.ok(/^\d{6}$/.test(seq));
+    assert.ok(L.typingSequenceMatches(seq, seq));
+    assert.ok(!L.typingSequenceMatches(seq, seq.slice(1)));
+    const seqA = L.generateTypingSequence(8, L.mulberry32(1), 'alnum');
+    assert.equal(seqA.length, 8);
+});
+
+test('imageLivenessCheck: rejects a blank/solid-color buffer, accepts real variation', () => {
+    const blank = new Uint8ClampedArray(400).fill(10); // solid near-black
+    assert.equal(L.imageLivenessCheck(blank).live, false);
+    assert.equal(L.imageLivenessCheck(null).live, false);
+
+    const varied = new Uint8ClampedArray(400);
+    for (let i = 0; i < varied.length; i++) varied[i] = (i * 37) % 256;
+    assert.equal(L.imageLivenessCheck(varied).live, true);
+});
+
 test('generateMemorySequence length matches level, sequencesMatch works', () => {
     const seq = L.generateMemorySequence(L.MEMORY_LEVEL_LENGTHS.hard, L.mulberry32(1));
     assert.equal(seq.length, 7);

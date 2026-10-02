@@ -40,6 +40,16 @@
             questionsCount: 'Questions', reps: 'Reps', maxMistakes: 'Mistakes allowed',
             presets: 'Presets', presetGentle: 'Gentle Wake', presetFitness: 'Fitness Wake',
             presetBrain: 'Brain Wake', presetHardcore: 'Hardcore', presetUltimate: 'Ultimate',
+            level: 'Level', timePerQuestion: 'Time per question',
+            mathLevelDesc_1: 'Addition & subtraction.', mathLevelDesc_2: 'Multiplication, division & order of operations.',
+            mathLevelDesc_3: 'Fractions, percentages & powers.', mathLevelDesc_4: 'Equations, parentheses & algebra.',
+            mathLevelDesc_5: 'Multi-step problems combining several topics.',
+            allowHints: 'Allow hints', allowHintsHint: 'A short hint button appears on each question, never the answer.',
+            repeatWrongQuestion: 'Repeat the same question on a miss', repeatWrongQuestionHint: 'Off: a wrong answer swaps in a fresh question. On: you retry the same one.',
+            showHint: 'Show hint',
+            backupChallenge: 'Backup challenge', backupChallengeHint: "If the camera can't verify this task, switch to this instead of plain manual counting.",
+            backupConfigured: 'has backup', none: 'None', useBackupChallenge: 'Switch to backup challenge',
+            instructions: 'Instructions',
 
             smartAlarm: 'Smart alarm window', smartAlarmDesc:
                 'Rings gently starting a few minutes before your target time, at rising volume — this is not based on measured sleep stages, just a time-based ramp.',
@@ -131,6 +141,17 @@
             techniqueTip_situp_full: 'Lie back, knees bent. Curl all the way up toward your knees, then lower all the way back down.',
             techniqueTip_situp_crunch: 'Lie back, knees bent. Lift your shoulder blades clearly off the floor, then lower back down with control.',
             techniqueTip_pullup: 'Hang with arms fully extended. Pull up until your chin clears the bar, then lower back to a full hang.',
+
+            dismissPhoto: 'Take a photo', dismissTypeSentence: 'Type a sentence', dismissTypeSequence: 'Typing sequence',
+            photoChallengeTitle: 'Take a photo to continue', photoInstructionsHint: "Describe what you'd like to see photographed — shown to you when the alarm rings.",
+            photoInstructionsPlaceholder: 'e.g. your toothbrush, the kitchen counter…',
+            photoNoInstructions: 'No instructions set', photoRetry: "That didn't look like a real camera frame — try again.",
+            photoLivenessOnly: "This only checks that a real camera frame was captured — it can't verify what's actually in the photo.",
+            takePhoto: 'Take photo', photoNoBackupStuck: 'Camera unavailable and no backup challenge is set — use the emergency exit below if you are stuck.',
+            sentenceToType: 'Sentence to type', sentenceToTypePlaceholder: 'Type the exact sentence to show at ring time…',
+            typeSentenceNoText: 'No sentence set yet', typeSentencePrompt: 'Type this sentence exactly:',
+            sequenceLength: 'Sequence length', characters: 'characters', charsetDigits: 'Digits', charsetAlnum: 'Letters & digits',
+            typeSequencePrompt: 'Type this exactly:', typeSequenceRetry: "That didn't match — a new sequence was generated, type the new one.",
         },
         he: {
             appName: 'וייק',
@@ -165,6 +186,16 @@
             questionsCount: 'מספר שאלות', reps: 'חזרות', maxMistakes: 'טעויות מותרות',
             presets: 'תבניות מוכנות', presetGentle: 'התעוררות עדינה', presetFitness: 'התעוררות כושר',
             presetBrain: 'התעוררות מוח', presetHardcore: 'קשוח', presetUltimate: 'אולטימטיבי',
+            level: 'רמה', timePerQuestion: 'זמן לכל שאלה',
+            mathLevelDesc_1: 'חיבור וחיסור.', mathLevelDesc_2: 'כפל, חילוק וסדר פעולות.',
+            mathLevelDesc_3: 'שברים, אחוזים וחזקות.', mathLevelDesc_4: 'משוואות, סוגריים ואלגברה.',
+            mathLevelDesc_5: 'בעיות רב-שלביות המשלבות כמה נושאים.',
+            allowHints: 'אפשר רמזים', allowHintsHint: 'כפתור רמז קצר יופיע בכל שאלה — לא התשובה עצמה.',
+            repeatWrongQuestion: 'חזור על אותה שאלה בטעות', repeatWrongQuestionHint: 'כבוי: תשובה שגויה מחליפה לשאלה חדשה. פעיל: תנסה שוב את אותה שאלה.',
+            showHint: 'הצג רמז',
+            backupChallenge: 'אתגר גיבוי', backupChallengeHint: 'אם המצלמה לא מצליחה לאמת את המשימה, עבור/י לאתגר הזה במקום ספירה ידנית בלבד.',
+            backupConfigured: 'עם גיבוי', none: 'ללא', useBackupChallenge: 'עבור/י לאתגר הגיבוי',
+            instructions: 'הוראות',
 
             smartAlarm: 'חלון שעון חכם', smartAlarmDesc:
                 'מצלצל בעדינות כמה דקות לפני היעד, בעוצמה עולה — לא מבוסס על מדידת שלבי שינה אמיתית, רק על עלייה מדורגת לפי זמן.',
@@ -256,6 +287,17 @@
             techniqueTip_situp_full: 'שכב/י על הגב, ברכיים כפופות. התכופף/י כל הדרך לכיוון הברכיים, ואז רד/י בחזרה במלואך.',
             techniqueTip_situp_crunch: 'שכב/י על הגב, ברכיים כפופות. הרם/י את השכמות בבירור מהרצפה, ואז רד/י בשליטה.',
             techniqueTip_pullup: 'תלה/י בידיים ישרות לגמרי. משוך/י למעלה עד שהסנטר עובר את המוט, ואז רד/י בחזרה לתלייה מלאה.',
+
+            dismissPhoto: 'צילום תמונה', dismissTypeSentence: 'הקלדת משפט', dismissTypeSequence: 'רצף הקלדה',
+            photoChallengeTitle: 'צלם/י תמונה כדי להמשיך', photoInstructionsHint: 'תאר/י מה תרצה/י לראות מצולם — יוצג לך כשהשעון יצלצל.',
+            photoInstructionsPlaceholder: 'לדוגמה: מברשת השיניים שלך, משטח המטבח…',
+            photoNoInstructions: 'לא הוגדרו הוראות', photoRetry: 'זה לא נראה כמו פריים אמיתי ממצלמה — נסה/י שוב.',
+            photoLivenessOnly: 'הבדיקה מוודאת רק שצולם פריים אמיתי מהמצלמה — היא אינה יכולה לאמת מה בפועל מופיע בתמונה.',
+            takePhoto: 'צלם/י תמונה', photoNoBackupStuck: 'המצלמה אינה זמינה ולא הוגדר אתגר גיבוי — השתמש/י ביציאת החירום למטה אם נתקעת.',
+            sentenceToType: 'משפט להקלדה', sentenceToTypePlaceholder: 'הקלד/י את המשפט המדויק שיוצג בזמן הצלצול…',
+            typeSentenceNoText: 'עדיין לא הוגדר משפט', typeSentencePrompt: 'הקלד/י את המשפט הזה במדויק:',
+            sequenceLength: 'אורך הרצף', characters: 'תווים', charsetDigits: 'ספרות', charsetAlnum: 'אותיות וספרות',
+            typeSequencePrompt: 'הקלד/י בדיוק:', typeSequenceRetry: 'זה לא תאם — נוצר רצף חדש, הקלד/י את החדש.',
         }
     };
 

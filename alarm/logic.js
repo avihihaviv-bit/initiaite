@@ -215,37 +215,175 @@
 
     function randInt(rng, min, max) { return Math.floor(rng() * (max - min + 1)) + min; }
 
+    // Round to 2 decimals to kill float noise (e.g. 0.1 + 0.2); answers are
+    // compared with a small tolerance (mathAnswerMatches) rather than ===.
+    function round2(n) { return Math.round(n * 100) / 100; }
+
+    function mathAnswerMatches(given, answer) {
+        if (given == null || String(given).trim() === '') return false;
+        const n = Number(given);
+        if (!Number.isFinite(n)) return false;
+        return Math.abs(n - answer) < 0.015;
+    }
+
+    // --- Level 1: addition & subtraction ------------------------------------
+    function mathLevel1(rng) {
+        const op = rng() < 0.5 ? '+' : '-';
+        let a = randInt(rng, 1, 20), b = randInt(rng, 1, 20);
+        if (op === '-' && b > a) [a, b] = [b, a];
+        return { question: `${a} ${op} ${b}`, answer: op === '+' ? a + b : a - b, hint: null };
+    }
+
+    // --- Level 2: multiplication, division, simple order of operations -----
+    function mathLevel2(rng) {
+        if (rng() < 0.55) {
+            // single mul or exact division
+            if (rng() < 0.5) {
+                const a = randInt(rng, 2, 12), b = randInt(rng, 2, 12);
+                return { question: `${a} × ${b}`, answer: a * b, hint: null };
+            }
+            const b = randInt(rng, 2, 12), result = randInt(rng, 2, 12), a = b * result;
+            return { question: `${a} ÷ ${b}`, answer: result, hint: null };
+        }
+        // a + b × c  (must multiply before adding)
+        const a = randInt(rng, 1, 20), b = randInt(rng, 2, 10), c = randInt(rng, 2, 10);
+        const plus = rng() < 0.5;
+        const answer = plus ? a + b * c : a - b * c;
+        return { question: `${a} ${plus ? '+' : '-'} ${b} × ${c}`, answer, hint: 'orderOfOps' };
+    }
+
+    // --- Level 3: fractions, percentages, powers, mixed order of ops -------
+    function mathLevel3(rng, lang) {
+        const kind = randInt(rng, 0, 3);
+        if (kind === 0) {
+            // fraction addition with a shared denominator (clean result)
+            const den = [2, 3, 4, 5, 6, 8, 10][randInt(rng, 0, 6)];
+            const n1 = randInt(rng, 1, den - 1), n2 = randInt(rng, 1, den - 1);
+            const answer = round2((n1 + n2) / den);
+            return { question: `${n1}/${den} + ${n2}/${den}`, answer, hint: 'fractionSameDenominator' };
+        }
+        if (kind === 1) {
+            const pct = [10, 20, 25, 50, 75, 5, 15, 30, 40, 60, 80, 90][randInt(rng, 0, 11)];
+            const base = randInt(rng, 2, 40) * 10;
+            const answer = round2((pct / 100) * base);
+            return { question: `${pct}% ${lang === 'he' ? 'מתוך' : 'of'} ${base}`, answer, hint: 'percentOfNumber' };
+        }
+        if (kind === 2) {
+            const base = randInt(rng, 2, 6), exp = randInt(rng, 2, 3);
+            return { question: `${base}^${exp}`, answer: Math.pow(base, exp), hint: 'powerMeaning' };
+        }
+        // mixed order of operations with 3 terms
+        const a = randInt(rng, 2, 15), b = randInt(rng, 2, 10), c = randInt(rng, 2, 10);
+        const ops = ['+', '-'];
+        const op1 = ops[randInt(rng, 0, 1)];
+        const answer = op1 === '+' ? a + b * c : a - b * c;
+        return { question: `${a} ${op1} ${b} × ${c}`, answer, hint: 'orderOfOps' };
+    }
+
+    // --- Level 4: equations, parentheses, algebraic expressions -------------
+    function mathLevel4(rng) {
+        const kind = randInt(rng, 0, 2);
+        if (kind === 0) {
+            // ax + b = c, solve for x (x chosen first so it's always a clean integer)
+            const x = randInt(rng, 2, 12), a = randInt(rng, 2, 9), b = randInt(rng, 1, 30);
+            const c = a * x + b;
+            return { question: `${a}x + ${b} = ${c}, x = ?`, answer: x, hint: 'isolateX' };
+        }
+        if (kind === 1) {
+            // (a + b) × c - d
+            const a = randInt(rng, 2, 15), b = randInt(rng, 2, 15), c = randInt(rng, 2, 8), d = randInt(rng, 1, 20);
+            const answer = (a + b) * c - d;
+            return { question: `(${a} + ${b}) × ${c} - ${d}`, answer, hint: 'parensFirst' };
+        }
+        // algebraic substitution: given x, evaluate ax + b
+        const x = randInt(rng, 2, 10), a = randInt(rng, 2, 9), b = randInt(rng, 1, 20);
+        const answer = a * x + b;
+        return { question: `x = ${x}, ${a}x + ${b} = ?`, answer, hint: 'substituteX' };
+    }
+
+    // --- Level 5: multi-step problems combining several topics --------------
+    function mathLevel5(rng, lang) {
+        const kind = randInt(rng, 0, 2);
+        if (kind === 0) {
+            // solve for x, then use x in a second expression
+            const x = randInt(rng, 2, 10), a = randInt(rng, 2, 8), b = randInt(rng, 1, 20);
+            const c = a * x + b;
+            const k = randInt(rng, 2, 5);
+            const answer = x * k - 1;
+            return { question: `${a}x + ${b} = ${c}. ${lang === 'he' ? 'חשב/י' : 'Find'} x × ${k} - 1`, answer, hint: 'multiStepSolveThenUse' };
+        }
+        if (kind === 1) {
+            // percentage of a parenthesized expression
+            const a = randInt(rng, 2, 15), b = randInt(rng, 2, 15), c = randInt(rng, 2, 6);
+            const inner = (a + b) * c;
+            const pct = [10, 20, 25, 50][randInt(rng, 0, 3)];
+            const answer = round2((pct / 100) * inner);
+            return { question: `${pct}% ${lang === 'he' ? 'מתוך' : 'of'} ((${a} + ${b}) × ${c})`, answer, hint: 'multiStepInnerFirst' };
+        }
+        // power combined with parentheses and a final operation
+        const base = randInt(rng, 2, 4), exp = 2, c = randInt(rng, 2, 15), d = randInt(rng, 1, 10);
+        const answer = Math.pow(base, exp) + (c - d);
+        return { question: `${base}^${exp} + (${c} - ${d})`, answer, hint: 'powerThenAdd' };
+    }
+
+    const MATH_HINTS = {
+        en: {
+            orderOfOps: 'Multiply/divide before you add or subtract.',
+            fractionSameDenominator: 'Same denominator — just add the numerators.',
+            percentOfNumber: 'Percent means "out of 100" — divide by 100 then multiply.',
+            powerMeaning: 'A power means multiplying the base by itself that many times.',
+            isolateX: 'Subtract the constant from both sides, then divide.',
+            parensFirst: 'Solve inside the parentheses first.',
+            substituteX: 'Replace x with the given number, then calculate.',
+            multiStepSolveThenUse: 'Solve for x first, then use that value in the second part.',
+            multiStepInnerFirst: 'Solve the parentheses, then take the percentage.',
+            powerThenAdd: 'Calculate the power first, then the parentheses, then add.'
+        },
+        he: {
+            orderOfOps: 'בצע/י כפל וחילוק לפני חיבור וחיסור.',
+            fractionSameDenominator: 'מכנה משותף — פשוט חבר/י את המונים.',
+            percentOfNumber: 'אחוז פירושו "מתוך 100" — חלק/י ב-100 והכפל/י.',
+            powerMeaning: 'חזקה פירושה להכפיל את הבסיס בעצמו את מספר הפעמים הזה.',
+            isolateX: 'חסר/י את הקבוע משני האגפים, ואז חלק/י.',
+            parensFirst: 'פתור/י קודם את מה שבתוך הסוגריים.',
+            substituteX: 'הצב/י את x במספר הנתון, ואז חשב/י.',
+            multiStepSolveThenUse: 'פתור/י קודם את x, ואז השתמש/י בערך בחלק השני.',
+            multiStepInnerFirst: 'פתור/י קודם את הסוגריים, ואז קח/י את האחוז.',
+            powerThenAdd: 'חשב/י קודם את החזקה, אחר כך את הסוגריים, ואז חבר/י.'
+        }
+    };
+    function mathHintText(hintKey, hintLang) {
+        if (!hintKey) return null;
+        return ((MATH_HINTS[hintLang] || MATH_HINTS.en)[hintKey]) || MATH_HINTS.en[hintKey] || null;
+    }
+
+    const MATH_LEVEL_GENERATORS = { 1: mathLevel1, 2: mathLevel2, 3: mathLevel3, 4: mathLevel4, 5: mathLevel5 };
+    // Old difficulty names are still accepted (alarms saved before the 1-5
+    // curriculum existed) and map onto the closest new level.
+    const LEGACY_DIFFICULTY_TO_LEVEL = { easy: 1, medium: 2, hard: 4 };
+
     function generateMathQuestion(difficulty, rng, opts) {
         rng = rng || Math.random;
-        let a, b, op;
+        opts = opts || {};
+        const lang = opts.lang === 'he' ? 'he' : 'en';
         if (difficulty === 'custom') {
-            const ops = (opts && opts.operators && opts.operators.length) ? opts.operators : ['+', '-'];
-            op = ops[randInt(rng, 0, ops.length - 1)];
+            const ops = (opts.operators && opts.operators.length) ? opts.operators : ['+', '-'];
+            const op = ops[randInt(rng, 0, ops.length - 1)];
+            let a, b;
             if (op === '×') { a = randInt(rng, 2, 12); b = randInt(rng, 2, 12); }
             else if (op === '÷') { b = randInt(rng, 2, 12); const result = randInt(rng, 2, 12); a = b * result; }
             else { a = randInt(rng, 1, 50); b = randInt(rng, 1, 50); if (op === '-' && b > a) [a, b] = [b, a]; }
-        } else if (difficulty === 'easy') {
-            op = rng() < 0.5 ? '+' : '-';
-            a = randInt(rng, 1, 20); b = randInt(rng, 1, 20);
-            if (op === '-' && b > a) [a, b] = [b, a];
-        } else if (difficulty === 'hard') {
-            const ops = ['×', '÷', '+'];
-            op = ops[randInt(rng, 0, ops.length - 1)];
-            if (op === '×') { a = randInt(rng, 6, 15); b = randInt(rng, 6, 15); }
-            else if (op === '÷') { b = randInt(rng, 2, 12); const result = randInt(rng, 2, 12); a = b * result; }
-            else { a = randInt(rng, 50, 200); b = randInt(rng, 50, 200); }
-        } else { // medium
-            const ops = ['+', '-', '×'];
-            op = ops[randInt(rng, 0, ops.length - 1)];
-            if (op === '×') { a = randInt(rng, 2, 12); b = randInt(rng, 2, 12); }
-            else { a = randInt(rng, 10, 60); b = randInt(rng, 10, 60); if (op === '-' && b > a) [a, b] = [b, a]; }
+            let answer;
+            if (op === '+') answer = a + b;
+            else if (op === '-') answer = a - b;
+            else if (op === '×') answer = a * b;
+            else answer = a / b;
+            return { question: `${a} ${op} ${b}`, answer, hint: null };
         }
-        let answer;
-        if (op === '+') answer = a + b;
-        else if (op === '-') answer = a - b;
-        else if (op === '×') answer = a * b;
-        else answer = a / b;
-        return { question: `${a} ${op} ${b}`, answer };
+        const level = MATH_LEVEL_GENERATORS[difficulty] ? difficulty : (LEGACY_DIFFICULTY_TO_LEVEL[difficulty] || 1);
+        const gen = MATH_LEVEL_GENERATORS[level] || mathLevel1;
+        const q = gen(rng, lang);
+        return { question: q.question, answer: q.answer, hint: q.hint, hintText: mathHintText(q.hint, lang) };
     }
 
     function generateMathSet(difficulty, count, rng, opts) {
@@ -268,6 +406,50 @@
     }
 
     const MEMORY_LEVEL_LENGTHS = { easy: 3, medium: 5, hard: 7, extreme: 10 };
+
+    // --- Typing challenges: a fixed sentence, or a freshly-random sequence -
+
+    function normalizeForMatch(str) {
+        return String(str || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+    function sentenceMatches(typed, target) {
+        return normalizeForMatch(typed) === normalizeForMatch(target);
+    }
+
+    const SEQUENCE_CHARSETS = { digits: '0123456789', alnum: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' };
+    function generateTypingSequence(length, rng, charset) {
+        rng = rng || Math.random;
+        const chars = SEQUENCE_CHARSETS[charset] || SEQUENCE_CHARSETS.digits;
+        let out = '';
+        for (let i = 0; i < length; i++) out += chars[randInt(rng, 0, chars.length - 1)];
+        return out;
+    }
+    function typingSequenceMatches(typed, target) {
+        return String(typed || '').trim() === String(target || '').trim();
+    }
+
+    // --- Photo challenge: a liveness check only, NOT content recognition ---
+    // We cannot reliably verify a photo's subject matter without a real
+    // vision model and a verified reference. What we CAN check locally and
+    // honestly is that an actual camera frame was captured (not a blank,
+    // frozen, or solid-color buffer) — a basic anti-"fake tap-through" gate,
+    // never presented as proof of what's in the picture.
+    function imageLivenessCheck(rgbaBytes) {
+        if (!rgbaBytes || rgbaBytes.length < 4) return { live: false, reason: 'empty' };
+        const pixelCount = Math.floor(rgbaBytes.length / 4);
+        const step = Math.max(1, Math.floor(pixelCount / 2000));
+        let sum = 0, sumSq = 0, n = 0;
+        for (let i = 0; i < pixelCount; i += step) {
+            const o = i * 4;
+            const lum = 0.299 * rgbaBytes[o] + 0.587 * rgbaBytes[o + 1] + 0.114 * rgbaBytes[o + 2];
+            sum += lum; sumSq += lum * lum; n++;
+        }
+        const mean = sum / n;
+        const variance = Math.max(0, sumSq / n - mean * mean);
+        const stdDev = Math.sqrt(variance);
+        if (stdDev < 4) return { live: false, reason: 'tooUniform' };
+        return { live: true, reason: 'ok' };
+    }
 
     // --- Snooze / anti-snooze ---------------------------------------------
 
@@ -350,8 +532,9 @@
         getNextOccurrence, nextOccurrenceAcrossAlarms, computeCountdown,
         recommendedBedtimes, sleepDurationMinutes,
         computeStreak, successRate, weeklyBuckets,
-        mulberry32, randInt, generateMathQuestion, generateMathSet,
+        mulberry32, randInt, generateMathQuestion, generateMathSet, mathAnswerMatches, mathHintText,
         generateMemorySequence, sequencesMatch,
+        normalizeForMatch, sentenceMatches, generateTypingSequence, typingSequenceMatches, imageLivenessCheck,
         snoozeAllowed, nextSnoozeTime, antiSnoozeDuration,
         checkAchievements, generateCoachInsights, average, stdDev, hhmmToMinutes
     };

@@ -167,6 +167,7 @@
         squat: {
             label: 'Squats', formLabel: 'kneesAndHips',
             joints: ['leftHip', 'rightHip', 'leftKnee', 'rightKnee', 'leftAnkle', 'rightAnkle'],
+            criticalJoints: ['leftKnee', 'rightKnee'], criticalCue: 'cantSeeKnees',
             primaryAngle: kneeAngle,
             formOk: () => true,
             cfg: { downThresholdDeg: 100, upThresholdDeg: 160, minVisibility: 0.55, minPhaseFrames: 4, formCue: 'keepBalance' }
@@ -174,6 +175,7 @@
         pushup: {
             label: 'Push-ups', formLabel: 'straightBody',
             joints: ['leftShoulder', 'rightShoulder', 'leftElbow', 'rightElbow', 'leftWrist', 'rightWrist', 'leftHip', 'rightHip', 'leftAnkle', 'rightAnkle'],
+            criticalJoints: ['leftElbow', 'rightElbow', 'leftWrist', 'rightWrist'], criticalCue: 'cantSeeArms',
             primaryAngle: elbowAngle,
             formOk: lm => bodyLineAngle(lm) >= 150, // rejects "only dropped the head/hips" reps
             cfg: { downThresholdDeg: 95, upThresholdDeg: 160, minVisibility: 0.55, minPhaseFrames: 4, formCue: 'keepBackStraight' }
@@ -181,6 +183,7 @@
         situp_full: {
             label: 'Sit-ups', formLabel: 'fullRange',
             joints: ['leftShoulder', 'rightShoulder', 'leftHip', 'rightHip', 'leftKnee', 'rightKnee'],
+            criticalJoints: ['leftHip', 'rightHip'], criticalCue: 'cantSeeMovement',
             primaryAngle: hipAngle,
             formOk: () => true,
             cfg: { downThresholdDeg: 80, upThresholdDeg: 160, minVisibility: 0.5, minPhaseFrames: 4, formCue: 'controlTheMovement' }
@@ -191,6 +194,7 @@
             // recommended more strongly for this one (see app.js copy).
             label: 'Crunches', formLabel: 'shoulderLift',
             joints: ['leftShoulder', 'rightShoulder', 'leftHip', 'rightHip'],
+            criticalJoints: ['leftShoulder', 'rightShoulder'], criticalCue: 'cantSeeMovement',
             primaryAngle: lm => shoulderRiseRatio(lm) * -200 + 180, // remapped so the RepCounter's "angle shrinks at the top of the rep" logic still applies
             formOk: () => true,
             cfg: { downThresholdDeg: 130, upThresholdDeg: 172, minVisibility: 0.5, minPhaseFrames: 3, formCue: 'liftShoulders' }
@@ -198,23 +202,48 @@
         pullup: {
             label: 'Pull-ups', formLabel: 'chinOverBar',
             joints: ['leftShoulder', 'rightShoulder', 'leftElbow', 'rightElbow', 'leftWrist', 'rightWrist', 'nose'],
+            criticalJoints: ['leftWrist', 'rightWrist', 'nose'], criticalCue: 'cantSeeArms',
             primaryAngle: elbowAngle,
             formOk: chinOverWrist, // rejects a partial pull that never reaches the bar
             cfg: { downThresholdDeg: 90, upThresholdDeg: 160, minVisibility: 0.6, minPhaseFrames: 4, formCue: 'pullHigher' }
         }
     };
 
+    // A required joint sitting right at the frame edge usually means the
+    // camera is too close / the body is partly cropped out, rather than a
+    // pure lighting/detection problem — worth a more actionable cue than
+    // the generic "can't detect your movement".
+    function anyJointNearEdge(landmarks, jointNames) {
+        const margin = 0.04;
+        return jointNames.some(name => {
+            const p = landmarks[LM[name]];
+            if (!p) return false;
+            return p.x < margin || p.x > 1 - margin || p.y < margin || p.y > 1 - margin;
+        });
+    }
+
     function buildExerciseTracker(exerciseId) {
         const def = EXERCISES[exerciseId];
         if (!def) throw new Error('Unknown exercise: ' + exerciseId);
         const counter = new RepCounter(def.cfg);
+        const allJointIdx = def.joints.map(j => LM[j]).filter(i => i != null).concat(exerciseId === 'pullup' ? [LM.nose] : []);
         return {
             def,
             feed(landmarks, now) {
-                const visibility = avgVisibility(landmarks, def.joints.map(j => LM[j]).filter(i => i != null).concat(exerciseId === 'pullup' ? [LM.nose] : []));
+                const visibility = avgVisibility(landmarks, allJointIdx);
                 const angle = def.primaryAngle(landmarks);
                 const formOk = def.formOk(landmarks);
-                return counter.update({ angle, formOk, visibility, now });
+                const result = counter.update({ angle, formOk, visibility, now });
+                if (result.cue === 'lowConfidence') {
+                    // Narrow the generic low-confidence cue down to something
+                    // actionable when we can tell WHY: body too close to the
+                    // camera (joints clipped at the frame edge) takes
+                    // priority over a specific-joint callout, since moving
+                    // back usually fixes both at once.
+                    if (anyJointNearEdge(landmarks, def.joints)) result.cue = 'moveAwayFromCamera';
+                    else if (def.criticalJoints && avgVisibility(landmarks, def.criticalJoints.map(j => LM[j])) < 0.35) result.cue = def.criticalCue;
+                }
+                return result;
             },
             get reps() { return counter.reps; },
             get phase() { return counter.phase; }
@@ -231,7 +260,11 @@
             pullHigher: 'Pull up until your chin clears the bar.',
             goLower: 'Go a little lower.',
             finishTheRep: 'Return fully to the starting position.',
-            formIssue: 'Check your form before continuing.'
+            formIssue: 'Check your form before continuing.',
+            moveAwayFromCamera: 'Move back so your whole body fits in frame.',
+            cantSeeKnees: "Can't detect your knees — adjust your angle or distance.",
+            cantSeeArms: "Can't detect your arms — adjust your angle or distance.",
+            cantSeeMovement: "Can't detect the movement clearly."
         },
         he: {
             lowConfidence: 'לא ניתן לזהות את התנועה — ודא/י שכל הגוף נמצא בפריים.',
@@ -242,7 +275,11 @@
             pullHigher: "משוך/י למעלה עד שהסנטר עובר את המוט.",
             goLower: 'רד/י מעט יותר.',
             finishTheRep: 'חזור/י במלואך לתנוחת ההתחלה.',
-            formIssue: 'בדוק/י את התנוחה לפני שתמשיך/י.'
+            formIssue: 'בדוק/י את התנוחה לפני שתמשיך/י.',
+            moveAwayFromCamera: 'התרחק/י כדי שכל הגוף ייכנס לפריים.',
+            cantSeeKnees: 'לא ניתן לזהות את הברכיים — שנה/י זווית או מרחק.',
+            cantSeeArms: 'לא ניתן לזהות את הידיים — שנה/י זווית או מרחק.',
+            cantSeeMovement: 'לא ניתן לזהות את התנועה בבירור.'
         }
     };
     function cueText(cueKey, lang) { return cueKey ? ((CUE_TEXT[lang] || CUE_TEXT.en)[cueKey] || CUE_TEXT.en[cueKey] || null) : null; }
