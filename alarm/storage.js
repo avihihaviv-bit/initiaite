@@ -23,7 +23,9 @@
         recentSounds: NS + 'recentSounds',
         challengeHistory: NS + 'challengeHistory',
         unlockedAchievements: NS + 'unlockedAchievements',
-        onboarded: NS + 'onboarded'
+        onboarded: NS + 'onboarded',
+        xpLedger: NS + 'xpLedger',
+        cosmetics: NS + 'cosmetics'
     };
 
     // In-memory fallback for environments without localStorage (older
@@ -157,7 +159,6 @@
         volume: 80,
         gradualVolume: true,
         vibration: true,
-        snooze: { enabled: true, durationMin: 10, maxSnoozes: 3, antiSnooze: false },
         challenge: { tasks: [] },
         smartWindow: { enabled: false, windowMinutes: 20 }
     };
@@ -245,6 +246,48 @@
     function getUnlockedAchievements() { return readJSON(KEYS.unlockedAchievements, []); }
     function setUnlockedAchievements(ids) { writeJSON(KEYS.unlockedAchievements, ids); }
 
+    // --- XP ledger ----------------------------------------------------------
+    // Every XP award is an immutable, individually-dedupeable ledger entry —
+    // total XP is always the SUM of this ledger, never a separately-tracked
+    // counter that could drift out of sync with reality. `dedupeKey`
+    // uniquely identifies the real-world event being rewarded (e.g.
+    // `dismiss:<dayLogId>`, `achievement:<id>`, `streak:50:2026-01-02`); a
+    // second call with the same key is a guaranteed no-op, which is what
+    // makes "no double XP after a reload / re-render / duplicate event"
+    // hold structurally rather than by careful caller discipline alone.
+
+    function listXpLedger() { return list(KEYS.xpLedger); }
+    function getTotalXp() { return listXpLedger().reduce((sum, e) => sum + (e.amount || 0), 0); }
+    function hasXpEvent(dedupeKey) { return listXpLedger().some(e => e.dedupeKey === dedupeKey); }
+    /** Returns the new ledger entry, or null if `dedupeKey` was already granted. */
+    function addXpEvent(dedupeKey, amount, reasonKey, meta) {
+        if (hasXpEvent(dedupeKey)) return null;
+        return add(KEYS.xpLedger, { dedupeKey, amount, reasonKey, meta: meta || null });
+    }
+
+    // --- Cosmetics -----------------------------------------------------
+    // Purely decorative unlocks (profile icon, title) earned by level/
+    // achievements. Never gates or bypasses the alarm/challenge flow.
+
+    const DEFAULT_COSMETICS = { unlockedIcons: ['🙂'], unlockedTitles: [], selectedIcon: '🙂', selectedTitle: null };
+    function getCosmetics() { return Object.assign({}, DEFAULT_COSMETICS, readJSON(KEYS.cosmetics, {})); }
+    function unlockCosmetic(kind, id) {
+        const c = getCosmetics();
+        const listKey = kind === 'icon' ? 'unlockedIcons' : 'unlockedTitles';
+        if (!c[listKey].includes(id)) c[listKey] = c[listKey].concat([id]);
+        writeJSON(KEYS.cosmetics, c);
+        return c;
+    }
+    function selectCosmetic(kind, id) {
+        const c = getCosmetics();
+        const listKey = kind === 'icon' ? 'unlockedIcons' : 'unlockedTitles';
+        const selKey = kind === 'icon' ? 'selectedIcon' : 'selectedTitle';
+        if (!c[listKey].includes(id)) return c; // can't select what hasn't been earned
+        c[selKey] = id;
+        writeJSON(KEYS.cosmetics, c);
+        return c;
+    }
+
     // --- Settings -----------------------------------------------------
 
     const DEFAULT_SETTINGS = {
@@ -263,7 +306,12 @@
         bedtimeReminderMin: 30,
         morningSummary: true,
         alarmReminders: true,
-        locationRemindersEnabled: false
+        locationRemindersEnabled: false,
+        gamificationAnimations: true,
+        successSounds: true,
+        showXpOnHome: true,
+        showDailyQuests: true,
+        showStreakOnHome: true
     };
 
     function getSettings() { return Object.assign({}, DEFAULT_SETTINGS, readJSON(KEYS.settings, {})); }
@@ -301,6 +349,8 @@
         getFavoriteSounds, toggleFavoriteSound, getRecentSounds, pushRecentSound,
         listChallengeHistory, addChallengeHistory,
         getUnlockedAchievements, setUnlockedAchievements,
+        listXpLedger, getTotalXp, hasXpEvent, addXpEvent,
+        getCosmetics, unlockCosmetic, selectCosmetic,
         getSettings, updateSettings, isOnboarded, setOnboarded,
         exportAll, deleteAll
     };

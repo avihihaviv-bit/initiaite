@@ -92,3 +92,55 @@ test('onboarded flag defaults false and can be set', () => {
     DB.setOnboarded(true);
     assert.equal(DB.isOnboarded(), true);
 });
+
+test('addXpEvent: grants XP once per dedupeKey, a repeat with the same key is a structural no-op', () => {
+    const first = DB.addXpEvent('dismiss:abc123', 100, 'alarmCompleted');
+    assert.ok(first);
+    assert.equal(DB.getTotalXp(), 100);
+    const second = DB.addXpEvent('dismiss:abc123', 100, 'alarmCompleted');
+    assert.equal(second, null); // no-op: same event, never double-counted
+    assert.equal(DB.getTotalXp(), 100);
+    assert.equal(DB.listXpLedger().length, 1);
+});
+
+test('addXpEvent: different dedupeKeys for the same reason both count', () => {
+    DB.addXpEvent('dismiss:a', 100, 'alarmCompleted');
+    DB.addXpEvent('dismiss:b', 100, 'alarmCompleted');
+    assert.equal(DB.getTotalXp(), 200);
+    assert.equal(DB.listXpLedger().length, 2);
+});
+
+test('hasXpEvent reflects ledger state exactly', () => {
+    assert.equal(DB.hasXpEvent('achievement:first_alarm'), false);
+    DB.addXpEvent('achievement:first_alarm', 20, 'achievementUnlocked');
+    assert.equal(DB.hasXpEvent('achievement:first_alarm'), true);
+});
+
+test('XP ledger survives deleteAll being the thing that clears it (privacy), and is empty by default', () => {
+    DB.addXpEvent('dismiss:x', 50, 'alarmCompleted');
+    assert.equal(DB.getTotalXp(), 50);
+    DB.deleteAll();
+    assert.equal(DB.getTotalXp(), 0);
+    assert.deepEqual(DB.listXpLedger(), []);
+});
+
+test('cosmetics: starts with one default icon unlocked and selected, nothing else', () => {
+    const c = DB.getCosmetics();
+    assert.deepEqual(c.unlockedIcons, ['🙂']);
+    assert.equal(c.selectedIcon, '🙂');
+    assert.deepEqual(c.unlockedTitles, []);
+});
+
+test('cosmetics: cannot select something that was never unlocked', () => {
+    const before = DB.getCosmetics();
+    DB.selectCosmetic('icon', '🚀'); // never unlocked
+    assert.deepEqual(DB.getCosmetics(), before);
+});
+
+test('cosmetics: unlock then select works, and unlocking twice does not duplicate', () => {
+    DB.unlockCosmetic('icon', '🚀');
+    DB.unlockCosmetic('icon', '🚀');
+    assert.deepEqual(DB.getCosmetics().unlockedIcons, ['🙂', '🚀']);
+    DB.selectCosmetic('icon', '🚀');
+    assert.equal(DB.getCosmetics().selectedIcon, '🚀');
+});

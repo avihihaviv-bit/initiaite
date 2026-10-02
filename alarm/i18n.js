@@ -152,6 +152,56 @@
             typeSentenceNoText: 'No sentence set yet', typeSentencePrompt: 'Type this sentence exactly:',
             sequenceLength: 'Sequence length', characters: 'characters', charsetDigits: 'Digits', charsetAlnum: 'Letters & digits',
             typeSequencePrompt: 'Type this exactly:', typeSequenceRetry: "That didn't match — a new sequence was generated, type the new one.",
+
+            // --- Gamification: XP, levels, ranks, quests, achievements, profile ---
+            levelLabel: 'Level', dailyQuests: 'Daily quests', levelUp: 'Level up!',
+            xpHintClose: 'Just {{n}} XP to the next level!', xpHintQuestsLeft: '{{n}} quests left to finish your daily goal.',
+            xpHintProgressing: "You're progressing nicely.",
+            profileTitle: 'Profile', you: 'You', totalXp: 'Total XP', viewXpHistory: 'View XP history', viewProfile: 'View profile',
+            ranksTitle: 'Ranks', recentAchievements: 'Recent achievements', profileIcon: 'Profile icon', profileTitleLabel: 'Title',
+            progressOverTime: 'Progress (last 14 days)', xpHistoryTitle: 'XP history', noXpYet: 'No XP earned yet — complete an alarm to start.',
+            xpFilter_all: 'All', xpFilter_today: 'Today', xpFilter_week: 'This week',
+            sectionGamification: 'Gamification', showXpOnHome: 'Show XP on home screen', showDailyQuests: 'Show daily quests',
+            showStreakOnHome: 'Show streak on home screen', gamificationAnimations: 'Gamification animations',
+            gamificationAnimationsHint: 'XP-gain and level-up animations. Separate from the general reduced-motion setting.',
+            successSounds: 'Success sound on dismissal',
+
+            rankBeginner: 'Beginner', rankRisingStar: 'Rising Star', rankEarlyRiser: 'Early Riser', rankDisciplined: 'Disciplined',
+            rankElite: 'Elite', rankMaster: 'Master', rankLegend: 'Legend', rankMythic: 'Mythic',
+
+            rarity_common: 'Common', rarity_rare: 'Rare', rarity_epic: 'Epic', rarity_legendary: 'Legendary',
+
+            quest_wake_on_time: 'Wake up on time', quest_complete_challenge: 'Complete a wake-up challenge',
+            quest_physical_exercise: 'Do a physical exercise', quest_solve_5_math: 'Solve 5 math questions',
+            quest_two_alarms: 'Complete 2 different alarms', quest_three_good_days: 'Succeed 3 days this week',
+
+            xpReasonAlarmCompleted: 'Completed an alarm on time', xpReasonPhysical: 'Completed a physical challenge',
+            xpReasonMath: 'Solved a math challenge', xpReasonCombo: 'Completed several challenges in one morning',
+            xpReasonStreak: 'Streak milestone', xpReasonQuest: 'Daily quest completed', xpReasonDailyQuests: "Completed all of today's quests",
+            xpReasonWeeklyQuest: 'Weekly quest completed', xpReasonWeeklyGoal: 'Weekly goal reached', xpReasonAchievement: 'Achievement unlocked',
+
+            titleWeekWarrior: 'Week Warrior', titleIronWill: 'Iron Will', titleMathWizard: 'Math Wizard', titleWakeBoss: 'Wake-Up Boss',
+            titleRising: 'Rising', titleIronBody: 'Iron Body', titleRecordBreaker: 'Record Breaker',
+
+            ach_first_challenge: 'First Challenge', ach_first_challenge_desc: 'Complete your first wake-up challenge.',
+            ach_early_bird: 'Early Bird', ach_early_bird_desc: 'Wake up before 7:00 for 7 days.',
+            ach_consistent: 'Consistent', ach_consistent_desc: 'Complete alarms for 14 days.',
+            ach_no_snooze_5: 'Steady Riser', ach_no_snooze_5_desc: 'Wake up without any mishaps 5 times.',
+            ach_sleep_master: 'Sleep Master', ach_sleep_master_desc: 'Complete your bedtime routine 10 times.',
+            ach_streak_7: '7-Day Streak', ach_streak_7_desc: 'Keep a 7-day streak going.',
+            ach_streak_30: '30-Day Streak', ach_streak_30_desc: 'Keep a 30-day streak going.',
+            ach_math_master: 'Math Master', ach_math_master_desc: 'Solve 50 math challenge questions correctly.',
+            ach_wake_up_boss: 'Wake-Up Boss', ach_wake_up_boss_desc: 'Complete 10 combo (multi-step) challenges.',
+            ach_first_alarm: 'First Alarm', ach_first_alarm_desc: 'Successfully complete your very first alarm.',
+            ach_mornings_5: 'Five Mornings', ach_mornings_5_desc: 'Successfully complete 5 mornings.',
+            ach_mornings_100: 'Hundred Mornings', ach_mornings_100_desc: 'Successfully complete 100 mornings.',
+            ach_first_physical: 'First Rep', ach_first_physical_desc: 'Complete your first physical challenge.',
+            ach_reps_100: '100 Reps', ach_reps_100_desc: 'Accumulate 100 valid reps over time.',
+            ach_math_10: 'Quick Mind', ach_math_10_desc: 'Solve 10 math questions correctly.',
+            ach_math_level5: 'Level 5 Solver', ach_math_level5_desc: 'Solve a level-5 math question correctly.',
+            ach_triple_combo: 'Triple Threat', ach_triple_combo_desc: 'Complete 3 different tasks in the same morning.',
+            ach_levels_10: 'Double Digits', ach_levels_10_desc: 'Reach level 10.',
+            ach_new_streak_record: 'New Record', ach_new_streak_record_desc: 'Set a new personal streak record.',
         },
         he: {
             appName: 'וייק',
@@ -298,6 +348,56 @@
             typeSentenceNoText: 'עדיין לא הוגדר משפט', typeSentencePrompt: 'הקלד/י את המשפט הזה במדויק:',
             sequenceLength: 'אורך הרצף', characters: 'תווים', charsetDigits: 'ספרות', charsetAlnum: 'אותיות וספרות',
             typeSequencePrompt: 'הקלד/י בדיוק:', typeSequenceRetry: 'זה לא תאם — נוצר רצף חדש, הקלד/י את החדש.',
+
+            // --- גיימיפיקציה: XP, רמות, דרגות, משימות, הישגים, פרופיל ---
+            levelLabel: 'רמה', dailyQuests: 'משימות יומיות', levelUp: 'עלית רמה!',
+            xpHintClose: 'עוד {{n}} XP בלבד לרמה הבאה!', xpHintQuestsLeft: 'נותרו {{n}} משימות להשלמת היעד היומי.',
+            xpHintProgressing: 'אתה מתקדם יפה.',
+            profileTitle: 'פרופיל', you: 'את/ה', totalXp: 'XP כולל', viewXpHistory: 'הצג היסטוריית XP', viewProfile: 'הצג פרופיל',
+            ranksTitle: 'דרגות', recentAchievements: 'הישגים אחרונים', profileIcon: 'סמל פרופיל', profileTitleLabel: 'כותרת',
+            progressOverTime: 'התקדמות (14 הימים האחרונים)', xpHistoryTitle: 'היסטוריית XP', noXpYet: 'עדיין לא נצבר XP — השלם/י שעון כדי להתחיל.',
+            xpFilter_all: 'הכול', xpFilter_today: 'היום', xpFilter_week: 'השבוע',
+            sectionGamification: 'גיימיפיקציה', showXpOnHome: 'הצג XP במסך הבית', showDailyQuests: 'הצג משימות יומיות',
+            showStreakOnHome: 'הצג רצף במסך הבית', gamificationAnimations: 'אנימציות גיימיפיקציה',
+            gamificationAnimationsHint: 'אנימציות קבלת XP ועליית רמה. נפרד מהגדרת הפחתת התנועה הכללית.',
+            successSounds: 'צליל הצלחה בכיבוי',
+
+            rankBeginner: 'מתחיל', rankRisingStar: 'כוכב עולה', rankEarlyRiser: 'קם מוקדם', rankDisciplined: 'ממושמע',
+            rankElite: 'עילית', rankMaster: 'מאסטר', rankLegend: 'לגנדה', rankMythic: 'מיתי',
+
+            rarity_common: 'רגיל', rarity_rare: 'נדיר', rarity_epic: 'אפי', rarity_legendary: 'לגנדרי',
+
+            quest_wake_on_time: 'התעורר/י בזמן', quest_complete_challenge: 'השלם/י אתגר כיבוי',
+            quest_physical_exercise: 'בצע/י תרגיל גופני', quest_solve_5_math: 'פתור/י 5 שאלות מתמטיקה',
+            quest_two_alarms: 'השלם/י 2 שעונים שונים', quest_three_good_days: 'הצלח/י 3 ימים בשבוע הזה',
+
+            xpReasonAlarmCompleted: 'השלמת שעון בזמן', xpReasonPhysical: 'השלמת אתגר גופני',
+            xpReasonMath: 'פתרון אתגר מתמטי', xpReasonCombo: 'השלמת כמה אתגרים באותו בוקר',
+            xpReasonStreak: 'אבן דרך ברצף', xpReasonQuest: 'השלמת משימה יומית', xpReasonDailyQuests: 'השלמת כל משימות היום',
+            xpReasonWeeklyQuest: 'השלמת משימה שבועית', xpReasonWeeklyGoal: 'השגת יעד שבועי', xpReasonAchievement: 'פתיחת הישג',
+
+            titleWeekWarrior: 'לוחם השבוע', titleIronWill: 'רצון של פלדה', titleMathWizard: 'קוסם המתמטיקה', titleWakeBoss: 'בוס ההתעוררות',
+            titleRising: 'במגמת עלייה', titleIronBody: 'גוף של פלדה', titleRecordBreaker: 'שובר שיאים',
+
+            ach_first_challenge: 'האתגר הראשון', ach_first_challenge_desc: 'השלם/י את אתגר הבוקר הראשון שלך.',
+            ach_early_bird: 'ציפור מוקדמת', ach_early_bird_desc: 'התעורר/י לפני 7:00 במשך 7 ימים.',
+            ach_consistent: 'עקבי/ת', ach_consistent_desc: 'השלם/י שעונים במשך 14 ימים.',
+            ach_no_snooze_5: 'קמה יציבה', ach_no_snooze_5_desc: 'התעורר/י בלי תקלות 5 פעמים.',
+            ach_sleep_master: 'אמן/ית השינה', ach_sleep_master_desc: 'השלם/י את שגרת השינה שלך 10 פעמים.',
+            ach_streak_7: 'רצף 7 ימים', ach_streak_7_desc: 'שמור/י על רצף של 7 ימים.',
+            ach_streak_30: 'רצף 30 ימים', ach_streak_30_desc: 'שמור/י על רצף של 30 ימים.',
+            ach_math_master: 'אמן/ית המתמטיקה', ach_math_master_desc: 'פתור/י 50 שאלות מתמטיקה נכון.',
+            ach_wake_up_boss: 'בוס ההתעוררות', ach_wake_up_boss_desc: 'השלם/י 10 אתגרים משולבים (כמה משימות).',
+            ach_first_alarm: 'השעון הראשון', ach_first_alarm_desc: 'השלם/י בהצלחה את השעון הראשון שלך.',
+            ach_mornings_5: 'חמישה בקרים', ach_mornings_5_desc: 'השלם/י בהצלחה 5 בקרים.',
+            ach_mornings_100: 'מאה בקרים', ach_mornings_100_desc: 'השלם/י בהצלחה 100 בקרים.',
+            ach_first_physical: 'החזרה הראשונה', ach_first_physical_desc: 'השלם/י את אתגר הכושר הראשון שלך.',
+            ach_reps_100: '100 חזרות', ach_reps_100_desc: 'צבור/י 100 חזרות תקינות במהלך הזמן.',
+            ach_math_10: 'חשיבה מהירה', ach_math_10_desc: 'פתור/י 10 שאלות מתמטיקה נכון.',
+            ach_math_level5: 'פותר/ת רמה 5', ach_math_level5_desc: 'פתור/י נכון שאלה ברמה 5.',
+            ach_triple_combo: 'שילוש מנצח', ach_triple_combo_desc: 'השלם/י 3 משימות שונות באותו בוקר.',
+            ach_levels_10: 'שתי ספרות', ach_levels_10_desc: 'הגיע/י לרמה 10.',
+            ach_new_streak_record: 'שיא חדש', ach_new_streak_record_desc: 'שבור/י שיא רצף אישי חדש.',
         }
     };
 

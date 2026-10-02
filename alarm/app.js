@@ -11,6 +11,7 @@ const DB = window.AlarmStorage;
 const Sounds = window.AlarmSounds;
 const Ch = window.AlarmChallenges;
 const Pose = window.AlarmPose;
+const Gamify = window.AlarmGamify;
 const t = window.I18N.t;
 
 const State = {
@@ -18,6 +19,9 @@ const State = {
     editingAlarmId: null,
     activeRing: null,
     celebrate: null,
+    celebrateTimer: null,
+    lastXpGrant: null,
+    xpHistoryFilter: 'all',
     calendarMonth: new Date(),
     calendarSelected: null,
     wakeLock: null,
@@ -94,7 +98,7 @@ function soundName(soundId) {
 // ---------------------------------------------------------------------- //
 // Router
 // ---------------------------------------------------------------------- //
-const ROUTES = ['home', 'alarms', 'alarm-edit', 'sleep', 'routines', 'stats', 'calendar', 'settings'];
+const ROUTES = ['home', 'alarms', 'alarm-edit', 'sleep', 'routines', 'stats', 'calendar', 'settings', 'profile', 'xp-history'];
 function getRoute() {
     const h = (location.hash || '#/home').slice(2);
     const [path, query] = h.split('?');
@@ -290,6 +294,8 @@ function renderView(path, params) {
         case 'stats': return viewStats();
         case 'calendar': return viewCalendar();
         case 'settings': return viewSettings();
+        case 'profile': return viewProfile();
+        case 'xp-history': return viewXpHistory();
         default: return viewHome();
     }
 }
@@ -305,7 +311,6 @@ function viewHome() {
     const logs = DB.listDayLogs();
     const streak = L.computeStreak(logs.map(l => ({ date: l.date, success: l.success })));
     const rate = L.successRate(logs.slice(-14));
-    const snoozeTotal = logs.slice(-14).reduce((s, l) => s + (l.snoozeCount || 0), 0);
     const insights = L.generateCoachInsights(logs);
     const run = getTodayRoutineRun('morning');
 
@@ -336,6 +341,9 @@ function viewHome() {
       <button class="btn btn-secondary" onclick="navigate('sleep')">${icon('moon')} ${t('quickSleepMode')}</button>
     </div>
 
+    ${settings.showXpOnHome !== false ? levelCardHTML() : ''}
+    ${settings.showDailyQuests !== false ? dailyQuestsCardHTML(now) : ''}
+
     ${run ? `
     <div class="section-title">${t('morningProgress')}</div>
     <div class="card">
@@ -345,9 +353,9 @@ function viewHome() {
 
     <div class="section-title">${t('statsTitle')}</div>
     <div class="stat-grid">
-      <div class="card stat-tile fade-stagger" style="animation-delay:0ms"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>
+      ${settings.showStreakOnHome !== false ? `<div class="card stat-tile fade-stagger" style="animation-delay:0ms"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>` : ''}
       <div class="card stat-tile fade-stagger" style="animation-delay:40ms"><div class="value">${rate == null ? '—' : rate + '%'}</div><div class="label">${t('successRate')}</div></div>
-      <div class="card stat-tile fade-stagger" style="animation-delay:80ms"><div class="value">${snoozeTotal}</div><div class="label">${t('snoozeCount')}</div></div>
+      <div class="card stat-tile fade-stagger" style="animation-delay:80ms"><div class="value">${DB.getTotalXp().toLocaleString()}</div><div class="label">${t('totalXp')}</div></div>
       <div class="card stat-tile fade-stagger" style="animation-delay:120ms"><div class="value">${alarms.filter(a => a.enabled).length}</div><div class="label">${t('navAlarms')}</div></div>
     </div>
 
@@ -367,6 +375,50 @@ function routineRunPct(run) {
     if (!run || !run.stepStates || !run.stepStates.length) return 0;
     const done = run.stepStates.filter(s => s === 'done').length;
     return Math.round((done / run.stepStates.length) * 100);
+}
+
+// ---------------------------------------------------------------------- //
+// Gamification: home-screen widgets. These render real, already-persisted
+// XP/level/quest state — nothing here can itself grant XP (see
+// grantXpForDismissal, the only place that does).
+// ---------------------------------------------------------------------- //
+function levelCardHTML() {
+    const levelState = Gamify.computeLevelState(DB.getTotalXp());
+    const rank = Gamify.rankForLevel(levelState.level);
+    const dailyQuests = Gamify.evaluateDailyQuests(L.isoDate(new Date()), buildDailyQuestContext(L.isoDate(new Date())));
+    const remainingQuests = dailyQuests.filter(q => !q.done).length;
+    let hint;
+    if (levelState.xpRemaining <= 100) hint = t('xpHintClose', { n: levelState.xpRemaining });
+    else if (remainingQuests > 0 && remainingQuests <= 2) hint = t('xpHintQuestsLeft', { n: remainingQuests });
+    else hint = t('xpHintProgressing');
+    return `
+    <div class="card level-card" onclick="navigate('profile')" style="--rank-color:${rank.color}">
+      <div class="level-card-top">
+        <div class="level-badge">${rank.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="level-number">${t('levelLabel')} ${levelState.level}</div>
+          <div class="level-rank-name">${t(rank.nameKey)}</div>
+        </div>
+        ${icon('chevronDown', 'rot-90')}
+      </div>
+      <div class="xp-bar"><div class="xp-bar-fill" style="width:${levelState.progressPct}%"></div></div>
+      <div class="level-card-sub">${levelState.xpIntoLevel.toLocaleString()} / ${levelState.xpForNext.toLocaleString()} XP · ${levelState.progressPct}%</div>
+      <div class="level-card-hint">${esc(hint)}</div>
+    </div>`;
+}
+function dailyQuestsCardHTML(now) {
+    const dateIso = L.isoDate(now);
+    const quests = Gamify.evaluateDailyQuests(dateIso, buildDailyQuestContext(dateIso));
+    if (!quests.length) return '';
+    return `
+    <div class="section-title">${t('dailyQuests')}</div>
+    <div class="card quests-card">
+      ${quests.map(q => `<div class="quest-row ${q.done ? 'done' : ''}">
+        <span class="quest-check">${q.done ? '✓' : '○'}</span>
+        <span class="quest-title">${t(q.titleKey)}</span>
+        <span class="quest-progress">${q.progress}/${q.target}</span>
+      </div>`).join('')}
+    </div>`;
 }
 
 // ---------------------------------------------------------------------- //
@@ -1108,20 +1160,17 @@ function viewStats() {
     const rate = L.successRate(logs);
     const wakeTimes = logs.filter(l => l.actualWakeTime).map(l => l.actualWakeTime);
     const avgWakeMin = wakeTimes.length ? Math.round(L.average(wakeTimes.map(L.hhmmToMinutes))) : null;
-    const snoozeTotal = logs.reduce((s, l) => s + (l.snoozeCount || 0), 0);
     const missed = logs.filter(l => l.success === false).length;
     const weekly = L.weeklyBuckets(logs);
     const insights = L.generateCoachInsights(logs);
-    const stats = aggregateAchievementStats(logs);
-    const unlocked = new Set(L.checkAchievements(stats));
-    DB.setUnlockedAchievements(Array.from(unlocked));
+    const unlocked = new Set(unlockAchievementsSticky(buildGamifyStats()));
 
     return `
     <div class="section-title">${t('statsTitle')}</div>
     <div class="stat-grid">
       <div class="card stat-tile"><div class="value">${avgWakeMin != null ? `${L.pad2(Math.floor(avgWakeMin / 60))}:${L.pad2(avgWakeMin % 60)}` : '—'}</div><div class="label">${t('avgWakeTime')}</div></div>
       <div class="card stat-tile"><div class="value">${rate}%</div><div class="label">${t('successRate')}</div></div>
-      <div class="card stat-tile"><div class="value">${snoozeTotal}</div><div class="label">${t('snoozeCount')}</div></div>
+      <div class="card stat-tile"><div class="value">${DB.getTotalXp().toLocaleString()}</div><div class="label">${t('totalXp')}</div></div>
       <div class="card stat-tile"><div class="value">${missed}</div><div class="label">${t('missedAlarms')}</div></div>
     </div>
 
@@ -1145,14 +1194,29 @@ function viewStats() {
 
     <div class="section-title">${t('achievements')}</div>
     <div class="achievement-grid">
-      ${L.ACHIEVEMENT_DEFS.map(ad => `<div class="card achievement-tile ${unlocked.has(ad.id) ? 'unlocked' : ''}">
-        <div class="emoji">${achievementEmoji(ad.id)}</div><div class="title">${esc(ad.title)}</div><div class="desc">${esc(ad.desc)}</div>
-      </div>`).join('')}
+      ${Gamify.ACHIEVEMENTS.map(ad => achievementTileHTML(ad, unlocked.has(ad.id))).join('')}
     </div>
   `;
 }
-function achievementEmoji(id) {
-    return { first_challenge: '🏆', early_bird: '🌅', consistent: '🔥', no_snooze_5: '💪', sleep_master: '🌙', streak_7: '🔥', streak_30: '🔥', math_master: '🧠', wake_up_boss: '👑' }[id] || '⭐';
+function achievementTileHTML(ad, isUnlocked) {
+    return `<div class="card achievement-tile ${isUnlocked ? 'unlocked' : ''}">
+    <div class="emoji">${ad.icon}</div><div class="title">${esc(t(ad.titleKey))}</div><div class="desc">${esc(t(ad.descKey))}</div>
+    <div class="badge rarity-${ad.rarity}">${t('rarity_' + ad.rarity)} · +${Gamify.RARITY_XP[ad.rarity]} XP</div>
+  </div>`;
+}
+/** Unlocks achievements STICKILY (union with whatever was already unlocked
+ * — never replaces), so a condition that later stops holding (there is at
+ * least one intentionally non-monotonic one: new_streak_record) can never
+ * un-unlock something the user already earned. Returns the full unlocked
+ * set (as an array) after the update; callers that also need to grant XP
+ * for newly-unlocked ones should diff against DB.getUnlockedAchievements()
+ * themselves BEFORE calling this (see grantXpForDismissal). */
+function unlockAchievementsSticky(stats) {
+    const prevUnlocked = new Set(DB.getUnlockedAchievements());
+    const nowUnlocked = new Set(Gamify.checkAchievements(stats));
+    const union = new Set([...prevUnlocked, ...nowUnlocked]);
+    DB.setUnlockedAchievements(Array.from(union));
+    return Array.from(union);
 }
 function aggregateAchievementStats(logs) {
     const streak = L.computeStreak(logs.map(l => ({ date: l.date, success: l.success })));
@@ -1169,6 +1233,117 @@ function aggregateAchievementStats(logs) {
         comboChallengesCompleted: history.filter(h => h.taskTypes && h.taskTypes.length > 1 && h.result === 'completed').length
     };
 }
+
+// ---------------------------------------------------------------------- //
+// Profile + XP history
+// ---------------------------------------------------------------------- //
+function viewProfile() {
+    const settings = DB.getSettings();
+    const levelState = Gamify.computeLevelState(DB.getTotalXp());
+    const rank = Gamify.rankForLevel(levelState.level);
+    const logs = DB.listDayLogs();
+    const streak = L.computeStreak(logs.map(l => ({ date: l.date, success: l.success })));
+    const rate = L.successRate(logs);
+    const cosmetics = DB.getCosmetics();
+    const ledger = DB.listXpLedger();
+
+    const recentAchievementIds = ledger.filter(e => e.reasonKey === 'xpReasonAchievement')
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .map(e => e.meta && e.meta.achievementId)
+        .filter(Boolean);
+
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const iso = L.isoDate(d);
+        const dayTotal = ledger.filter(e => e.createdAt && e.createdAt.slice(0, 10) === iso).reduce((s, e) => s + e.amount, 0);
+        days.push({ date: iso, xp: dayTotal });
+    }
+    const maxDayXp = Math.max(1, ...days.map(d => d.xp));
+
+    return `
+    <div class="section-title">${t('profileTitle')}</div>
+    <div class="card profile-header" style="--rank-color:${rank.color}">
+      <div class="profile-icon-big">${cosmetics.selectedIcon}</div>
+      <div class="profile-name">${esc(settings.userName || t('you'))}</div>
+      ${cosmetics.selectedTitle ? `<div class="row-sub">${esc(t(cosmetics.selectedTitle))}</div>` : ''}
+      <div class="profile-rank-line">${rank.icon} ${t('levelLabel')} ${levelState.level} · ${t(rank.nameKey)}</div>
+      <div class="xp-bar" style="margin-top:10px"><div class="xp-bar-fill" style="width:${levelState.progressPct}%"></div></div>
+      <div class="level-card-sub">${levelState.xpIntoLevel.toLocaleString()} / ${levelState.xpForNext.toLocaleString()} XP</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="card stat-tile"><div class="value">${DB.getTotalXp().toLocaleString()}</div><div class="label">${t('totalXp')}</div></div>
+      <div class="card stat-tile"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>
+      <div class="card stat-tile"><div class="value">🏆 ${streak.best}</div><div class="label">${t('bestStreak')}</div></div>
+      <div class="card stat-tile"><div class="value">${rate == null ? '—' : rate + '%'}</div><div class="label">${t('successRate')}</div></div>
+    </div>
+
+    <button class="btn btn-secondary btn-block" style="margin-top:14px" onclick="navigate('xp-history')">${t('viewXpHistory')}</button>
+
+    <div class="section-title">${t('ranksTitle')}</div>
+    <div class="achievement-grid">
+      ${Gamify.RANKS.map(r => `<div class="card achievement-tile ${levelState.level >= r.minLevel ? 'unlocked' : ''}" style="--rank-color:${r.color}">
+        <div class="emoji">${r.icon}</div><div class="title">${t(r.nameKey)}</div><div class="desc">${t('levelLabel')} ${r.minLevel}${r.maxLevel === Infinity ? '+' : '–' + r.maxLevel}</div>
+      </div>`).join('')}
+    </div>
+
+    ${recentAchievementIds.length ? `
+    <div class="section-title">${t('recentAchievements')}</div>
+    <div class="achievement-grid">
+      ${recentAchievementIds.map(id => { const ad = Gamify.ACHIEVEMENTS.find(a => a.id === id); return ad ? achievementTileHTML(ad, true) : ''; }).join('')}
+    </div>` : ''}
+
+    <div class="section-title">${t('profileIcon')}</div>
+    <div class="card"><div class="cosmetic-grid">
+      ${Gamify.ICON_UNLOCKS.map(u => `<button class="cosmetic-option ${cosmetics.unlockedIcons.includes(u.icon) ? 'unlocked' : ''} ${cosmetics.selectedIcon === u.icon ? 'selected' : ''}" ${cosmetics.unlockedIcons.includes(u.icon) ? `onclick="selectCosmeticIcon('${u.icon}')"` : 'disabled'} title="${t('levelLabel')} ${u.level}">${u.icon}</button>`).join('')}
+    </div></div>
+
+    ${cosmetics.unlockedTitles.length ? `
+    <div class="section-title">${t('profileTitleLabel')}</div>
+    <div class="card preset-row">
+      ${cosmetics.unlockedTitles.map(tk => `<button class="${cosmetics.selectedTitle === tk ? 'active' : ''}" onclick="selectCosmeticTitle('${tk}')">${esc(t(tk))}</button>`).join('')}
+    </div>` : ''}
+
+    <div class="section-title">${t('progressOverTime')}</div>
+    <div class="card">
+      <div class="bar-chart">
+        ${days.map(d => `<div class="bar-col"><div class="bar" style="height:${d.xp ? 20 + (d.xp / maxDayXp) * 60 : 6}px"><span style="height:${d.xp ? (d.xp / maxDayXp) * 100 : 0}%"></span></div><div class="bar-label">${new Date(d.date).toLocaleDateString(window.I18N.getLang(), { weekday: 'narrow' })}</div></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+function selectCosmeticIcon(iconId) { DB.selectCosmetic('icon', iconId); render(); }
+function selectCosmeticTitle(titleKey) { DB.selectCosmetic('title', titleKey); render(); }
+
+function viewXpHistory() {
+    const filter = State.xpHistoryFilter || 'all';
+    let ledger = DB.listXpLedger().slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const now = new Date();
+    if (filter === 'today') {
+        const today = L.isoDate(now);
+        ledger = ledger.filter(e => e.createdAt && e.createdAt.slice(0, 10) === today);
+    } else if (filter === 'week') {
+        const weekStartIso = weekStartIsoFor(now, DB.getSettings().weekStartsOn);
+        ledger = ledger.filter(e => e.createdAt && e.createdAt.slice(0, 10) >= weekStartIso);
+    }
+    const filters = ['all', 'today', 'week'];
+    return `
+    <div class="section-title">${t('xpHistoryTitle')}</div>
+    <div class="preset-row" style="margin-bottom:10px">
+      ${filters.map(f => `<button class="${filter === f ? 'active' : ''}" onclick="setXpHistoryFilter('${f}')">${t('xpFilter_' + f)}</button>`).join('')}
+    </div>
+    ${ledger.length ? `<div class="card">
+      ${ledger.map(e => `<div class="xp-history-row">
+        <span class="xp-history-amount">+${e.amount}</span>
+        <span class="xp-history-reason">${esc(t(e.reasonKey))}</span>
+        <span class="xp-history-date">${new Date(e.createdAt).toLocaleDateString(window.I18N.getLang())}</span>
+      </div>`).join('')}
+    </div>` : `<div class="empty-state"><div class="emoji">📜</div><p>${t('noXpYet')}</p></div>`}
+  `;
+}
+function setXpHistoryFilter(f) { State.xpHistoryFilter = f; render(); }
 
 // ---------------------------------------------------------------------- //
 // Calendar
@@ -1216,7 +1391,7 @@ function selectCalendarDay(key) {
     ${logs.length ? logs.map(l => `
       <div class="card-tight card" style="margin-bottom:8px">
         <div class="row"><div class="row-label">${l.scheduledTime}</div><span class="badge ${l.success ? 'badge-success' : 'badge-danger'}">${l.success ? t('done') : t('missedAlarms')}</span></div>
-        <div class="row-sub">${t('wakeTime')}: ${esc(l.actualWakeTime || '—')} · ${t('snoozes')}: ${l.snoozeCount || 0}</div>
+        <div class="row-sub">${t('wakeTime')}: ${esc(l.actualWakeTime || '—')}</div>
       </div>`).join('') : `<p class="row-sub">—</p>`}
   `);
 }
@@ -1282,6 +1457,16 @@ function viewSettings() {
       <div class="row"><div class="row-label">${t('morningSummary')}</div>${switchHTML(s.morningSummary, 'updateSettingBool', 'morningSummary')}</div>
     </div>
 
+    <div class="section-title">${t('sectionGamification')}</div>
+    <div class="card">
+      <div class="row"><div><div class="row-label">${t('showXpOnHome')}</div></div>${switchHTML(s.showXpOnHome !== false, 'updateSettingBool', 'showXpOnHome')}</div>
+      <div class="row"><div><div class="row-label">${t('showDailyQuests')}</div></div>${switchHTML(s.showDailyQuests !== false, 'updateSettingBool', 'showDailyQuests')}</div>
+      <div class="row"><div><div class="row-label">${t('showStreakOnHome')}</div></div>${switchHTML(s.showStreakOnHome !== false, 'updateSettingBool', 'showStreakOnHome')}</div>
+      <div class="row"><div><div class="row-label">${t('gamificationAnimations')}</div><div class="row-sub">${t('gamificationAnimationsHint')}</div></div>${switchHTML(s.gamificationAnimations !== false, 'updateSettingBool', 'gamificationAnimations')}</div>
+      <div class="row"><div><div class="row-label">${t('successSounds')}</div></div>${switchHTML(s.successSounds !== false, 'updateSettingBool', 'successSounds')}</div>
+      <button class="btn btn-secondary btn-block" style="margin-top:10px" onclick="navigate('profile')">${t('viewProfile')}</button>
+    </div>
+
     <div class="section-title">${t('reliabilityTitle')}</div>
     <div class="card"><p class="row-sub">${t('reliabilityBody')}</p></div>
 
@@ -1329,6 +1514,96 @@ function confirmDeleteAllData() {
 }
 
 // ---------------------------------------------------------------------- //
+// Celebrate screen: confetti + (if enabled) the real XP just earned, with
+// a special, rank-colored panel on a level-up. Always tap-to-skip — per
+// spec, skipping never forfeits the reward, since the XP was already
+// committed to the ledger before this screen ever rendered.
+// ---------------------------------------------------------------------- //
+function celebrateHTML(grant) {
+    const colors = ['#ffd166', '#06d6a0', '#ef476f', '#118ab2', '#ffffff'];
+    const confetti = Array.from({ length: 16 }).map((_, i) =>
+        `<span class="confetti-piece" style="left:${Math.round(Math.random() * 96)}%;background:${colors[i % colors.length]};animation-delay:${Math.round(Math.random() * 300)}ms"></span>`
+    ).join('');
+    const settings = DB.getSettings();
+    const showXp = settings.showXpOnHome !== false && grant && grant.gained > 0;
+    const leveledUp = showXp && grant.leveledUp;
+    const toRank = leveledUp ? Gamify.rankForLevel(grant.toLevel) : null;
+
+    const xpLine = showXp ? `
+      <div class="xp-gain-line" id="xpGainLine">
+        <span class="xp-gain-amount" id="xpGainAmount">+0</span><span class="xp-gain-label"> XP</span>
+      </div>
+      <div class="xp-bar-mini"><div class="xp-bar-mini-fill" id="xpBarMiniFill" style="width:0%"></div></div>` : '';
+
+    const levelUpPanel = leveledUp ? `
+      <div class="level-up-panel" style="--rank-color:${toRank.color}">
+        <div class="level-up-glow"></div>
+        <div class="level-up-badge">${toRank.icon}</div>
+        <div class="level-up-title">${t('levelUp')}</div>
+        <div class="level-up-number">${grant.toLevel}</div>
+        <div class="level-up-rank">${t(toRank.nameKey)}</div>
+      </div>` : '';
+
+    return `<div class="ring-screen" style="overflow:hidden" onclick="skipCelebrate()">${confetti}
+    <div class="celebrate" style="margin:auto;position:relative">
+      ${leveledUp ? levelUpPanel : `<div class="emoji">🎉</div><h2>${t('youreAwake')}</h2>`}
+      ${xpLine}
+    </div>
+  </div>`;
+}
+
+/** A short, synthesized two-note success chime — no shipped audio file, so
+ * nothing here can be a copyright concern. Independent of the alarm's own
+ * SoundEngine (which is busy being stopped at this exact moment). */
+function playSuccessChime() {
+    try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new Ctx();
+        [660, 880].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.value = freq;
+            const startAt = ctx.currentTime + i * 0.1;
+            gain.gain.setValueAtTime(0.0001, startAt);
+            gain.gain.exponentialRampToValueAtTime(0.18, startAt + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.25);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(startAt); osc.stop(startAt + 0.3);
+        });
+        setTimeout(() => ctx.close().catch(() => {}), 500);
+    } catch (e) { /* Web Audio unavailable — silently skip, never block dismissal */ }
+}
+
+function startXpGainAnimation(grant) {
+    if (!grant || grant.gained <= 0) return;
+    const amountEl = document.getElementById('xpGainAmount') || document.querySelector('.xp-gain-amount');
+    const fillEl = document.getElementById('xpBarMiniFill');
+    if (!amountEl && !fillEl) return;
+    const totalAfter = DB.getTotalXp();
+    const totalBefore = totalAfter - grant.gained;
+    const before = Gamify.computeLevelState(totalBefore);
+    const after = Gamify.computeLevelState(totalAfter);
+    const fromPct = after.level === before.level ? before.progressPct : 0;
+    const toPct = after.progressPct;
+    const settings = DB.getSettings();
+    const reduced = settings.reducedMotion || settings.gamificationAnimations === false;
+    if (reduced) {
+        if (amountEl) amountEl.textContent = '+' + grant.gained;
+        if (fillEl) fillEl.style.width = toPct + '%';
+        return;
+    }
+    const durationMs = 700;
+    const start = performance.now();
+    function step(now) {
+        const p = Math.min(1, (now - start) / durationMs);
+        if (amountEl) amountEl.textContent = '+' + Math.round(grant.gained * p);
+        if (fillEl) fillEl.style.width = (fromPct + (toPct - fromPct) * p) + '%';
+        if (p < 1 && State.celebrate) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+// ---------------------------------------------------------------------- //
 // Ring / challenge screen
 // ---------------------------------------------------------------------- //
 function renderRing() {
@@ -1343,11 +1618,8 @@ function renderRing() {
     if (!State.activeRing && !State.celebrate) { overlay.classList.add('hidden'); overlay.innerHTML = ''; stopQrStream(); return; }
     overlay.classList.remove('hidden');
     if (State.celebrate) {
-        const colors = ['#ffd166', '#06d6a0', '#ef476f', '#118ab2', '#ffffff'];
-        const confetti = Array.from({ length: 16 }).map((_, i) =>
-            `<span class="confetti-piece" style="left:${Math.round(Math.random() * 96)}%;background:${colors[i % colors.length]};animation-delay:${Math.round(Math.random() * 300)}ms"></span>`
-        ).join('');
-        overlay.innerHTML = `<div class="ring-screen" style="overflow:hidden">${confetti}<div class="celebrate" style="margin:auto;position:relative"><div class="emoji">🎉</div><h2>${t('youreAwake')}</h2></div></div>`;
+        overlay.innerHTML = celebrateHTML(State.lastXpGrant);
+        startXpGainAnimation(State.lastXpGrant);
         return;
     }
     const ring = State.activeRing;
@@ -1808,40 +2080,183 @@ function bindRingEvents() {
     }
 }
 
+// ---------------------------------------------------------------------- //
+// Gamification: XP is granted ONLY from real events below (a completed
+// alarm dismissal, a real physical/math task, a real streak/quest/
+// achievement milestone) — never from opening a screen or tapping a
+// button. Every grant goes through DB.addXpEvent(dedupeKey, ...), which is
+// a structural no-op on a repeat key, so re-renders, reloads, device
+// restarts, or a second alarm firing can never double-pay the same event.
+// ---------------------------------------------------------------------- //
+
+/** Same physical/math/combo stats viewStats already computes from real
+ * history — extended here with the extra fields the gamification
+ * achievements need. Reuses aggregateAchievementStats rather than
+ * re-deriving its fields a second way. */
+function buildGamifyStats() {
+    const logs = DB.listDayLogs();
+    const history = DB.listChallengeHistory();
+    const base = aggregateAchievementStats(logs);
+    const streak = L.computeStreak(logs.map(l => ({ date: l.date, success: l.success })));
+    const physicalTypes = ['sport', 'situps'];
+    return Object.assign({}, base, {
+        streak,
+        level: Gamify.computeLevelState(DB.getTotalXp()).level,
+        totalSuccessfulMornings: logs.filter(l => l.success).length,
+        physicalChallengesCompleted: history.filter(h => h.result === 'completed' && h.taskTypes && h.taskTypes.some(tt => physicalTypes.includes(tt))).length,
+        totalRepsCompleted: history.reduce((sum, h) => sum + (h.repsCompleted || 0), 0),
+        mathLevel5SolvedEver: history.some(h => h.mathLevel5Solved),
+        tripleComboCount: history.filter(h => h.result === 'completed' && h.taskTypes && h.taskTypes.length >= 3).length
+    });
+}
+
+function buildDailyQuestContext(dateIso) {
+    const logsToday = DB.listDayLogs().filter(l => l.date === dateIso && l.dismissMethod !== 'emergency');
+    const historyToday = DB.listChallengeHistory().filter(h => h.date === dateIso && h.result === 'completed');
+    const physicalTypes = ['sport', 'situps'];
+    return {
+        alarmsCompletedToday: logsToday.length,
+        distinctAlarmsCompletedToday: new Set(logsToday.map(l => l.alarmId)).size,
+        challengesCompletedToday: historyToday.length,
+        physicalCompletedToday: historyToday.filter(h => h.taskTypes.some(tt => physicalTypes.includes(tt))).length,
+        mathSolvedToday: historyToday.reduce((sum, h) => sum + (h.mathCorrect || 0), 0)
+    };
+}
+
+/** The ISO date (local) of the configured week's start on-or-before `date`. */
+function weekStartIsoFor(date, weekStartsOn) {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diff = (d.getDay() - weekStartsOn + 7) % 7;
+    d.setDate(d.getDate() - diff);
+    return L.isoDate(d);
+}
+function buildWeeklyContext(weekStartIso, now) {
+    const weekStart = new Date(weekStartIso + 'T00:00:00');
+    const successfulDates = new Set(
+        DB.listDayLogs()
+            .filter(l => l.success && l.dismissMethod !== 'emergency')
+            .filter(l => { const d = new Date(l.date + 'T00:00:00'); return d >= weekStart && d <= now; })
+            .map(l => l.date)
+    );
+    return { successfulDaysThisWeek: successfulDates.size };
+}
+
+/**
+ * Grants every XP event a real, just-completed dismissal earns. Returns a
+ * summary ({gained, events, fromLevel, toLevel, leveledUp}) for the UI to
+ * animate — never a fire-and-forget side effect the screen can't reflect.
+ * An emergency exit is a safety valve, not a success: it earns nothing.
+ */
+function grantXpForDismissal(ring, method, dayLog, historyEntry, now) {
+    if (method === 'emergency' || !dayLog) return { events: [], gained: 0, leveledUp: false, fromLevel: null, toLevel: null };
+    const fromLevel = Gamify.computeLevelState(DB.getTotalXp()).level;
+    const events = [];
+    const grant = (key, amount, reasonKey, meta) => { const e = DB.addXpEvent(key, amount, reasonKey, meta); if (e) events.push(e); };
+
+    grant(`dismiss:${dayLog.id}`, 100, 'xpReasonAlarmCompleted', { alarmId: ring.alarm.id });
+
+    if (historyEntry) {
+        const physicalTypes = ['sport', 'situps'];
+        if (historyEntry.taskTypes.some(tt => physicalTypes.includes(tt))) grant(`dismiss:${dayLog.id}:physical`, 20, 'xpReasonPhysical');
+        if (historyEntry.taskTypes.includes('math')) grant(`dismiss:${dayLog.id}:math`, 15, 'xpReasonMath');
+        const comboXp = Gamify.comboBonusXp(new Set(historyEntry.taskTypes).size);
+        if (comboXp > 0) grant(`dismiss:${dayLog.id}:combo`, comboXp, 'xpReasonCombo');
+    }
+
+    const logs = DB.listDayLogs();
+    const streak = L.computeStreak(logs.map(l => ({ date: l.date, success: l.success })));
+    const milestone = Gamify.streakMilestoneReached(streak.current);
+    if (milestone) {
+        const startDate = Gamify.streakStartDateIso(L.isoDate(now), streak.current);
+        grant(`streak:${milestone.days}:${startDate}`, milestone.xp, 'xpReasonStreak', { days: milestone.days });
+    }
+
+    const dateIso = L.isoDate(now);
+    const dailyQuests = Gamify.evaluateDailyQuests(dateIso, buildDailyQuestContext(dateIso));
+    dailyQuests.forEach(q => { if (q.done) grant(`quest:${dateIso}:${q.id}`, q.xp, 'xpReasonQuest', { questId: q.id }); });
+    if (dailyQuests.length && dailyQuests.every(q => q.done)) grant(`dailyQuestsComplete:${dateIso}`, 50, 'xpReasonDailyQuests');
+
+    const weekStartIso = weekStartIsoFor(now, DB.getSettings().weekStartsOn);
+    const weekCtx = buildWeeklyContext(weekStartIso, now);
+    Gamify.evaluateWeeklyQuests(weekCtx).forEach(q => { if (q.done) grant(`weeklyquest:${weekStartIso}:${q.id}`, q.xp, 'xpReasonWeeklyQuest', { questId: q.id }); });
+    if (weekCtx.successfulDaysThisWeek >= Gamify.WEEKLY_GOAL.targetDays) grant(`weeklyGoal:${weekStartIso}`, Gamify.WEEKLY_GOAL.xp, 'xpReasonWeeklyGoal');
+
+    const prevUnlocked = new Set(DB.getUnlockedAchievements());
+    const union = unlockAchievementsSticky(buildGamifyStats());
+    const newlyUnlocked = Array.from(union).filter(id => !prevUnlocked.has(id));
+    newlyUnlocked.forEach(id => grant(`achievement:${id}`, Gamify.achievementXp(id), 'xpReasonAchievement', { achievementId: id }));
+
+    const toLevel = Gamify.computeLevelState(DB.getTotalXp()).level;
+    syncCosmeticUnlocks(toLevel, newlyUnlocked);
+    return { events, gained: events.reduce((s, e) => s + e.amount, 0), leveledUp: toLevel > fromLevel, fromLevel, toLevel };
+}
+/** Purely decorative: unlocks profile icons by level and titles by specific
+ * achievement, never anything that touches the alarm/challenge flow. */
+function syncCosmeticUnlocks(level, newlyUnlockedAchievementIds) {
+    Gamify.iconUnlocksUpToLevel(level).forEach(iconId => DB.unlockCosmetic('icon', iconId));
+    newlyUnlockedAchievementIds.forEach(id => { const titleKey = Gamify.TITLE_UNLOCKS[id]; if (titleKey) DB.unlockCosmetic('title', titleKey); });
+}
+
 function dismissRing(method) {
     const ring = State.activeRing;
     if (!ring) return;
     Sounds.engine.stop();
     stopQrStream();
     stopPoseSession();
+    stopPhotoStream();
     clearMathTimer();
     if (State.wakeLock) { State.wakeLock.release(); State.wakeLock = null; }
     const now = new Date();
     const settings = DB.getSettings();
-    DB.addDayLog({
+    // An emergency exit is a safety valve, not a success: it must not count
+    // toward streaks, "successful mornings" achievements, or any stat that
+    // feeds gamification — otherwise escaping the challenge would be an XP
+    // farming route, the exact opposite of what the whole system rewards.
+    const dayLog = DB.addDayLog({
         alarmId: ring.alarm.id, date: L.isoDate(now), scheduledTime: ring.alarm.time,
-        actualWakeTime: L.formatTime(now, true), snoozeCount: ring.snoozeCount, success: true,
+        actualWakeTime: L.formatTime(now, true), snoozeCount: ring.snoozeCount, success: method !== 'emergency',
         challengeCompleted: !!ring.runner, dismissMethod: method
     });
+    let historyEntry = null;
     if (ring.runner) {
         const mathCorrect = ring.runner.tasks.filter(ts => ts.config.type === 'math').reduce((sum, ts) => sum + (ts.correctCount || 0), 0);
-        DB.addChallengeHistory({ alarmId: ring.alarm.id, date: L.isoDate(now), taskTypes: ring.alarm.challenge.tasks.map(tsk => tsk.type), snoozeCount: ring.snoozeCount, result: method === 'emergency' ? 'emergency_stop' : 'completed', mathCorrect });
+        const repsCompleted = ring.runner.tasks.filter(ts => ts.config.type === 'sport' || ts.config.type === 'situps').reduce((sum, ts) => sum + (ts.reps || 0), 0);
+        const mathLevel5Solved = ring.runner.tasks.some(ts => ts.config.type === 'math' && Number(ts.config.difficulty) === 5 && (ts.correctCount || 0) > 0);
+        historyEntry = DB.addChallengeHistory({
+            alarmId: ring.alarm.id, date: L.isoDate(now), taskTypes: ring.alarm.challenge.tasks.map(tsk => tsk.type),
+            snoozeCount: ring.snoozeCount, result: method === 'emergency' ? 'emergency_stop' : 'completed',
+            mathCorrect, repsCompleted, mathLevel5Solved
+        });
     }
+    // XP/achievements/quests always accrue for real, regardless of display
+    // settings — showXpOnHome only controls whether the celebrate screen
+    // SHOWS the gain (see celebrateHTML); it is never a way to pause the
+    // underlying ledger, since nothing lets a user hand-edit XP either way.
+    State.lastXpGrant = grantXpForDismissal(ring, method, dayLog, historyEntry, now);
+    if (method !== 'emergency' && settings.successSounds !== false) playSuccessChime();
     State.activeRing = null;
     State.celebrate = true;
     haptic(30);
     render();
-    setTimeout(() => { State.celebrate = false; render(); }, 2000);
-    if (settings.morningSummary) setTimeout(() => showMorningReport(ring, now), 2100);
+    const celebrateMs = State.lastXpGrant.leveledUp ? 3600 : 2000;
+    State.celebrateTimer = setTimeout(() => { State.celebrate = false; State.lastXpGrant = null; render(); }, celebrateMs);
+    if (settings.morningSummary) { const grantForReport = State.lastXpGrant; setTimeout(() => showMorningReport(ring, now, grantForReport), celebrateMs + 100); }
 }
-function showMorningReport(ring, wakeDate) {
+function skipCelebrate() {
+    if (!State.celebrate) return;
+    if (State.celebrateTimer) clearTimeout(State.celebrateTimer);
+    State.celebrate = false;
+    State.lastXpGrant = null;
+    render();
+}
+function showMorningReport(ring, wakeDate, grant) {
     const streak = L.computeStreak(DB.listDayLogs().map(l => ({ date: l.date, success: l.success })));
     openModal(() => `
     <div class="modal-header"><h2>${t('morningReport')} ☀️</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
     <div class="stat-grid">
       <div class="card stat-tile"><div class="value">${L.formatTime(wakeDate, DB.getSettings().timeFormat === '24h')}</div><div class="label">${t('wakeTime')}</div></div>
       <div class="card stat-tile"><div class="value">${ring.alarm.time}</div><div class="label">${t('target')}</div></div>
-      <div class="card stat-tile"><div class="value">${ring.snoozeCount}</div><div class="label">${t('snoozes')}</div></div>
+      <div class="card stat-tile"><div class="value">+${grant ? grant.gained : 0}</div><div class="label">${t('totalXp')}</div></div>
       <div class="card stat-tile"><div class="value">${flame()} ${streak.current}</div><div class="label">${t('streak')}</div></div>
     </div>
   `);

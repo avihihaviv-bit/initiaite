@@ -477,3 +477,63 @@ h1, h2, h3, p { margin: 0; }
 .tp-btn .icon { width: 18px; height: 18px; }
 
 .hidden { display: none !important; }
+
+/* ===========================================================================
+   Gamification: level/rank card, daily quests, XP-gain + level-up
+   animations, achievement rarity badges, profile and XP history screens.
+=========================================================================== */
+.level-card { cursor: pointer; background: linear-gradient(160deg, var(--card), var(--card-2)); border: 1px solid var(--border); }
+.level-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.level-badge { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; background: color-mix(in srgb, var(--rank-color) 18%, var(--card)); border: 2px solid var(--rank-color); flex-shrink: 0; }
+.level-number { font-size: 17px; font-weight: 800; }
+.level-rank-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--rank-color); }
+.level-card-top .icon { color: var(--text-muted); }
+.xp-bar { height: 10px; border-radius: 999px; background: var(--card-2); overflow: hidden; }
+.xp-bar-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--rank-color), var(--accent)); transition: width .5s var(--ease); }
+.level-card-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
+.level-card-hint { font-size: 12px; color: var(--text); font-weight: 600; margin-top: 4px; opacity: .85; }
+
+.quests-card { display: flex; flex-direction: column; gap: 2px; }
+.quest-row { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.quest-row:last-child { border-bottom: none; }
+.quest-row.done { opacity: .55; }
+.quest-row.done .quest-title { text-decoration: line-through; }
+.quest-check { width: 20px; text-align: center; font-weight: 800; color: var(--accent); flex-shrink: 0; }
+.quest-title { flex: 1; font-weight: 600; }
+.quest-progress { font-size: 12px; color: var(--text-muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.xp-gain-line { text-align: center; font-size: 30px; font-weight: 800; color: #ffd166; margin-top: 10px; font-variant-numeric: tabular-nums; }
+.xp-gain-label { font-size: 16px; opacity: .85; }
+.xp-bar-mini { width: 200px; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, .18); overflow: hidden; margin: 10px auto 0; }
+.xp-bar-mini-fill { display: block; height: 100%; background: linear-gradient(90deg, #ffd166, #fff); border-radius: 999px; transition: width .05s linear; }
+
+.level-up-panel { position: relative; text-align: center; padding: 18px 10px; }
+.level-up-glow { position: absolute; inset: -40px; background: radial-gradient(circle, color-mix(in srgb, var(--rank-color) 55%, transparent), transparent 70%); animation: levelUpGlow 1.6s ease-out both; pointer-events: none; }
+.level-up-badge { font-size: 48px; animation: bounceIn .6s var(--ease) both; }
+.level-up-title { font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--rank-color); margin-top: 6px; animation: fadeSlideUp .4s var(--ease) .1s both; }
+.level-up-number { font-size: 52px; font-weight: 800; line-height: 1; animation: fadeSlideUp .4s var(--ease) .15s both; }
+.level-up-rank { font-size: 16px; font-weight: 700; opacity: .9; animation: fadeSlideUp .4s var(--ease) .2s both; }
+@keyframes levelUpGlow { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: .4; } }
+
+.badge.rarity-common { background: var(--card-2); color: var(--text-muted); }
+.badge.rarity-rare { background: color-mix(in srgb, #4ea1ff 20%, var(--card-2)); color: #4ea1ff; }
+.badge.rarity-epic { background: color-mix(in srgb, #b06eff 20%, var(--card-2)); color: #b06eff; }
+.badge.rarity-legendary { background: color-mix(in srgb, #ff9f4e 22%, var(--card-2)); color: #ff9f4e; }
+.achievement-tile .badge { margin-top: 6px; font-size: 10px; }
+
+/* Profile screen */
+.profile-header { text-align: center; padding: 10px 0 4px; }
+.profile-icon-big { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; font-size: 38px; margin: 0 auto 10px; background: color-mix(in srgb, var(--rank-color) 18%, var(--card)); border: 3px solid var(--rank-color); }
+.profile-name { font-size: 19px; font-weight: 800; }
+.profile-rank-line { font-size: 13px; font-weight: 700; color: var(--rank-color); margin-top: 2px; }
+.cosmetic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 8px; }
+.cosmetic-option { aspect-ratio: 1; border-radius: 12px; border: 2px solid var(--border); background: var(--card-2); font-size: 22px; display: grid; place-items: center; opacity: .35; filter: grayscale(1); }
+.cosmetic-option.unlocked { opacity: 1; filter: none; cursor: pointer; }
+.cosmetic-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+/* XP history */
+.xp-history-row { display: flex; align-items: center; gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--border); }
+.xp-history-row:last-child { border-bottom: none; }
+.xp-history-amount { font-weight: 800; color: var(--success); font-variant-numeric: tabular-nums; min-width: 56px; text-align: end; }
+.xp-history-reason { flex: 1; font-weight: 600; font-size: 14px; }
+.xp-history-date { font-size: 11px; color: var(--text-muted); }
