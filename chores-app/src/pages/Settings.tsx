@@ -45,7 +45,7 @@ export default function Settings() {
 
       <Card>
         <p className="mb-3 flex items-center gap-1.5 font-display text-sm font-bold text-ink"><Palette size={15} /> Appearance</p>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-ink">Theme</p>
             <p className="text-xs text-ink-faint">Light, dark, or match your system</p>

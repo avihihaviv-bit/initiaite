@@ -65,6 +65,25 @@ export function formatTime(hhmm?: string): string {
   return `${h12}:${String(m).padStart(2, '0')} ${period}`
 }
 
+/** "Start – End" when both are set, otherwise just the start time. */
+export function formatTimeRange(start?: string, end?: string): string {
+  if (!start) return ''
+  return end ? `${formatTime(start)} – ${formatTime(end)}` : formatTime(start)
+}
+
+export function timeToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number)
+  return h * 60 + m
+}
+
+/** Minutes since midnight back to "HH:mm", wrapping past 24h. */
+export function minutesToTime(totalMinutes: number): string {
+  const wrapped = ((totalMinutes % 1440) + 1440) % 1440
+  const h = Math.floor(wrapped / 60)
+  const m = wrapped % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
 export function startOfWeek(iso: string): string {
   const d = parseISODate(iso)
   const day = d.getDay()

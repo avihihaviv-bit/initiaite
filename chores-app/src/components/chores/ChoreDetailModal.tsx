@@ -10,7 +10,7 @@ import { ProgressBar } from '../ui/ProgressBar'
 import type { Chore } from '../../types'
 import { useStore } from '../../store/useStore'
 import { describeRecurrence } from '../../lib/recurrence'
-import { formatTime, friendlyDate, timeAgo, todayISO } from '../../lib/date'
+import { formatTime, formatTimeRange, friendlyDate, timeAgo, todayISO } from '../../lib/date'
 import { effectiveDueDate, isCompletedOn } from '../../lib/occurrence'
 import { useToast } from '../ui/Toast'
 
@@ -92,7 +92,7 @@ export function ChoreDetailModal({ chore, onClose, onEdit }: { chore: Chore | nu
           <Pill tone={PRIORITY_TONE[chore.priority]}>{chore.priority} priority</Pill>
           <Pill tone="neutral">{chore.estimatedMinutes} min</Pill>
           <Pill tone="neutral">{describeRecurrence(chore.recurrence)}</Pill>
-          {chore.dueTime && <Pill tone="neutral">Due {formatTime(chore.dueTime)}</Pill>}
+          {chore.dueTime && <Pill tone="neutral">{chore.endTime ? formatTimeRange(chore.dueTime, chore.endTime) : `Due ${formatTime(chore.dueTime)}`}</Pill>}
           <Pill tone="neutral">+{chore.xp} XP · +{chore.points} pts</Pill>
           {assignees.length > 1 && <Pill tone="primary">🤝 Shared</Pill>}
         </div>

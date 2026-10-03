@@ -17,7 +17,7 @@ interface Props {
 
 export function Tabs({ tabs, active, onChange, className }: Props) {
   return (
-    <div className={clsx('no-scrollbar scroll-fade-x flex gap-1 overflow-x-auto rounded-xl bg-surface-2 p-1', className)} role="tablist">
+    <div className={clsx('no-scrollbar scroll-fade-x flex gap-0.5 overflow-x-auto rounded-xl bg-surface-2 p-1 sm:gap-1', className)} role="tablist">
       {tabs.map((t) => (
         <button
           key={t.id}
@@ -25,7 +25,7 @@ export function Tabs({ tabs, active, onChange, className }: Props) {
           aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           className={clsx(
-            'focus-ring relative flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-all',
+            'focus-ring relative flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-2 text-[13px] font-semibold transition-all sm:px-3.5 sm:text-sm',
             active === t.id ? 'bg-surface text-ink shadow-[var(--shadow-soft)]' : 'text-ink-soft hover:text-ink'
           )}
         >

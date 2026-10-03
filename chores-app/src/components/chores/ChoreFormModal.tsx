@@ -9,7 +9,7 @@ import { ChoreWizard } from './ChoreWizard'
 import { useStore } from '../../store/useStore'
 import type { Chore, Difficulty, Priority, RecurrenceRule } from '../../types'
 import { suggestedPoints } from '../../lib/gamification'
-import { todayISO } from '../../lib/date'
+import { minutesToTime, timeToMinutes, todayISO } from '../../lib/date'
 import { useToast } from '../ui/Toast'
 
 interface Props {
@@ -61,6 +61,7 @@ function EditChoreForm({ open, onClose, editChore }: { open: boolean; onClose: (
   const [points, setPoints] = useState(16)
   const [dueDate, setDueDate] = useState(todayISO())
   const [dueTime, setDueTime] = useState('')
+  const [endTime, setEndTime] = useState('')
   const [recurrence, setRecurrence] = useState<RecurrenceRule>({ frequency: 'none', startDate: todayISO() })
   const [reminder, setReminder] = useState<Chore['reminder']>('30-before')
   const [dependsOn, setDependsOn] = useState<string[]>([])
@@ -79,12 +80,31 @@ function EditChoreForm({ open, onClose, editChore }: { open: boolean; onClose: (
     setPoints(editChore.points)
     setDueDate(editChore.dueDate)
     setDueTime(editChore.dueTime ?? '')
+    setEndTime(editChore.endTime ?? '')
     setRecurrence(editChore.recurrence)
     setReminder(editChore.reminder ?? 'none')
     setDependsOn(editChore.dependsOn)
   }, [open, editChore])
 
   const canSubmit = title.trim().length > 0 && categoryId
+
+  // Start time, end time, and duration stay in sync: changing any one of them
+  // recomputes the other two so "9:00–9:30" and "30 min" never disagree.
+  const handleStartTimeChange = (value: string) => {
+    setDueTime(value)
+    if (value && endTime) setEndTime(minutesToTime(timeToMinutes(value) + estimatedMinutes))
+  }
+  const handleEndTimeChange = (value: string) => {
+    setEndTime(value)
+    if (dueTime && value) {
+      const diff = timeToMinutes(value) - timeToMinutes(dueTime)
+      if (diff > 0) setEstimatedMinutes(diff)
+    }
+  }
+  const handleDurationChange = (minutes: number) => {
+    setEstimatedMinutes(minutes)
+    if (dueTime && endTime) setEndTime(minutesToTime(timeToMinutes(dueTime) + minutes))
+  }
 
   const handleSubmit = () => {
     if (!canSubmit) return
@@ -101,6 +121,7 @@ function EditChoreForm({ open, onClose, editChore }: { open: boolean; onClose: (
       xp,
       dueDate,
       dueTime: dueTime || undefined,
+      endTime: dueTime ? (endTime || undefined) : undefined,
       recurrence: { ...recurrence, startDate: recurrence.startDate || dueDate },
       reminder,
       dependsOn,
@@ -185,21 +206,23 @@ function EditChoreForm({ open, onClose, editChore }: { open: boolean; onClose: (
 
         <div className="grid grid-cols-2 gap-3">
           <TextInput label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-          <TextInput label="Due time (optional)" type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} />
+          <TextInput label="Start time (optional)" type="time" value={dueTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
+          <TextInput label="End time (optional)" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} disabled={!dueTime} />
           <TextInput
             label="Estimated duration (min)"
             type="number"
             min={1}
             value={estimatedMinutes}
-            onChange={(e) => setEstimatedMinutes(Math.max(1, Number(e.target.value) || 1))}
+            onChange={(e) => handleDurationChange(Math.max(1, Number(e.target.value) || 1))}
           />
-          <div>
-            <span className="mb-1.5 block text-xs font-semibold text-ink-soft">Difficulty</span>
-            <SegmentedControl options={DIFFICULTIES.map((d) => ({ id: d.id, label: d.label }))} value={difficulty} onChange={(v) => setDifficulty(v as Difficulty)} />
-          </div>
+        </div>
+
+        <div>
+          <span className="mb-1.5 block text-xs font-semibold text-ink-soft">Difficulty</span>
+          <SegmentedControl options={DIFFICULTIES.map((d) => ({ id: d.id, label: d.label }))} value={difficulty} onChange={(v) => setDifficulty(v as Difficulty)} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">

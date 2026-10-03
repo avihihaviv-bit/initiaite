@@ -6,7 +6,7 @@ import type { Chore } from '../../types'
 import { useStore } from '../../store/useStore'
 import { AvatarStack } from '../ui/AvatarStack'
 import { Pill } from '../ui/Pill'
-import { formatTime, friendlyDate, todayISO } from '../../lib/date'
+import { formatTimeRange, friendlyDate, todayISO } from '../../lib/date'
 import { isBlocked } from '../../lib/priority'
 import { effectiveDueDate, isCompletedOn, isOverdue } from '../../lib/occurrence'
 import { ChoreActionsMenu } from './ChoreActionsMenu'
@@ -107,7 +107,7 @@ export function ChoreCard({ chore, onOpen, onEdit, onStartTimer, compact, select
             </span>
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-faint">
               <span className="inline-flex items-center gap-1"><Clock size={12} /> {chore.estimatedMinutes} min</span>
-              {chore.dueTime && <span>· {formatTime(chore.dueTime)}</span>}
+              {chore.dueTime && <span>· {formatTimeRange(chore.dueTime, chore.endTime)}</span>}
               {!compact && category && <span>· {category.emoji} {category.name}</span>}
               {chore.subtasks.length > 0 && (
                 <span>· {subtaskDone}/{chore.subtasks.length} subtasks</span>

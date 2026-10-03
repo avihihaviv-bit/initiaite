@@ -100,7 +100,8 @@ export interface Chore {
   points: number
   xp: number
   dueDate: string // ISO yyyy-mm-dd for the next/only occurrence
-  dueTime?: string // HH:mm
+  dueTime?: string // HH:mm — start of the scheduled window
+  endTime?: string // HH:mm — end of the scheduled window, optional
   recurrence: RecurrenceRule
   reminder?: 'none' | 'at-time' | '15-before' | '30-before' | '1h-before'
   subtasks: Subtask[]

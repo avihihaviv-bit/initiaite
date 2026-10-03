@@ -10,7 +10,7 @@ import { RecurrencePicker } from './RecurrencePicker'
 import { useStore } from '../../store/useStore'
 import type { Priority, RecurrenceRule } from '../../types'
 import { suggestedPoints } from '../../lib/gamification'
-import { addDays, formatTime, friendlyDate, todayISO, WEEKDAY_LABELS } from '../../lib/date'
+import { addDays, formatTime, formatTimeRange, friendlyDate, minutesToTime, timeToMinutes, todayISO, WEEKDAY_LABELS } from '../../lib/date'
 import { describeRecurrence } from '../../lib/recurrence'
 import { suggestTime } from '../../lib/scheduling'
 import { useToast } from '../ui/Toast'
@@ -59,6 +59,7 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
   // Step 3 — When
   const [dueDate, setDueDate] = useState(defaultDate ?? todayISO())
   const [dueTime, setDueTime] = useState('')
+  const [endTime, setEndTime] = useState('')
   const [noSpecificTime, setNoSpecificTime] = useState(true)
   const [estimatedMinutes, setEstimatedMinutes] = useState(15)
   const [customDuration, setCustomDuration] = useState('')
@@ -83,6 +84,7 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
     setAssignMode('shared')
     setDueDate(start)
     setDueTime('')
+    setEndTime('')
     setNoSpecificTime(true)
     setEstimatedMinutes(15)
     setCustomDuration('')
@@ -108,8 +110,30 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
   const applySuggestion = () => {
     const suggestion = suggestTime(chores, selectedUserIds, dueDate, estimatedMinutes)
     setDueTime(suggestion.time)
+    setEndTime(minutesToTime(timeToMinutes(suggestion.time) + estimatedMinutes))
     setNoSpecificTime(false)
     show(`Suggested ${formatTime(suggestion.time)} — ${suggestion.reason}`, { tone: 'info' })
+  }
+
+  // Start time, end time, and duration stay in sync: changing any one of them
+  // recomputes the other two so "9:00–9:30" and "30 min" never disagree.
+  const handleStartTimeChange = (value: string) => {
+    setDueTime(value)
+    if (value) setEndTime(minutesToTime(timeToMinutes(value) + estimatedMinutes))
+  }
+  const handleDurationChange = (minutes: number) => {
+    setEstimatedMinutes(minutes)
+    if (dueTime) setEndTime(minutesToTime(timeToMinutes(dueTime) + minutes))
+  }
+  const handleEndTimeChange = (value: string) => {
+    setEndTime(value)
+    if (dueTime && value) {
+      const diff = timeToMinutes(value) - timeToMinutes(dueTime)
+      if (diff > 0) {
+        setEstimatedMinutes(diff)
+        setCustomDuration('')
+      }
+    }
   }
 
   const handleSubmit = () => {
@@ -126,6 +150,7 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
       xp: finalXp,
       dueDate,
       dueTime: noSpecificTime ? undefined : dueTime,
+      endTime: noSpecificTime ? undefined : (endTime || undefined),
       recurrence: { ...recurrence, startDate: recurrence.startDate || dueDate },
       reminder: noSpecificTime ? ('none' as const) : ('30-before' as const),
       subtasks: [],
@@ -310,16 +335,19 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
 
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="block text-xs font-semibold text-ink-soft">Select time</span>
+                  <span className="block text-xs font-semibold text-ink-soft">What time?</span>
                   <label className="flex items-center gap-1.5 text-xs font-semibold text-ink-faint">
                     <input type="checkbox" checked={noSpecificTime} onChange={(e) => setNoSpecificTime(e.target.checked)} className="h-3.5 w-3.5 accent-[var(--color-primary-500)]" />
                     No specific time
                   </label>
                 </div>
                 {!noSpecificTime && (
-                  <div className="flex items-end gap-2">
-                    <div className="w-36">
-                      <TextInput type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} />
+                  <div className="flex flex-wrap items-end gap-2">
+                    <div className="w-32">
+                      <TextInput label="From" type="time" value={dueTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
+                    </div>
+                    <div className="w-32">
+                      <TextInput label="Until" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} />
                     </div>
                     <Button variant="secondary" size="sm" icon={<Sparkles size={13} />} onClick={applySuggestion}>Suggest best time</Button>
                   </div>
@@ -334,7 +362,7 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
                       key={d}
                       type="button"
                       onClick={() => {
-                        setEstimatedMinutes(d)
+                        handleDurationChange(d)
                         setCustomDuration('')
                       }}
                       className={`focus-ring rounded-xl border px-3 py-1.5 text-xs font-bold transition ${
@@ -349,12 +377,15 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
                     onChange={(e) => {
                       setCustomDuration(e.target.value)
                       const n = Number(e.target.value)
-                      if (n > 0) setEstimatedMinutes(n)
+                      if (n > 0) handleDurationChange(n)
                     }}
                     placeholder="Custom"
                     className="focus-ring w-20 rounded-xl border border-border bg-surface px-2 text-xs font-bold text-ink placeholder:font-normal placeholder:text-ink-faint"
                   />
                 </div>
+                {!noSpecificTime && dueTime && endTime && (
+                  <p className="mt-1.5 text-xs font-semibold text-ink-faint">{formatTimeRange(dueTime, endTime)} · {estimatedMinutes} min</p>
+                )}
               </div>
             </div>
           )}
@@ -433,7 +464,7 @@ export function ChoreWizard({ open, onClose, defaultDate, defaultUserId }: Props
                     {selectedUserIds.length > 1 && assignMode === 'separate' && <span className="text-xs text-ink-faint">(separate)</span>}
                   </div>
                   <div className="text-ink-soft">📅 {friendlyDate(dueDate)}</div>
-                  <div className="text-ink-soft">⏰ {noSpecificTime ? 'No specific time' : formatTime(dueTime)}</div>
+                  <div className="text-ink-soft">⏰ {noSpecificTime ? 'No specific time' : formatTimeRange(dueTime, endTime)}</div>
                   <div className="text-ink-soft">⏱ {estimatedMinutes} minutes</div>
                   <div className="text-ink-soft">⭐ +{customXp ? Number(customXp) || xp : xp} XP</div>
                   <div className="text-ink-soft">🔁 {describeRecurrence(recurrence)}</div>

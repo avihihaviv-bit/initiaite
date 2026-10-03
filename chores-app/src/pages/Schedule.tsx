@@ -9,7 +9,7 @@ import { Pill } from '../components/ui/Pill'
 import { EmptyState } from '../components/ui/EmptyState'
 import { ChoreDetailModal } from '../components/chores/ChoreDetailModal'
 import { ChoreFormModal } from '../components/chores/ChoreFormModal'
-import { formatTime, friendlyDate, todayISO } from '../lib/date'
+import { formatTime, formatTimeRange, friendlyDate, todayISO } from '../lib/date'
 import { effectiveDueDate, isDueOn, isOverdue, occurrencesForRange } from '../lib/occurrence'
 import { useToast } from '../components/ui/Toast'
 
@@ -127,7 +127,9 @@ export default function Schedule() {
                           <span className={clsx('flex-1 truncate text-sm font-bold text-ink', item.o.status === 'completed' && 'text-ink-faint line-through')}>
                             {item.o.chore.title}
                           </span>
-                          <span className="shrink-0 text-xs text-ink-faint">{item.o.chore.estimatedMinutes} min</span>
+                          <span className="shrink-0 text-xs text-ink-faint">
+                            {item.o.chore.endTime ? formatTimeRange(item.o.chore.dueTime, item.o.chore.endTime) : `${item.o.chore.estimatedMinutes} min`}
+                          </span>
                         </button>
                         {item.o.status === 'completed' ? (
                           <Check size={16} className="shrink-0 text-success-500" />

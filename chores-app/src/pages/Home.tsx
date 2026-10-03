@@ -14,7 +14,7 @@ import { ChoreFormModal } from '../components/chores/ChoreFormModal'
 import { ChoreTimerModal } from '../components/chores/ChoreTimerModal'
 import { levelFromXP } from '../lib/gamification'
 import { rankChores, bestNextChore } from '../lib/priority'
-import { addDays, friendlyDate, formatTime, todayISO } from '../lib/date'
+import { addDays, friendlyDate, formatTimeRange, todayISO } from '../lib/date'
 import { effectiveDueDate, isCompletedOn, isDueOn, isOverdue } from '../lib/occurrence'
 import { useToast } from '../components/ui/Toast'
 
@@ -148,7 +148,7 @@ export default function Home() {
                 <div>
                   <p className="font-display text-lg font-extrabold text-ink">{bestNext.chore.title}</p>
                   <p className="text-sm text-ink-soft">
-                    {user.name} · {bestNext.chore.dueTime ? `Today · ${formatTime(bestNext.chore.dueTime)}` : 'Today'} · {bestNext.chore.estimatedMinutes} min · +{bestNext.chore.xp} XP
+                    {user.name} · {bestNext.chore.dueTime ? `Today · ${formatTimeRange(bestNext.chore.dueTime, bestNext.chore.endTime)}` : 'Today'} · {bestNext.chore.estimatedMinutes} min · +{bestNext.chore.xp} XP
                   </p>
                 </div>
               </div>
