@@ -464,6 +464,19 @@ h1, h2, h3, p { margin: 0; }
 .calendar-day { transition: border-color .15s var(--ease), transform .1s var(--ease); }
 .calendar-day:active { transform: scale(.94); }
 
+/* Clickable rows/cards that weren't getting the same tactile feedback as
+   every other tappable control (level card, alarm rows, sound name, QR
+   row, cosmetic picker) — same press-scale language as .calendar-day etc. */
+.level-card, .alarm-item .time, .alarm-item .meta, .sound-row .name, .cosmetic-option.unlocked {
+    transition: transform .1s var(--ease), box-shadow .15s var(--ease);
+}
+.level-card:active, .alarm-item .time:active, .alarm-item .meta:active, .sound-row .name:active, .cosmetic-option.unlocked:active {
+    transform: scale(.97);
+}
+@media (hover: hover) {
+    .level-card:hover { box-shadow: var(--shadow-md); }
+}
+
 .ring-screen .ring-time { animation: breathe 2.4s ease-in-out infinite; }
 .ring-screen .challenge-panel { animation: fadeSlideUp .4s var(--ease) both; }
 .celebrate .emoji { animation: bounceIn .55s var(--ease) both; }

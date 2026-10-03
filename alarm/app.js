@@ -341,8 +341,12 @@ function viewHome() {
       <button class="btn btn-secondary" onclick="navigate('sleep')">${icon('moon')} ${t('quickSleepMode')}</button>
     </div>
 
-    ${settings.showXpOnHome !== false ? levelCardHTML() : ''}
-    ${settings.showDailyQuests !== false ? dailyQuestsCardHTML(now) : ''}
+    ${(() => {
+        const needQuests = settings.showXpOnHome !== false || settings.showDailyQuests !== false;
+        const dailyQuests = needQuests ? Gamify.evaluateDailyQuests(L.isoDate(now), buildDailyQuestContext(L.isoDate(now))) : null;
+        return `${settings.showXpOnHome !== false ? levelCardHTML(dailyQuests) : ''}
+    ${settings.showDailyQuests !== false ? dailyQuestsCardHTML(dailyQuests) : ''}`;
+    })()}
 
     ${run ? `
     <div class="section-title">${t('morningProgress')}</div>
@@ -382,17 +386,16 @@ function routineRunPct(run) {
 // XP/level/quest state — nothing here can itself grant XP (see
 // grantXpForDismissal, the only place that does).
 // ---------------------------------------------------------------------- //
-function levelCardHTML() {
+function levelCardHTML(dailyQuests) {
     const levelState = Gamify.computeLevelState(DB.getTotalXp());
     const rank = Gamify.rankForLevel(levelState.level);
-    const dailyQuests = Gamify.evaluateDailyQuests(L.isoDate(new Date()), buildDailyQuestContext(L.isoDate(new Date())));
-    const remainingQuests = dailyQuests.filter(q => !q.done).length;
+    const remainingQuests = (dailyQuests || []).filter(q => !q.done).length;
     let hint;
     if (levelState.xpRemaining <= 100) hint = t('xpHintClose', { n: levelState.xpRemaining });
     else if (remainingQuests > 0 && remainingQuests <= 2) hint = t('xpHintQuestsLeft', { n: remainingQuests });
     else hint = t('xpHintProgressing');
     return `
-    <div class="card level-card" onclick="navigate('profile')" style="--rank-color:${rank.color}">
+    <div class="card level-card" onclick="navigate('profile')" role="button" tabindex="0" aria-label="${esc(t('viewProfile'))}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();navigate('profile');}" style="--rank-color:${rank.color}">
       <div class="level-card-top">
         <div class="level-badge">${rank.icon}</div>
         <div style="flex:1;min-width:0">
@@ -402,13 +405,12 @@ function levelCardHTML() {
         ${icon('chevronDown', 'rot-90')}
       </div>
       <div class="xp-bar"><div class="xp-bar-fill" style="width:${levelState.progressPct}%"></div></div>
-      <div class="level-card-sub">${levelState.xpIntoLevel.toLocaleString()} / ${levelState.xpForNext.toLocaleString()} XP · ${levelState.progressPct}%</div>
+      <div class="level-card-sub"><bdi dir="ltr">${levelState.xpIntoLevel.toLocaleString()} / ${levelState.xpForNext.toLocaleString()} XP · ${levelState.progressPct}%</bdi></div>
       <div class="level-card-hint">${esc(hint)}</div>
     </div>`;
 }
-function dailyQuestsCardHTML(now) {
-    const dateIso = L.isoDate(now);
-    const quests = Gamify.evaluateDailyQuests(dateIso, buildDailyQuestContext(dateIso));
+function dailyQuestsCardHTML(quests) {
+    quests = quests || [];
     if (!quests.length) return '';
     return `
     <div class="section-title">${t('dailyQuests')}</div>
@@ -438,8 +440,8 @@ function viewAlarms() {
     <div class="card" style="padding:4px 16px">
       ${alarms.map((a, i) => `
         <div class="alarm-item fade-stagger" style="animation-delay:${Math.min(i, 8) * 35}ms">
-          <div class="time ${a.enabled ? '' : 'off'}" role="button" tabindex="0" onclick="goEditAlarm('${a.id}')">${L.formatTime(hhmmDate(a.time), settings.timeFormat === '24h')}</div>
-          <div class="meta" onclick="goEditAlarm('${a.id}')">
+          <div class="time ${a.enabled ? '' : 'off'}" role="button" tabindex="0" aria-label="${esc(a.label || t('alarm'))}" onclick="goEditAlarm('${a.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goEditAlarm('${a.id}');}">${L.formatTime(hhmmDate(a.time), settings.timeFormat === '24h')}</div>
+          <div class="meta" onclick="goEditAlarm('${a.id}')" role="button" tabindex="0" aria-label="${esc(a.label || t('alarm'))}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goEditAlarm('${a.id}');}">
             <div class="label">${esc(a.label || t('alarm'))}</div>
             <div class="days">${esc(daysSummary(a))}</div>
             <div class="chips">
@@ -541,7 +543,7 @@ function viewAlarmEdit() {
     <div class="card"><input type="text" id="alarmLabelInput" placeholder="${esc(t('labelAlarm'))}" value="${esc(a.label)}" oninput="State.draftAlarm.label=this.value"></div>
 
     <div class="section-title">${t('sound')}</div>
-    <div class="card row" style="cursor:pointer" onclick="openSoundPicker()">
+    <div class="card row" style="cursor:pointer" onclick="openSoundPicker()" role="button" tabindex="0" aria-label="${esc(t('sound'))}: ${esc(soundName(a.soundId))}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSoundPicker();}">
       <div><div class="row-label">${esc(soundName(a.soundId))}</div><div class="row-sub">${t('preview')} · ${t('volume')} ${a.volume}%</div></div>
       ${icon('chevronDown', 'rot-90')}
     </div>
@@ -838,7 +840,7 @@ function soundRowHTML(id, name, favs, custom) {
     const sub = custom && custom.durationSec ? `${formatSeconds(custom.durationSec)}${custom.startOffsetSec ? ' · ' + t('startPoint').toLowerCase() + ' ' + formatSeconds(custom.startOffsetSec) : ''}` : '';
     return `<div class="sound-row ${selected ? 'selected' : ''}">
     <button class="play-btn" onclick="previewSound('${id}', this)" aria-label="${esc(t('preview'))}">▶</button>
-    <div class="name" onclick="selectSound('${id}')">${esc(name)}${sub ? `<div class="row-sub" style="margin-top:2px">${esc(sub)}</div>` : ''}</div>
+    <div class="name" onclick="selectSound('${id}')" role="button" tabindex="0" aria-label="${esc(name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectSound('${id}');}">${esc(name)}${sub ? `<div class="row-sub" style="margin-top:2px">${esc(sub)}</div>` : ''}</div>
     <button class="star ${favs.has(id) ? 'fav' : ''}" onclick="event.stopPropagation(); toggleFav('${id}')">★</button>
     ${custom ? `<button class="star" onclick="event.stopPropagation(); openTrimSoundModal('${id}')" aria-label="${esc(t('setStartPoint'))}">✂️</button>` : ''}
     ${custom ? `<button class="star" onclick="event.stopPropagation(); DB.deleteCustomSound('${id}'); openSoundPicker()">${icon('trash')}</button>` : ''}
@@ -926,7 +928,7 @@ function openQrTaskPicker(taskIndex) {
         return `
       <div class="modal-header"><h2>${t('dismissQr')}</h2><button class="icon-btn" onclick="closeModal()">${icon('close')}</button></div>
       ${tags.length ? tags.map(qr => `
-        <div class="row" style="cursor:pointer" onclick="chooseQrTag('${qr.id}', ${taskIndex == null ? 'null' : taskIndex})">
+        <div class="row" style="cursor:pointer" onclick="chooseQrTag('${qr.id}', ${taskIndex == null ? 'null' : taskIndex})" role="button" tabindex="0" aria-label="${esc(qr.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseQrTag('${qr.id}', ${taskIndex == null ? 'null' : taskIndex});}">
           <div class="row-label">${icon('alarm')} ${esc(qr.name)}</div>
           <button class="star" onclick="event.stopPropagation(); DB.deleteQrChallenge('${qr.id}'); openQrTaskPicker(${taskIndex == null ? 'null' : taskIndex})">${icon('trash')}</button>
         </div>`).join('') : `<p class="row-sub">${t('createQrChallenge')}</p>`}
@@ -1270,7 +1272,7 @@ function viewProfile() {
       ${cosmetics.selectedTitle ? `<div class="row-sub">${esc(t(cosmetics.selectedTitle))}</div>` : ''}
       <div class="profile-rank-line">${rank.icon} ${t('levelLabel')} ${levelState.level} · ${t(rank.nameKey)}</div>
       <div class="xp-bar" style="margin-top:10px"><div class="xp-bar-fill" style="width:${levelState.progressPct}%"></div></div>
-      <div class="level-card-sub">${levelState.xpIntoLevel.toLocaleString()} / ${levelState.xpForNext.toLocaleString()} XP</div>
+      <div class="level-card-sub"><bdi dir="ltr">${levelState.xpIntoLevel.toLocaleString()} / ${levelState.xpForNext.toLocaleString()} XP</bdi></div>
     </div>
 
     <div class="stat-grid">
@@ -1363,7 +1365,7 @@ function viewCalendar() {
     for (let d = 1; d <= daysInMonth; d++) {
         const key = L.isoDate(new Date(year, m, d));
         const dayLogs = logs.filter(l => l.date === key);
-        cells += `<div class="calendar-day ${key === todayKey ? 'today' : ''}" onclick="selectCalendarDay('${key}')">
+        cells += `<div class="calendar-day ${key === todayKey ? 'today' : ''}" onclick="selectCalendarDay('${key}')" role="button" tabindex="0" aria-label="${esc(d + '')}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectCalendarDay('${key}');}">
       <span>${d}</span>
       ${dayLogs.length ? `<div class="dot-row">${dayLogs.slice(0, 4).map(l => `<span class="${l.success ? '' : 'miss'}"></span>`).join('')}</div>` : ''}
     </div>`;
@@ -2188,7 +2190,7 @@ function grantXpForDismissal(ring, method, dayLog, historyEntry, now) {
 
     const toLevel = Gamify.computeLevelState(DB.getTotalXp()).level;
     syncCosmeticUnlocks(toLevel, newlyUnlocked);
-    return { events, gained: events.reduce((s, e) => s + e.amount, 0), leveledUp: toLevel > fromLevel, fromLevel, toLevel };
+    return { events, gained: events.reduce((s, e) => s + e.amount, 0), leveledUp: toLevel > fromLevel, fromLevel, toLevel, newlyUnlockedAchievements: newlyUnlocked };
 }
 /** Purely decorative: unlocks profile icons by level and titles by specific
  * achievement, never anything that touches the alarm/challenge flow. */
@@ -2239,8 +2241,20 @@ function dismissRing(method) {
     haptic(30);
     render();
     const celebrateMs = State.lastXpGrant.leveledUp ? 3600 : 2000;
+    const newlyUnlockedAchievements = State.lastXpGrant.newlyUnlockedAchievements || [];
     State.celebrateTimer = setTimeout(() => { State.celebrate = false; State.lastXpGrant = null; render(); }, celebrateMs);
+    if (newlyUnlockedAchievements.length) setTimeout(() => showAchievementUnlockToasts(newlyUnlockedAchievements), celebrateMs + 150);
     if (settings.morningSummary) { const grantForReport = State.lastXpGrant; setTimeout(() => showMorningReport(ring, now, grantForReport), celebrateMs + 100); }
+}
+/** One toast per newly-unlocked achievement, shown once the full-screen
+ * celebrate overlay has cleared so it never competes with it; staggered so
+ * several at once (e.g. the first alarm ever) read as a sequence. */
+function showAchievementUnlockToasts(achievementIds) {
+    achievementIds.forEach((id, i) => {
+        const ad = Gamify.ACHIEVEMENTS.find(a => a.id === id);
+        if (!ad) return;
+        setTimeout(() => toast(`${ad.icon} ${t('achievementUnlocked')}: ${t(ad.titleKey)}`), i * 900);
+    });
 }
 function skipCelebrate() {
     if (!State.celebrate) return;
