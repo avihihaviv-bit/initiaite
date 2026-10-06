@@ -1,4 +1,9 @@
-const KEY = 'homebase:v1'
+// Bumped when the shape of what's "normal" to have saved changes enough that
+// old data shouldn't just be loaded as-is — e.g. onboarding used to be
+// skippable with an invented demo household baked in, which is no longer a
+// valid state to silently carry forward. Bumping this abandons anything
+// saved under the old key, so everyone gets a clean run through onboarding.
+const KEY = 'homebase:v2'
 
 export function loadState<T>(): T | null {
   try {
