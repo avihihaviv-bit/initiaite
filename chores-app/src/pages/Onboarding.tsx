@@ -31,7 +31,7 @@ export default function Onboarding() {
   const [selfColor, setSelfColor] = useState(COLOR_OPTIONS[0])
   const [familyName, setFamilyName] = useState('')
   const [members, setMembers] = useState<MemberDraft[]>([])
-  const [choreIds, setChoreIds] = useState<string[]>(ONBOARDING_CHORE_TEMPLATES.slice(0, 5).map((t) => t.id))
+  const [choreIds, setChoreIds] = useState<string[]>([])
   const [requireApproval, setRequireApproval] = useState(true)
   const [reminders, setReminders] = useState({ choreReminders: true, overdueAlerts: true, streakNudges: true })
   const [finished, setFinished] = useState(false)
@@ -147,8 +147,8 @@ export default function Onboarding() {
 
             {step === 4 && (
               <div>
-                <h2 className="font-display text-xl font-extrabold text-ink">Choose your starting chores</h2>
-                <p className="mt-1 text-sm text-ink-soft">We'll set these up for you — tweak anytime.</p>
+                <h2 className="font-display text-xl font-extrabold text-ink">Want any starting chores?</h2>
+                <p className="mt-1 text-sm text-ink-soft">Totally optional — pick any that fit, or skip and add your own later.</p>
                 <div className="mt-5 grid grid-cols-2 gap-2">
                   {ONBOARDING_CHORE_TEMPLATES.map((t) => {
                     const active = choreIds.includes(t.id)
@@ -257,7 +257,7 @@ function AddMemberRow({ onAdd }: { onAdd: (m: MemberDraft) => void }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Family member name"
-        className="focus-ring h-9 flex-1 rounded-xl border border-border bg-surface px-3 text-sm"
+        className="focus-ring h-9 min-w-0 flex-1 rounded-xl border border-border bg-surface px-3 text-sm"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && name.trim()) {
             onAdd({ name: name.trim(), avatarEmoji, color })

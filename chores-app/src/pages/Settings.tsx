@@ -135,10 +135,10 @@ export default function Settings() {
       </Card>
 
       <Card>
-        <p className="mb-1 flex items-center gap-1.5 font-display text-sm font-bold text-ink"><SparklesIcon size={15} /> Demo data</p>
-        <p className="mb-3 text-xs text-ink-faint">Reset everything back to the sample household — useful for exploring from scratch.</p>
+        <p className="mb-1 flex items-center gap-1.5 font-display text-sm font-bold text-ink"><SparklesIcon size={15} /> Start over</p>
+        <p className="mb-3 text-xs text-ink-faint">Erase everything — chores, people, progress — and go through setup again from a blank slate.</p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" icon={<RotateCcw size={14} />} onClick={() => setResetConfirm(true)}>Reset demo data</Button>
+          <Button variant="secondary" icon={<RotateCcw size={14} />} onClick={() => setResetConfirm(true)}>Erase everything</Button>
           <Button variant="ghost" onClick={() => updateSettings({ onboardingComplete: false })}>Redo setup wizard</Button>
         </div>
       </Card>
@@ -155,14 +155,14 @@ export default function Settings() {
       />
       <ConfirmDialog
         open={resetConfirm}
-        title="Reset all data?"
-        description="This replaces your chores, family, and progress with the sample household. This can't be undone."
-        confirmLabel="Reset"
+        title="Erase everything?"
+        description="This permanently deletes your chores, people, and progress, and starts the setup wizard fresh. This can't be undone."
+        confirmLabel="Erase"
         danger
         onClose={() => setResetConfirm(false)}
         onConfirm={() => {
           resetDemoData()
-          show('Demo data reset', { tone: 'info' })
+          show('Everything erased — starting fresh', { tone: 'info' })
         }}
       />
     </div>

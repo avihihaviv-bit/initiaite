@@ -7,11 +7,10 @@ import { Avatar } from '../components/ui/Avatar'
 import { generateDailyPlan, totalPlanMinutes, totalPlanXP } from '../lib/ai'
 import { EmptyState } from '../components/ui/EmptyState'
 
-const SUGGESTIONS = [
+const BASE_SUGGESTIONS = [
   "What should I do next?",
   "I have 30 minutes and my room is messy",
   "Any overdue chores?",
-  "Give Yoav three chores for Sunday",
   "Who has the most chores this week?",
 ]
 
@@ -24,6 +23,10 @@ export default function AIAssistant() {
   const confirmPendingAction = useStore((s) => s.confirmPendingAction)
   const dismissPendingAction = useStore((s) => s.dismissPendingAction)
   const currentUser = users.find((u) => u.id === currentUserId)
+  const suggestionTarget = users.find((u) => u.id !== currentUserId) ?? currentUser
+  const suggestions = suggestionTarget
+    ? [...BASE_SUGGESTIONS, `Give ${suggestionTarget.name} three chores for Sunday`]
+    : BASE_SUGGESTIONS
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -115,7 +118,7 @@ export default function AIAssistant() {
 
         <div className="border-t border-border p-3 sm:p-4">
           <div className="mb-2.5 flex gap-1.5 overflow-x-auto pb-0.5">
-            {SUGGESTIONS.map((s) => (
+            {suggestions.map((s) => (
               <button
                 key={s}
                 onClick={() => submit(s)}

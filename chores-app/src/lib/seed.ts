@@ -1,7 +1,4 @@
-import type { AppState, Category, Chore, Family, Reward, User } from '../types'
-import { todayISO } from './date'
-
-const today = todayISO()
+import type { AppState, Category, Chore, Family, Reward } from '../types'
 
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-cleaning', name: 'Cleaning', emoji: '🧹', color: '#7c5cff' },
@@ -38,15 +35,6 @@ export const ONBOARDING_CHORE_TEMPLATES: OnboardingChoreTemplate[] = [
   { id: 'tpl-plants', title: 'Water plants', emoji: '🌳', categoryId: 'cat-outside', estimatedMinutes: 8, difficulty: 'easy', frequency: 'weekly' },
 ]
 
-function buildUsers(): User[] {
-  return [
-    { id: 'u-yoav', name: 'Yoav', avatarEmoji: '👦', color: '#7c5cff', role: 'child', xp: 0, points: 0, createdAt: today },
-    { id: 'u-mom', name: 'Mom', avatarEmoji: '👩', color: '#ff6bd6', role: 'admin', xp: 0, points: 0, createdAt: today },
-    { id: 'u-dad', name: 'Dad', avatarEmoji: '👨', color: '#2f8fef', role: 'admin', xp: 0, points: 0, createdAt: today },
-    { id: 'u-sis', name: 'Sister', avatarEmoji: '👧', color: '#ff9f0a', role: 'child', xp: 0, points: 0, createdAt: today },
-  ]
-}
-
 export function buildRewards(): Reward[] {
   return [
     { id: 'r-gaming', name: '30 min extra gaming', emoji: '🎮', description: 'Extend screen time by half an hour.', cost: 150, requiresApproval: false, availability: 'always', createdBy: 'u-mom' },
@@ -58,21 +46,20 @@ export function buildRewards(): Reward[] {
   ]
 }
 
-/** A clean household: real family members, no chores, everyone at level 1 — ready for you to add your own. */
+/** A blank slate — no invented family, no chores. The onboarding wizard is
+ * what actually builds the household, from the user's own input. */
 export function buildDemoState(): AppState {
-  const family: Family = { id: 'fam-1', name: 'The Household', memberIds: [], fairnessTarget: 85 }
-  const users = buildUsers()
-  family.memberIds = users.map((u) => u.id)
+  const family: Family = { id: 'fam-1', name: '', memberIds: [], fairnessTarget: 85 }
 
   return {
     family,
-    users,
+    users: [],
     categories: DEFAULT_CATEGORIES,
     chores: [],
-    rewards: buildRewards(),
+    rewards: [],
     redemptions: [],
     earnedBadges: [],
-    streaks: users.map((u) => ({ userId: u.id, current: 0, longest: 0, lastCompletedDate: null, freezeAvailable: true, freezeUsedThisMonth: false })),
+    streaks: [],
     notifications: [],
     settings: {
       themeMode: 'system',
@@ -88,8 +75,8 @@ export function buildDemoState(): AppState {
         quietHoursStart: '21:00',
         quietHoursEnd: '07:30',
       },
-      onboardingComplete: true,
-      currentUserId: 'u-yoav',
+      onboardingComplete: false,
+      currentUserId: null,
     },
     chatHistory: [],
   }
